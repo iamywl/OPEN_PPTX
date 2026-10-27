@@ -1,0 +1,167 @@
+{
+  "name": "deckcraft-vscode",
+  "displayName": "DeckCraft - PPTX & Presentation Studio",
+  "description": "View, present, edit and export PowerPoint (.pptx) and DeckCraft presentations inside VS Code.",
+  "version": "0.1.0",
+  "publisher": "deckcraft",
+  "icon": "assets/icon.png",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/storytold/deckcraft"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other",
+    "Visualization",
+    "Formatters"
+  ],
+  "keywords": [
+    "pptx",
+    "powerpoint",
+    "deckcraft",
+    "presentation",
+    "slides",
+    "viewer",
+    "preview",
+    "mcp"
+  ],
+  "main": "./dist/extension.js",
+  "activationEvents": [
+    "onCustomEditor:deckcraft.editor"
+  ],
+  "contributes": {
+    "customEditors": [
+      {
+        "viewType": "deckcraft.editor",
+        "displayName": "DeckCraft Presentation Studio",
+        "selector": [
+          {
+            "filenamePattern": "*.pptx"
+          },
+          {
+            "filenamePattern": "*.deckcraft"
+          },
+          {
+            "filenamePattern": "*.ppt"
+          }
+        ],
+        "priority": "default"
+      }
+    ],
+    "commands": [
+      {
+        "command": "deckcraft.openSample",
+        "title": "DeckCraft: Open Sample Presentation",
+        "category": "DeckCraft"
+      },
+      {
+        "command": "deckcraft.newDeck",
+        "title": "DeckCraft: Create New Presentation",
+        "category": "DeckCraft"
+      },
+      {
+        "command": "deckcraft.exportPdf",
+        "title": "DeckCraft: Export Presentation to PDF",
+        "category": "DeckCraft"
+      },
+      {
+        "command": "deckcraft.exportMarkdown",
+        "title": "DeckCraft: Export Outline to Markdown",
+        "category": "DeckCraft"
+      },
+      {
+        "command": "deckcraft.renderSlides",
+        "title": "DeckCraft: Render Slides as PNG Images",
+        "category": "DeckCraft"
+      },
+      {
+        "command": "deckcraft.openDesktopApp",
+        "title": "DeckCraft: Open in macOS Desktop App",
+        "category": "DeckCraft"
+      },
+      {
+        "command": "deckcraft.startMcpServer",
+        "title": "DeckCraft: Start MCP Server (for AI Agents)",
+        "category": "DeckCraft"
+      },
+      {
+        "command": "deckcraft.downloadCli",
+        "title": "DeckCraft: Check / Update CLI Binary",
+        "category": "DeckCraft"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "deckcraft.exportPdf",
+          "when": "activeCustomEditorId == 'deckcraft.editor'",
+          "group": "navigation@1"
+        },
+        {
+          "command": "deckcraft.openDesktopApp",
+          "when": "activeCustomEditorId == 'deckcraft.editor'",
+          "group": "navigation@2"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "deckcraft.exportPdf",
+          "when": "resourceExtname == .pptx || resourceExtname == .deckcraft",
+          "group": "7_modification"
+        },
+        {
+          "command": "deckcraft.exportMarkdown",
+          "when": "resourceExtname == .pptx || resourceExtname == .deckcraft",
+          "group": "7_modification"
+        },
+        {
+          "command": "deckcraft.renderSlides",
+          "when": "resourceExtname == .pptx || resourceExtname == .deckcraft",
+          "group": "7_modification"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "DeckCraft",
+      "properties": {
+        "deckcraft.cliPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the deckcraft-cli executable (leave empty to use bundled or system binary)."
+        },
+        "deckcraft.renderScale": {
+          "type": "number",
+          "default": 1.5,
+          "enum": [
+            1,
+            1.5,
+            2,
+            3
+          ],
+          "description": "Resolution scale factor for rendering slide previews."
+        },
+        "deckcraft.desktopAppPath": {
+          "type": "string",
+          "default": "/Applications/DeckCraft.app",
+          "description": "Path to the native DeckCraft desktop application on macOS."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "build": "node esbuild.js --production",
+    "build-dev": "node esbuild.js",
+    "package": "vsce package"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.20.0",
+    "typescript": "^5.3.3"
+  }
+}
