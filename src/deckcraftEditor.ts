@@ -57,30 +57,40 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
 
     const renderScale = vscode.workspace.getConfiguration('deckcraft').get<number>('renderScale') || 1.5;
 
-    // Storage path for cached slide images
+    // Use a unique cache dir per document in OS temp or storage
     const docHash = crypto.createHash('md5').update(document.uri.fsPath).digest('hex').slice(0, 10);
     const cacheDir = path.join(this.context.globalStorageUri.fsPath, 'renders', docHash);
     fs.mkdirSync(cacheDir, { recursive: true });
 
-    // Show initial loading state
     webview.html = this.getLoadingHtml(path.basename(document.uri.fsPath));
+
+    const loadPresentationData = async (): Promise<{ info: DeckCraftInfo; slideUris: string[] }> => {
+      const info = await DeckcraftCli.getInfo(document.uri.fsPath, this.context);
+      const slideImages = await DeckcraftCli.renderAll(
+        document.uri.fsPath,
+        cacheDir,
+        renderScale,
+        this.context
+      );
+
+      // Convert images to Base64 data URIs for 100% reliable rendering without webview CSP/path blocks
+      const slideUris = slideImages.map((imgPath) => {
+        try {
+          const buffer = fs.readFileSync(imgPath);
+          return `data:image/png;base64,${buffer.toString('base64')}`;
+        } catch (e) {
+          console.error(`Failed to read slide image: ${imgPath}`, e);
+          return '';
+        }
+      });
+
+      return { info, slideUris };
+    };
 
     const renderAndUpdate = async () => {
       try {
-        const info = await DeckcraftCli.getInfo(document.uri.fsPath, this.context);
+        const { info, slideUris } = await loadPresentationData();
         if (token.isCancellationRequested) return;
-
-        const slideImages = await DeckcraftCli.renderAll(
-          document.uri.fsPath,
-          cacheDir,
-          renderScale,
-          this.context
-        );
-        if (token.isCancellationRequested) return;
-
-        const slideUris = slideImages.map((imgPath) =>
-          webview.asWebviewUri(vscode.Uri.file(imgPath)).toString()
-        );
 
         webview.html = getWebviewContent(
           webview,
@@ -99,6 +109,8 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
 
     // Listen to messages from webview
     webviewPanel.webview.onDidReceiveMessage(async (message) => {
+      const filePath = document.uri.fsPath;
+
       switch (message.command) {
         case 'refresh': {
           await renderAndUpdate();
@@ -106,6 +118,152 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
           break;
         }
 
+        // --- EDITING COMMANDS ---
+        case 'addSlide': {
+          try {
+            const layout = message.layout || 'titleAndContent';
+            const title = message.title || 'New Slide';
+            const cmd = JSON.stringify({ layout, title });
+            await DeckcraftCli.runCommand([`slide.new=${cmd}`], this.context, filePath, filePath);
+            const { info, slideUris } = await loadPresentationData();
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: info.slides.length - 1 });
+            vscode.window.showInformationMessage(`Added slide "${title}"`);
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`Failed to add slide: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'deleteSlide': {
+          try {
+            const index = message.index ?? 0;
+            const cmd = JSON.stringify({ index });
+            await DeckcraftCli.runCommand([`slide.delete=${cmd}`], this.context, filePath, filePath);
+            const { info, slideUris } = await loadPresentationData();
+            const nextIdx = Math.max(0, Math.min(index, info.slides.length - 1));
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: nextIdx });
+            vscode.window.showInformationMessage(`Deleted slide #${index + 1}`);
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`Failed to delete slide: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'duplicateSlide': {
+          try {
+            const index = message.index ?? 0;
+            const cmd = JSON.stringify({ index });
+            await DeckcraftCli.runCommand([`slide.duplicate=${cmd}`], this.context, filePath, filePath);
+            const { info, slideUris } = await loadPresentationData();
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index + 1 });
+            vscode.window.showInformationMessage(`Duplicated slide #${index + 1}`);
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`Failed to duplicate slide: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'moveSlide': {
+          try {
+            const from = message.from;
+            const to = message.to;
+            const cmd = JSON.stringify({ from, to });
+            await DeckcraftCli.runCommand([`slide.move=${cmd}`], this.context, filePath, filePath);
+            const { info, slideUris } = await loadPresentationData();
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: to });
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`Failed to move slide: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'renameSlide': {
+          try {
+            const index = message.index ?? 0;
+            const name = message.name || '';
+            const cmd = JSON.stringify({ name, index });
+            await DeckcraftCli.runCommand([`slide.rename=${cmd}`], this.context, filePath, filePath);
+            const { info, slideUris } = await loadPresentationData();
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
+            vscode.window.showInformationMessage(`Renamed slide #${index + 1}`);
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`Failed to rename slide: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'insertShape': {
+          try {
+            const index = message.index ?? 0;
+            const preset = message.preset || 'roundRect';
+            const text = message.text || '';
+            const goCmd = JSON.stringify({ index });
+            const shapeCmd = JSON.stringify({
+              preset,
+              rect: [180, 160, 360, 140],
+              text,
+            });
+            await DeckcraftCli.runCommand(
+              [`slide.go=${goCmd}`, `shape.insert=${shapeCmd}`],
+              this.context,
+              filePath,
+              filePath
+            );
+            const { info, slideUris } = await loadPresentationData();
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
+            vscode.window.showInformationMessage(`Inserted ${preset} on slide #${index + 1}`);
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`Failed to insert shape: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'insertTextBox': {
+          try {
+            const index = message.index ?? 0;
+            const text = message.text || 'New Text Box';
+            const goCmd = JSON.stringify({ index });
+            const shapeCmd = JSON.stringify({
+              preset: 'rect',
+              rect: [140, 160, 420, 100],
+              text,
+            });
+            await DeckcraftCli.runCommand(
+              [
+                `slide.go=${goCmd}`,
+                `shape.insert=${shapeCmd}`,
+                `format.fill={"type":"none"}`,
+                `format.line={"type":"none"}`,
+              ],
+              this.context,
+              filePath,
+              filePath
+            );
+            const { info, slideUris } = await loadPresentationData();
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
+            vscode.window.showInformationMessage(`Added text box to slide #${index + 1}`);
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`Failed to add text box: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'saveNotes': {
+          try {
+            const index = message.index ?? 0;
+            const text = message.notes || '';
+            const cmd = JSON.stringify({ text, index });
+            await DeckcraftCli.runCommand([`slide.notes=${cmd}`], this.context, filePath, filePath);
+            const { info, slideUris } = await loadPresentationData();
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
+            vscode.window.showInformationMessage(`Saved speaker notes for slide #${index + 1}`);
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`Failed to save notes: ${err.message}`);
+          }
+          break;
+        }
+
+        // --- EXPORT & DESKTOP ACTIONS ---
         case 'exportPdf': {
           await this.exportPdf(document.uri);
           break;
@@ -253,7 +411,7 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
     <head>
       <style>
         body {
-          background: #18191f;
+          background: #12141c;
           color: #e0e0e0;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
           height: 100vh;
@@ -293,7 +451,7 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
     <head>
       <style>
         body {
-          background: #18191f;
+          background: #12141c;
           color: #e0e0e0;
           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
           padding: 32px;

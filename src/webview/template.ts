@@ -15,33 +15,35 @@ export function getWebviewContent(
   const slideSize = info.slideSize ? `${info.slideSize[0]}×${info.slideSize[1]}` : '16:9';
 
   return `<!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} data: blob: https:; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
-  <title>${escapeHtml(title)} - DeckCraft Studio</title>
+  <title>${escapeHtml(title)} - OPEN_PPTX Studio</title>
   <style>
     :root {
-      --glass-bg: rgba(22, 25, 34, 0.68);
-      --glass-panel: rgba(28, 32, 45, 0.58);
+      --glass-bg: rgba(20, 23, 32, 0.75);
+      --glass-panel: rgba(28, 33, 46, 0.65);
       --glass-card: rgba(255, 255, 255, 0.04);
       --glass-card-hover: rgba(255, 255, 255, 0.08);
-      --glass-border: rgba(255, 255, 255, 0.11);
-      --glass-border-light: rgba(255, 255, 255, 0.18);
-      --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.16);
-      --glass-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.45);
+      --glass-border: rgba(255, 255, 255, 0.12);
+      --glass-border-light: rgba(255, 255, 255, 0.22);
+      --glass-highlight: inset 0 1px 0 0 rgba(255, 255, 255, 0.18);
+      --glass-shadow: 0 12px 36px 0 rgba(0, 0, 0, 0.5);
       
       --accent-orange: #f26b1d;
       --accent-orange-glow: rgba(242, 107, 29, 0.45);
       --accent-blue: #0ea5e9;
       --accent-blue-glow: rgba(14, 165, 233, 0.4);
+      --accent-green: #10b981;
+      --accent-red: #ef4444;
       
       --fg-primary: #f8fafc;
       --fg-secondary: #94a3b8;
       --fg-muted: #64748b;
       
-      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", "Segoe UI", Roboto, sans-serif;
     }
 
     * {
@@ -51,7 +53,7 @@ export function getWebviewContent(
     }
 
     body {
-      background-color: #0d0f17;
+      background-color: #0b0d14;
       color: var(--fg-primary);
       font-family: var(--font-family);
       height: 100vh;
@@ -65,91 +67,84 @@ export function getWebviewContent(
     /* AMBIENT GLOW MESH BACKGROUND */
     .ambient-glow-1 {
       position: absolute;
-      top: -120px;
-      left: 10%;
-      width: 450px;
-      height: 450px;
-      background: radial-gradient(circle, rgba(242, 107, 29, 0.12) 0%, transparent 70%);
-      filter: blur(60px);
+      top: -100px;
+      left: 12%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(242, 107, 29, 0.14) 0%, transparent 70%);
+      filter: blur(65px);
       pointer-events: none;
       z-index: 0;
     }
 
     .ambient-glow-2 {
       position: absolute;
-      bottom: -150px;
-      right: 5%;
+      bottom: -120px;
+      right: 8%;
       width: 550px;
       height: 550px;
-      background: radial-gradient(circle, rgba(14, 165, 233, 0.14) 0%, transparent 70%);
+      background: radial-gradient(circle, rgba(14, 165, 233, 0.16) 0%, transparent 70%);
       filter: blur(75px);
       pointer-events: none;
       z-index: 0;
     }
 
-    /* TOP GLASS HEADER HUD */
+    /* TOP HEADER */
     header.glass-header {
       position: relative;
       z-index: 10;
-      height: 54px;
-      min-height: 54px;
-      margin: 8px 12px 4px 12px;
+      height: 48px;
+      min-height: 48px;
+      margin: 6px 10px 0 10px;
       background: var(--glass-panel);
       backdrop-filter: blur(24px) saturate(180%);
       -webkit-backdrop-filter: blur(24px) saturate(180%);
       border: 1px solid var(--glass-border);
       box-shadow: var(--glass-highlight), var(--glass-shadow);
-      border-radius: 12px;
+      border-radius: 10px 10px 0 0;
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 16px;
-      gap: 12px;
+      padding: 0 14px;
+      gap: 10px;
     }
 
     .header-left {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       overflow: hidden;
     }
 
     .brand-badge {
-      width: 30px;
-      height: 30px;
-      border-radius: 8px;
+      width: 26px;
+      height: 26px;
+      border-radius: 6px;
       background: linear-gradient(135deg, #f26b1d, #d44d08);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
       font-weight: 700;
-      font-size: 15px;
-      box-shadow: 0 0 16px var(--accent-orange-glow);
+      font-size: 14px;
+      box-shadow: 0 0 14px var(--accent-orange-glow);
       border: 1px solid rgba(255, 255, 255, 0.25);
     }
 
-    .deck-title-group {
-      display: flex;
-      flex-direction: column;
-      overflow: hidden;
-    }
-
     .deck-title {
-      font-size: 14px;
+      font-size: 13px;
       font-weight: 600;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 260px;
+      max-width: 240px;
       color: #ffffff;
-      letter-spacing: -0.2px;
     }
 
     .badge-pill {
       font-size: 11px;
-      padding: 3px 9px;
-      background: rgba(255, 255, 255, 0.07);
+      padding: 2px 8px;
+      background: rgba(255, 255, 255, 0.06);
       backdrop-filter: blur(8px);
       color: var(--fg-secondary);
       border: 1px solid var(--glass-border);
@@ -158,7 +153,6 @@ export function getWebviewContent(
       display: inline-flex;
       align-items: center;
       gap: 4px;
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
     }
 
     .badge-pill.highlight {
@@ -167,36 +161,64 @@ export function getWebviewContent(
       background: rgba(242, 107, 29, 0.12);
     }
 
-    /* HEADER ACTIONS */
-    .header-actions {
+    /* POWERPOINT STYLE EDITING RIBBON TOOLBAR */
+    .glass-ribbon {
+      position: relative;
+      z-index: 9;
+      height: 44px;
+      min-height: 44px;
+      margin: 0 10px 4px 10px;
+      background: rgba(22, 26, 36, 0.62);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid var(--glass-border);
+      border-top: none;
+      border-radius: 0 0 10px 10px;
       display: flex;
       align-items: center;
+      justify-content: space-between;
+      padding: 0 10px;
       gap: 8px;
+      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
     }
 
+    .ribbon-group {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .ribbon-divider {
+      width: 1px;
+      height: 20px;
+      background: var(--glass-border);
+      margin: 0 4px;
+    }
+
+    /* BUTTONS */
     button.btn-glass {
       background: rgba(255, 255, 255, 0.06);
       color: var(--fg-primary);
       border: 1px solid var(--glass-border);
-      border-radius: 8px;
-      padding: 6px 12px;
-      font-size: 12px;
+      border-radius: 6px;
+      padding: 5px 9px;
+      font-size: 11.5px;
       font-weight: 500;
       cursor: pointer;
       display: inline-flex;
       align-items: center;
-      gap: 6px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
+      gap: 5px;
+      backdrop-filter: blur(10px);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1);
-      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.18s ease;
+      white-space: nowrap;
     }
 
     button.btn-glass:hover {
-      background: rgba(255, 255, 255, 0.12);
+      background: rgba(255, 255, 255, 0.13);
       border-color: var(--glass-border-light);
       transform: translateY(-1px);
-      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 4px 12px rgba(0, 0, 0, 0.3);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 3px 10px rgba(0, 0, 0, 0.3);
     }
 
     button.btn-glass:active {
@@ -207,12 +229,20 @@ export function getWebviewContent(
       background: linear-gradient(135deg, rgba(242, 107, 29, 0.9), rgba(212, 77, 8, 0.9));
       color: #ffffff;
       border: 1px solid rgba(255, 255, 255, 0.25);
-      box-shadow: 0 0 18px var(--accent-orange-glow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      box-shadow: 0 0 14px var(--accent-orange-glow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
     }
 
     button.btn-glass-primary:hover {
       background: linear-gradient(135deg, #ff7b2b, #ea580c);
-      box-shadow: 0 0 24px rgba(242, 107, 29, 0.65), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      box-shadow: 0 0 20px rgba(242, 107, 29, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+    }
+
+    button.btn-glass-danger {
+      color: #fca5a5;
+    }
+    button.btn-glass-danger:hover {
+      background: rgba(239, 68, 68, 0.25);
+      border-color: rgba(239, 68, 68, 0.5);
     }
 
     /* MAIN BODY LAYOUT */
@@ -220,8 +250,8 @@ export function getWebviewContent(
       flex: 1;
       display: flex;
       overflow: hidden;
-      margin: 4px 12px 12px 12px;
-      gap: 12px;
+      margin: 4px 10px 10px 10px;
+      gap: 10px;
       position: relative;
       z-index: 1;
     }
@@ -229,13 +259,13 @@ export function getWebviewContent(
     /* GLASS SIDEBAR FILMSTRIP */
     .sidebar-glass {
       width: 250px;
-      min-width: 220px;
-      max-width: 360px;
+      min-width: 210px;
+      max-width: 320px;
       background: var(--glass-panel);
       backdrop-filter: blur(24px) saturate(180%);
       -webkit-backdrop-filter: blur(24px) saturate(180%);
       border: 1px solid var(--glass-border);
-      border-radius: 12px;
+      border-radius: 10px;
       box-shadow: var(--glass-highlight), var(--glass-shadow);
       display: flex;
       flex-direction: column;
@@ -243,7 +273,7 @@ export function getWebviewContent(
     }
 
     .sidebar-top {
-      padding: 12px 14px;
+      padding: 10px 12px;
       font-size: 11px;
       font-weight: 600;
       text-transform: uppercase;
@@ -259,10 +289,10 @@ export function getWebviewContent(
     .thumbnail-scroll {
       flex: 1;
       overflow-y: auto;
-      padding: 12px;
+      padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 10px;
     }
 
     .thumbnail-scroll::-webkit-scrollbar {
@@ -277,14 +307,14 @@ export function getWebviewContent(
     .thumb-card {
       display: flex;
       flex-direction: column;
-      gap: 8px;
-      padding: 9px;
-      border-radius: 10px;
+      gap: 6px;
+      padding: 8px;
+      border-radius: 8px;
       cursor: pointer;
       background: var(--glass-card);
       border: 1px solid var(--glass-border);
       box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05);
-      transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
     }
 
@@ -292,13 +322,13 @@ export function getWebviewContent(
       background: var(--glass-card-hover);
       border-color: var(--glass-border-light);
       transform: translateY(-2px);
-      box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.35);
     }
 
     .thumb-card.active {
       background: rgba(242, 107, 29, 0.12);
       border: 1px solid rgba(242, 107, 29, 0.7);
-      box-shadow: 0 0 20px var(--accent-orange-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 16px var(--accent-orange-glow), inset 0 1px 0 rgba(255, 255, 255, 0.2);
     }
 
     .thumb-card.active::before {
@@ -342,7 +372,7 @@ export function getWebviewContent(
       width: 100%;
       aspect-ratio: 16 / 9;
       background: #000;
-      border-radius: 6px;
+      border-radius: 5px;
       overflow: hidden;
       display: flex;
       align-items: center;
@@ -354,6 +384,7 @@ export function getWebviewContent(
       width: 100%;
       height: 100%;
       object-fit: contain;
+      display: block;
     }
 
     .thumb-title {
@@ -372,7 +403,7 @@ export function getWebviewContent(
       backdrop-filter: blur(24px) saturate(180%);
       -webkit-backdrop-filter: blur(24px) saturate(180%);
       border: 1px solid var(--glass-border);
-      border-radius: 12px;
+      border-radius: 10px;
       box-shadow: var(--glass-highlight), var(--glass-shadow);
       display: flex;
       flex-direction: column;
@@ -383,18 +414,18 @@ export function getWebviewContent(
     /* FLOATING STAGE ZOOM CONTROLS */
     .stage-hud {
       position: absolute;
-      top: 14px;
-      right: 18px;
+      top: 12px;
+      right: 16px;
       z-index: 15;
       display: flex;
       align-items: center;
-      gap: 6px;
+      gap: 5px;
       background: rgba(20, 24, 34, 0.7);
       backdrop-filter: blur(16px);
       border: 1px solid var(--glass-border);
-      border-radius: 24px;
-      padding: 4px 10px;
-      box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+      border-radius: 20px;
+      padding: 3px 8px;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.4);
     }
 
     .stage-hud span {
@@ -407,7 +438,7 @@ export function getWebviewContent(
       background: transparent;
       border: none;
       color: var(--fg-primary);
-      font-size: 13px;
+      font-size: 12px;
       cursor: pointer;
       padding: 2px 6px;
       border-radius: 4px;
@@ -418,28 +449,28 @@ export function getWebviewContent(
       background: rgba(255, 255, 255, 0.15);
     }
 
-    /* STAGE CANVAS & WRAPPER */
+    /* STAGE CANVAS */
     .stage-container {
       flex: 1;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 30px;
+      padding: 24px;
       overflow: hidden;
       position: relative;
     }
 
     .slide-glass-frame {
-      max-width: 94%;
-      max-height: 90%;
+      max-width: 95%;
+      max-height: 92%;
       aspect-ratio: 16 / 9;
       background: #000;
       border-radius: 8px;
-      box-shadow: 0 16px 48px -10px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.1);
+      box-shadow: 0 16px 44px -8px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.12);
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: transform 0.24s cubic-bezier(0.16, 1, 0.3, 1);
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       position: relative;
     }
 
@@ -448,6 +479,7 @@ export function getWebviewContent(
       height: 100%;
       object-fit: contain;
       border-radius: 8px;
+      display: block;
     }
 
     /* FLOATING NAV BUTTONS */
@@ -455,20 +487,20 @@ export function getWebviewContent(
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       background: rgba(28, 32, 45, 0.65);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid var(--glass-border);
       border-radius: 50%;
       color: white;
-      font-size: 24px;
+      font-size: 22px;
       display: flex;
       align-items: center;
       justify-content: center;
       cursor: pointer;
-      box-shadow: var(--glass-highlight), 0 8px 24px rgba(0,0,0,0.4);
+      box-shadow: var(--glass-highlight), 0 6px 20px rgba(0,0,0,0.4);
       transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
       z-index: 10;
     }
@@ -476,7 +508,7 @@ export function getWebviewContent(
     .nav-arrow:hover {
       background: rgba(242, 107, 29, 0.85);
       border-color: rgba(255, 255, 255, 0.3);
-      box-shadow: 0 0 24px var(--accent-orange-glow);
+      box-shadow: 0 0 20px var(--accent-orange-glow);
       transform: translateY(-50%) scale(1.1);
     }
 
@@ -484,13 +516,13 @@ export function getWebviewContent(
       transform: translateY(-50%) scale(0.95);
     }
 
-    .nav-arrow.prev { left: 18px; }
-    .nav-arrow.next { right: 18px; }
+    .nav-arrow.prev { left: 16px; }
+    .nav-arrow.next { right: 16px; }
 
     /* BOTTOM GLASS DRAWER (Speaker Notes & Metadata) */
     .bottom-glass-drawer {
       border-top: 1px solid var(--glass-border);
-      background: rgba(22, 25, 34, 0.8);
+      background: rgba(20, 24, 34, 0.85);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       display: flex;
@@ -498,8 +530,8 @@ export function getWebviewContent(
     }
 
     .drawer-header {
-      height: 38px;
-      padding: 0 16px;
+      height: 36px;
+      padding: 0 14px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -511,7 +543,7 @@ export function getWebviewContent(
     }
 
     .drawer-header:hover {
-      background: rgba(255, 255, 255, 0.03);
+      background: rgba(255, 255, 255, 0.04);
       color: var(--fg-primary);
     }
 
@@ -522,20 +554,37 @@ export function getWebviewContent(
     }
 
     .drawer-body {
-      padding: 12px 18px;
+      padding: 10px 16px;
       border-top: 1px solid rgba(255, 255, 255, 0.05);
       font-size: 13px;
       line-height: 1.6;
       max-height: 130px;
-      overflow-y: auto;
-      white-space: pre-wrap;
-      color: #cbd5e1;
       display: none;
-      background: rgba(0, 0, 0, 0.25);
+      background: rgba(0, 0, 0, 0.3);
+      flex-direction: column;
+      gap: 8px;
     }
 
     .drawer-body.open {
-      display: block;
+      display: flex;
+    }
+
+    .notes-textarea {
+      width: 100%;
+      min-height: 55px;
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      color: #f1f5f9;
+      font-family: inherit;
+      font-size: 12.5px;
+      padding: 8px;
+      resize: vertical;
+      outline: none;
+    }
+
+    .notes-textarea:focus {
+      border-color: var(--accent-orange);
     }
 
     /* FULLSCREEN PRESENTATION MODE */
@@ -561,7 +610,6 @@ export function getWebviewContent(
       object-fit: contain;
     }
 
-    /* FLOATING PRESENTATION HUD */
     .present-hud {
       position: fixed;
       bottom: 24px;
@@ -602,52 +650,154 @@ export function getWebviewContent(
     .present-hud button:hover {
       background: rgba(255, 255, 255, 0.2);
     }
+
+    /* MODAL POPUPS */
+    .modal-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.65);
+      backdrop-filter: blur(6px);
+      z-index: 10000;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .modal-backdrop.open {
+      display: flex;
+    }
+
+    .glass-modal {
+      width: 440px;
+      background: rgba(28, 33, 46, 0.92);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 12px;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.7), var(--glass-highlight);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .modal-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: white;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .modal-input-group {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .modal-label {
+      font-size: 12px;
+      color: var(--fg-secondary);
+    }
+
+    .modal-input, .modal-select {
+      background: rgba(0, 0, 0, 0.35);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      color: white;
+      padding: 8px 10px;
+      font-size: 13px;
+      outline: none;
+    }
+
+    .modal-input:focus, .modal-select:focus {
+      border-color: var(--accent-orange);
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 4px;
+    }
   </style>
 </head>
 <body>
   <div class="ambient-glow-1"></div>
   <div class="ambient-glow-2"></div>
 
-  <!-- GLASS HEADER HUD -->
+  <!-- TOP HEADER -->
   <header class="glass-header">
     <div class="header-left">
-      <div class="brand-badge" title="DeckCraft Studio">D</div>
-      <div class="deck-title-group">
-        <div class="deck-title" id="deckTitle" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
-      </div>
-      <div class="badge-pill highlight" title="Theme">🎨 ${escapeHtml(theme)}</div>
-      <div class="badge-pill" title="Slide Aspect Ratio">📐 ${escapeHtml(slideSize)}</div>
+      <div class="brand-badge" title="OPEN_PPTX Studio">P</div>
+      <div class="deck-title" id="deckTitle" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+      <div class="badge-pill highlight" id="themeBadge">🎨 ${escapeHtml(theme)}</div>
+      <div class="badge-pill" id="sizeBadge">📐 ${escapeHtml(slideSize)}</div>
       <div class="badge-pill" id="slideIndicator">1 / ${slideCount}</div>
     </div>
 
     <div class="header-actions">
-      <button class="btn-glass btn-glass-primary" id="btnPresent" title="Fullscreen Slideshow (Cmd+Enter / F5)">
-        ▶ Present
+      <button class="btn-glass btn-glass-primary" id="btnPresent" title="전체화면 슬라이드 쇼 (F5 / Cmd+Enter)">
+        ▶ 슬라이드 쇼
       </button>
-      <button class="btn-glass" id="btnExportPdf" title="Export Presentation to PDF">
-        📑 Export PDF
+      <button class="btn-glass" id="btnExportPdf" title="벡터 PDF로 내보내기">
+        📑 PDF
       </button>
-      <button class="btn-glass" id="btnExportMd" title="Export Outline to Markdown">
-        📝 Outline MD
+      <button class="btn-glass" id="btnExportMd" title="마크다운 개요 추출">
+        📝 개요 MD
       </button>
-      <button class="btn-glass" id="btnSavePng" title="Export Active Slide as PNG Image">
-        🖼️ Slide PNG
+      <button class="btn-glass" id="btnSavePng" title="현재 슬라이드 PNG 저장">
+        🖼️ 슬라이드 PNG
       </button>
-      <button class="btn-glass" id="btnDesktopApp" title="Open Presentation in DeckCraft.app">
-        💻 Native App
+      <button class="btn-glass" id="btnDesktopApp" title="네이티브 DeckCraft 앱에서 열기">
+        💻 데스크톱 앱
       </button>
-      <button class="btn-glass" id="btnRefresh" title="Re-render all slides">
+      <button class="btn-glass" id="btnRefresh" title="새로고침">
         🔄
       </button>
     </div>
   </header>
+
+  <!-- POWERPOINT EDITING RIBBON -->
+  <div class="glass-ribbon">
+    <div class="ribbon-group">
+      <button class="btn-glass btn-glass-primary" id="btnNewSlideModal" title="새 슬라이드 추가">
+        ➕ 새 슬라이드
+      </button>
+      <button class="btn-glass" id="btnDuplicateSlide" title="현재 슬라이드 복제">
+        📋 복제
+      </button>
+      <button class="btn-glass btn-glass-danger" id="btnDeleteSlide" title="현재 슬라이드 삭제">
+        🗑️ 삭제
+      </button>
+      <div class="ribbon-divider"></div>
+      <button class="btn-glass" id="btnMoveUp" title="슬라이드 위로 이동">
+        ⬆️ 위로
+      </button>
+      <button class="btn-glass" id="btnMoveDown" title="슬라이드 아래로 이동">
+        ⬇️ 아래로
+      </button>
+    </div>
+
+    <div class="ribbon-group">
+      <button class="btn-glass" id="btnRenameModal" title="슬라이드 제목 수정">
+        ✏️ 제목 수정
+      </button>
+      <button class="btn-glass" id="btnTextBoxModal" title="텍스트 상자 삽입">
+        📝 텍스트 추가
+      </button>
+      <button class="btn-glass" id="btnShapeModal" title="도형 삽입">
+        🔲 도형 삽입
+      </button>
+    </div>
+  </div>
 
   <!-- MAIN BODY -->
   <div class="main-body">
     <!-- LEFT SIDEBAR -->
     <aside class="sidebar-glass">
       <div class="sidebar-top">
-        <span>FILMSTRIP (${slideCount})</span>
+        <span>슬라이드 목록 (<span id="slideTotalBadge">${slideCount}</span>)</span>
         <span id="themeLabel">${escapeHtml(theme)}</span>
       </div>
       <div class="thumbnail-scroll" id="thumbList">
@@ -663,8 +813,8 @@ export function getWebviewContent(
               <div class="thumb-img-box">
                 <img src="${imgUri}" alt="Slide ${i + 1}" loading="lazy" />
               </div>
-              <div class="thumb-title" title="${escapeHtml(slide.title || 'Untitled')}">
-                ${escapeHtml(slide.title || '(Untitled Slide)')}
+              <div class="thumb-title" title="${escapeHtml(slide.title || '슬라이드 ' + (i + 1))}">
+                ${escapeHtml(slide.title || '(슬라이드 ' + (i + 1) + ')')}
               </div>
             </div>`;
           })
@@ -676,15 +826,15 @@ export function getWebviewContent(
     <main class="viewport-glass">
       <!-- ZOOM / HUD -->
       <div class="stage-hud">
-        <button id="btnZoomOut" title="Zoom Out">−</button>
+        <button id="btnZoomOut" title="축소">−</button>
         <span id="zoomLabel">100%</span>
-        <button id="btnZoomIn" title="Zoom In">+</button>
-        <button id="btnZoomFit" title="Fit to Viewport">Fit</button>
+        <button id="btnZoomIn" title="확대">+</button>
+        <button id="btnZoomFit" title="화면 맞춤">Fit</button>
       </div>
 
       <!-- NAVIGATION BUTTONS -->
-      <button class="nav-arrow prev" id="btnPrev" title="Previous Slide (← / Backspace)">‹</button>
-      <button class="nav-arrow next" id="btnNext" title="Next Slide (→ / Space)">›</button>
+      <button class="nav-arrow prev" id="btnPrev" title="이전 슬라이드 (← / Backspace)">‹</button>
+      <button class="nav-arrow next" id="btnNext" title="다음 슬라이드 (→ / Space)">›</button>
 
       <!-- STAGE CONTAINER -->
       <div class="stage-container" id="stageContainer">
@@ -697,15 +847,18 @@ export function getWebviewContent(
       <div class="bottom-glass-drawer">
         <div class="drawer-header" id="notesToggle">
           <div class="drawer-details-pills">
-            <span>📝 Speaker Notes & Details</span>
-            <div class="badge-pill" id="animCount">Anim: ${info.slides[0]?.animations || 0}</div>
-            <div class="badge-pill" id="shapeCount">Shapes: ${info.slides[0]?.shapes || 0}</div>
-            <div class="badge-pill" id="transitionType">Transition: ${escapeHtml(info.slides[0]?.transition || 'none')}</div>
+            <span>📝 발표자 메모 & 슬라이드 세부 정보</span>
+            <div class="badge-pill" id="animCount">애니메이션: ${info.slides[0]?.animations || 0}</div>
+            <div class="badge-pill" id="shapeCount">도형: ${info.slides[0]?.shapes || 0}</div>
+            <div class="badge-pill" id="transitionType">전환: ${escapeHtml(info.slides[0]?.transition || '없음')}</div>
           </div>
           <span id="drawerArrow">▼</span>
         </div>
         <div class="drawer-body" id="notesBody">
-          <p id="notesContent">${escapeHtml(info.slides[0]?.notes || '(No speaker notes for this slide)')}</p>
+          <textarea class="notes-textarea" id="notesInput" placeholder="이 슬라이드의 발표자 메모를 입력하세요...">${escapeHtml(info.slides[0]?.notes || '')}</textarea>
+          <div style="display:flex; justify-content:flex-end;">
+            <button class="btn-glass btn-glass-primary" id="btnSaveNotes">💾 메모 저장</button>
+          </div>
         </div>
       </div>
     </main>
@@ -715,19 +868,115 @@ export function getWebviewContent(
   <div class="present-glass-overlay" id="presentOverlay">
     <img class="present-canvas-img" id="presentImg" src="${slideImageUris[0] || ''}" alt="Slide Show" />
     <div class="present-hud">
-      <button id="presentPrev">‹ Prev</button>
+      <button id="presentPrev">‹ 이전</button>
       <span id="presentCounter">1 / ${slideCount}</span>
-      <button id="presentNext">Next ›</button>
+      <button id="presentNext">다음 ›</button>
       <span>·</span>
-      <span>Space/Arrow to advance</span>
-      <button id="presentExit">Exit (Esc)</button>
+      <span>Space/방향키 이동</span>
+      <button id="presentExit">종료 (Esc)</button>
+    </div>
+  </div>
+
+  <!-- MODAL: NEW SLIDE -->
+  <div class="modal-backdrop" id="modalNewSlide">
+    <div class="glass-modal">
+      <div class="modal-title">
+        <span>➕ 새 슬라이드 추가</span>
+        <button class="btn-glass modal-close" data-close="modalNewSlide">✕</button>
+      </div>
+      <div class="modal-input-group">
+        <label class="modal-label">슬라이드 제목</label>
+        <input class="modal-input" id="inputNewSlideTitle" placeholder="예: 주요 사업 추진 현황" value="새 슬라이드" />
+      </div>
+      <div class="modal-input-group">
+        <label class="modal-label">슬라이드 레이아웃</label>
+        <select class="modal-select" id="selectNewSlideLayout">
+          <option value="titleAndContent">제목 및 내용 (Title and Content)</option>
+          <option value="titleOnly">제목만 (Title Only)</option>
+          <option value="titleSlide">제목 슬라이드 (Title Slide)</option>
+          <option value="sectionHeader">구역 머리글 (Section Header)</option>
+          <option value="twoContent">콘텐츠 2개 (Two Content)</option>
+          <option value="comparison">비교 (Comparison)</option>
+          <option value="blank">빈 화면 (Blank)</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-glass modal-close" data-close="modalNewSlide">취소</button>
+        <button class="btn-glass btn-glass-primary" id="btnConfirmAddSlide">추가하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RENAME SLIDE -->
+  <div class="modal-backdrop" id="modalRename">
+    <div class="glass-modal">
+      <div class="modal-title">
+        <span>✏️ 슬라이드 제목 수정</span>
+        <button class="btn-glass modal-close" data-close="modalRename">✕</button>
+      </div>
+      <div class="modal-input-group">
+        <label class="modal-label">새 제목</label>
+        <input class="modal-input" id="inputRenameTitle" placeholder="슬라이드 제목을 입력하세요" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-glass modal-close" data-close="modalRename">취소</button>
+        <button class="btn-glass btn-glass-primary" id="btnConfirmRename">수정 완료</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INSERT SHAPE -->
+  <div class="modal-backdrop" id="modalShape">
+    <div class="glass-modal">
+      <div class="modal-title">
+        <span>🔲 도형 삽입</span>
+        <button class="btn-glass modal-close" data-close="modalShape">✕</button>
+      </div>
+      <div class="modal-input-group">
+        <label class="modal-label">도형 종류</label>
+        <select class="modal-select" id="selectShapePreset">
+          <option value="roundRect">둥근 모서리 직사각형</option>
+          <option value="rect">직사각형</option>
+          <option value="ellipse">타원 / 원</option>
+          <option value="rightArrow">오른쪽 화살표</option>
+          <option value="star5">별 (5개 꼭짓점)</option>
+          <option value="diamond">다이아몬드 (마름모)</option>
+          <option value="wedgeRectCallout">말풍선 (Callout)</option>
+        </select>
+      </div>
+      <div class="modal-input-group">
+        <label class="modal-label">도형 내부 텍스트 (선택 사항)</label>
+        <input class="modal-input" id="inputShapeText" placeholder="예: 주요 목표 달성" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-glass modal-close" data-close="modalShape">취소</button>
+        <button class="btn-glass btn-glass-primary" id="btnConfirmInsertShape">삽입하기</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: INSERT TEXT BOX -->
+  <div class="modal-backdrop" id="modalTextBox">
+    <div class="glass-modal">
+      <div class="modal-title">
+        <span>📝 텍스트 상자 추가</span>
+        <button class="btn-glass modal-close" data-close="modalTextBox">✕</button>
+      </div>
+      <div class="modal-input-group">
+        <label class="modal-label">내용</label>
+        <input class="modal-input" id="inputTextBoxContent" placeholder="추가할 텍스트 내용을 입력하세요" value="텍스트 상자" />
+      </div>
+      <div class="modal-actions">
+        <button class="btn-glass modal-close" data-close="modalTextBox">취소</button>
+        <button class="btn-glass btn-glass-primary" id="btnConfirmInsertTextBox">추가하기</button>
+      </div>
     </div>
   </div>
 
   <script nonce="${nonce}">
     const vscode = acquireVsCodeApi();
-    const slidesData = ${JSON.stringify(info.slides)};
-    const images = ${JSON.stringify(slideImageUris)};
+    let slidesData = ${JSON.stringify(info.slides)};
+    let images = ${JSON.stringify(slideImageUris)};
     let currentIndex = 0;
     let zoomLevel = 1.0;
 
@@ -736,16 +985,44 @@ export function getWebviewContent(
     const presentImg = document.getElementById('presentImg');
     const slideIndicator = document.getElementById('slideIndicator');
     const presentCounter = document.getElementById('presentCounter');
-    const notesContent = document.getElementById('notesContent');
+    const notesInput = document.getElementById('notesInput');
     const notesBody = document.getElementById('notesBody');
     const drawerArrow = document.getElementById('drawerArrow');
     const notesToggle = document.getElementById('notesToggle');
-    const thumbCards = document.querySelectorAll('.thumb-card');
     const presentOverlay = document.getElementById('presentOverlay');
     const animCount = document.getElementById('animCount');
     const shapeCount = document.getElementById('shapeCount');
     const transitionType = document.getElementById('transitionType');
     const zoomLabel = document.getElementById('zoomLabel');
+    const thumbList = document.getElementById('thumbList');
+    const slideTotalBadge = document.getElementById('slideTotalBadge');
+
+    function renderThumbnails() {
+      thumbList.innerHTML = slidesData.map((slide, i) => {
+        const imgUri = images[i] || '';
+        const titleText = slide.title || ('슬라이드 ' + (i + 1));
+        return \`
+        <div class="thumb-card \${i === currentIndex ? 'active' : ''}" data-index="\${i}">
+          <div class="thumb-card-top">
+            <span class="thumb-idx">#\${i + 1}</span>
+            <span class="thumb-layout-tag">\${escapeHtml(slide.layout || 'Slide')}</span>
+          </div>
+          <div class="thumb-img-box">
+            <img src="\${imgUri}" alt="Slide \${i + 1}" loading="lazy" />
+          </div>
+          <div class="thumb-title" title="\${escapeHtml(titleText)}">
+            \${escapeHtml(titleText)}
+          </div>
+        </div>\`;
+      }).join('');
+
+      document.querySelectorAll('.thumb-card').forEach((card) => {
+        card.addEventListener('click', () => {
+          const idx = parseInt(card.getAttribute('data-index'), 10);
+          updateSlide(idx);
+        });
+      });
+    }
 
     function updateSlide(index) {
       if (index < 0 || index >= slidesData.length) return;
@@ -757,8 +1034,9 @@ export function getWebviewContent(
       const countText = (currentIndex + 1) + ' / ' + slidesData.length;
       slideIndicator.textContent = countText;
       presentCounter.textContent = countText;
+      slideTotalBadge.textContent = slidesData.length;
 
-      thumbCards.forEach((card, i) => {
+      document.querySelectorAll('.thumb-card').forEach((card, i) => {
         if (i === currentIndex) {
           card.classList.add('active');
           card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
@@ -768,21 +1046,29 @@ export function getWebviewContent(
       });
 
       const slide = slidesData[currentIndex];
-      const notes = slide?.notes;
-      notesContent.textContent = notes && notes.trim().length > 0 ? notes : '(No speaker notes for this slide)';
+      notesInput.value = slide?.notes || '';
       
-      animCount.textContent = 'Anim: ' + (slide?.animations || 0);
-      shapeCount.textContent = 'Shapes: ' + (slide?.shapes || 0);
-      transitionType.textContent = 'Transition: ' + (slide?.transition || 'none');
+      animCount.textContent = '애니메이션: ' + (slide?.animations || 0);
+      shapeCount.textContent = '도형: ' + (slide?.shapes || 0);
+      transitionType.textContent = '전환: ' + (slide?.transition || '없음');
     }
 
-    thumbCards.forEach((card) => {
-      card.addEventListener('click', () => {
-        const idx = parseInt(card.getAttribute('data-index'), 10);
-        updateSlide(idx);
-      });
+    // Initial render of thumbnails
+    renderThumbnails();
+
+    // Listen to updates from extension
+    window.addEventListener('message', (event) => {
+      const msg = event.data;
+      if (msg.type === 'updateData') {
+        slidesData = msg.info.slides;
+        images = msg.slideUris;
+        renderThumbnails();
+        const nextIdx = msg.targetIndex !== undefined ? msg.targetIndex : currentIndex;
+        updateSlide(Math.min(nextIdx, slidesData.length - 1));
+      }
     });
 
+    // Navigation
     document.getElementById('btnPrev').addEventListener('click', () => {
       if (currentIndex > 0) updateSlide(currentIndex - 1);
     });
@@ -791,7 +1077,7 @@ export function getWebviewContent(
       if (currentIndex < slidesData.length - 1) updateSlide(currentIndex + 1);
     });
 
-    // Zoom Controls
+    // Zoom
     function setZoom(level) {
       zoomLevel = Math.max(0.5, Math.min(2.5, level));
       slideFrame.style.transform = 'scale(' + zoomLevel + ')';
@@ -802,10 +1088,100 @@ export function getWebviewContent(
     document.getElementById('btnZoomOut').addEventListener('click', () => setZoom(zoomLevel - 0.15));
     document.getElementById('btnZoomFit').addEventListener('click', () => setZoom(1.0));
 
-    // Notes Toggle
+    // Notes Toggle & Save
     notesToggle.addEventListener('click', () => {
       const isOpen = notesBody.classList.toggle('open');
       drawerArrow.textContent = isOpen ? '▲' : '▼';
+    });
+
+    document.getElementById('btnSaveNotes').addEventListener('click', () => {
+      vscode.postMessage({
+        command: 'saveNotes',
+        index: currentIndex,
+        notes: notesInput.value,
+      });
+    });
+
+    // --- MODAL CONTROLS ---
+    function openModal(id) {
+      document.getElementById(id).classList.add('open');
+    }
+    function closeModal(id) {
+      document.getElementById(id).classList.remove('open');
+    }
+
+    document.querySelectorAll('.modal-close').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const id = btn.getAttribute('data-close');
+        if (id) closeModal(id);
+      });
+    });
+
+    // New Slide
+    document.getElementById('btnNewSlideModal').addEventListener('click', () => openModal('modalNewSlide'));
+    document.getElementById('btnConfirmAddSlide').addEventListener('click', () => {
+      const title = document.getElementById('inputNewSlideTitle').value || '새 슬라이드';
+      const layout = document.getElementById('selectNewSlideLayout').value || 'titleAndContent';
+      closeModal('modalNewSlide');
+      vscode.postMessage({ command: 'addSlide', title, layout });
+    });
+
+    // Delete Slide
+    document.getElementById('btnDeleteSlide').addEventListener('click', () => {
+      if (slidesData.length <= 1) {
+        alert('최소 1개의 슬라이드는 유지되어야 합니다.');
+        return;
+      }
+      if (confirm('슬라이드 #' + (currentIndex + 1) + '을(를) 삭제하시겠습니까?')) {
+        vscode.postMessage({ command: 'deleteSlide', index: currentIndex });
+      }
+    });
+
+    // Duplicate Slide
+    document.getElementById('btnDuplicateSlide').addEventListener('click', () => {
+      vscode.postMessage({ command: 'duplicateSlide', index: currentIndex });
+    });
+
+    // Move Up / Down
+    document.getElementById('btnMoveUp').addEventListener('click', () => {
+      if (currentIndex > 0) {
+        vscode.postMessage({ command: 'moveSlide', from: currentIndex, to: currentIndex - 1 });
+      }
+    });
+
+    document.getElementById('btnMoveDown').addEventListener('click', () => {
+      if (currentIndex < slidesData.length - 1) {
+        vscode.postMessage({ command: 'moveSlide', from: currentIndex, to: currentIndex + 1 });
+      }
+    });
+
+    // Rename Slide Title
+    document.getElementById('btnRenameModal').addEventListener('click', () => {
+      const currentTitle = slidesData[currentIndex]?.title || '';
+      document.getElementById('inputRenameTitle').value = currentTitle;
+      openModal('modalRename');
+    });
+    document.getElementById('btnConfirmRename').addEventListener('click', () => {
+      const name = document.getElementById('inputRenameTitle').value;
+      closeModal('modalRename');
+      vscode.postMessage({ command: 'renameSlide', index: currentIndex, name });
+    });
+
+    // Insert Shape
+    document.getElementById('btnShapeModal').addEventListener('click', () => openModal('modalShape'));
+    document.getElementById('btnConfirmInsertShape').addEventListener('click', () => {
+      const preset = document.getElementById('selectShapePreset').value;
+      const text = document.getElementById('inputShapeText').value;
+      closeModal('modalShape');
+      vscode.postMessage({ command: 'insertShape', index: currentIndex, preset, text });
+    });
+
+    // Insert Text Box
+    document.getElementById('btnTextBoxModal').addEventListener('click', () => openModal('modalTextBox'));
+    document.getElementById('btnConfirmInsertTextBox').addEventListener('click', () => {
+      const text = document.getElementById('inputTextBoxContent').value;
+      closeModal('modalTextBox');
+      vscode.postMessage({ command: 'insertTextBox', index: currentIndex, text });
     });
 
     // Presentation Mode
@@ -850,6 +1226,9 @@ export function getWebviewContent(
 
     // Keyboard navigation
     window.addEventListener('keydown', (e) => {
+      if (document.querySelector('.modal-backdrop.open')) return;
+      if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
+
       if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
         if (currentIndex < slidesData.length - 1) {
           updateSlide(currentIndex + 1);
@@ -889,6 +1268,15 @@ export function getWebviewContent(
     document.getElementById('btnRefresh').addEventListener('click', () => {
       vscode.postMessage({ command: 'refresh' });
     });
+
+    function escapeHtml(text) {
+      return (text || '')
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+    }
   </script>
 </body>
 </html>`;
