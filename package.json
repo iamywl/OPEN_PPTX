@@ -3,11 +3,11 @@
   "displayName": "DeckCraft - PPTX & Presentation Studio",
   "description": "View, present, edit and export PowerPoint (.pptx) and DeckCraft presentations inside VS Code.",
   "version": "0.1.0",
-  "publisher": "deckcraft",
+  "publisher": "KodingKO",
   "icon": "assets/icon.png",
   "repository": {
     "type": "git",
-    "url": "https://github.com/storytold/deckcraft"
+    "url": "https://github.com/iamywl/OPEN_PPTX.git"
   },
   "engines": {
     "vscode": "^1.85.0"
