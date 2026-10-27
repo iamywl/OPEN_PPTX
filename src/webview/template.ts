@@ -495,42 +495,102 @@ export function getWebviewContent(
 
     .shape-box-overlay {
       position: absolute;
-      border: 1px dashed transparent;
-      border-radius: 3px;
-      cursor: pointer;
+      border: 1.5px dashed rgba(14, 165, 233, 0.4);
+      border-radius: 4px;
+      cursor: move;
       transition: border-color 0.15s, background 0.15s;
       box-sizing: border-box;
       display: flex;
       align-items: center;
       justify-content: center;
+      user-select: none;
     }
 
     .shape-box-overlay:hover {
-      border-color: rgba(14, 165, 233, 0.6);
+      border-color: rgba(14, 165, 233, 0.9);
       background: rgba(14, 165, 233, 0.08);
     }
 
     .shape-box-overlay.selected {
       border: 2px solid var(--accent-orange) !important;
-      background: rgba(242, 107, 29, 0.12) !important;
-      box-shadow: 0 0 12px var(--accent-orange-glow);
+      background: rgba(242, 107, 29, 0.08) !important;
+      box-shadow: 0 0 14px var(--accent-orange-glow);
+    }
+
+    .shape-box-overlay.dragging {
+      opacity: 0.85;
+      border-style: solid;
+      border-color: #38bdf8 !important;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6);
+    }
+
+    /* 8-POINT RESIZE HANDLES */
+    .resize-handle {
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      background: #ffffff;
+      border: 2px solid var(--accent-orange);
+      border-radius: 50%;
+      z-index: 30;
+      display: none;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+    }
+
+    .shape-box-overlay.selected .resize-handle {
+      display: block;
+    }
+
+    .handle-nw { top: -5px; left: -5px; cursor: nwse-resize; }
+    .handle-n  { top: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+    .handle-ne { top: -5px; right: -5px; cursor: nesw-resize; }
+    .handle-e  { top: calc(50% - 5px); right: -5px; cursor: ew-resize; }
+    .handle-se { bottom: -5px; right: -5px; cursor: nwse-resize; }
+    .handle-s  { bottom: -5px; left: calc(50% - 5px); cursor: ns-resize; }
+    .handle-sw { bottom: -5px; left: -5px; cursor: nesw-resize; }
+    .handle-w  { top: calc(50% - 5px); left: -5px; cursor: ew-resize; }
+
+    /* INLINE DIRECT TEXT EDITING */
+    .inline-text-editor {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      outline: 2px solid #0ea5e9;
+      background: rgba(15, 23, 42, 0.95);
+      color: #ffffff;
+      padding: 6px 8px;
+      font-family: var(--font-family);
+      font-size: 14px;
+      line-height: 1.35;
+      cursor: text;
+      overflow-y: auto;
+      word-break: break-word;
+      white-space: pre-wrap;
+      border-radius: 4px;
+      user-select: text;
+      -webkit-user-select: text;
+      z-index: 50;
+      box-shadow: 0 0 16px rgba(14, 165, 233, 0.6);
+      box-sizing: border-box;
     }
 
     .shape-quick-bar {
       position: absolute;
-      top: -34px;
+      top: -36px;
       left: 0;
-      background: rgba(20, 24, 34, 0.9);
-      backdrop-filter: blur(12px);
+      background: rgba(20, 24, 34, 0.95);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
       border: 1px solid var(--glass-border);
       border-radius: 6px;
       padding: 3px 6px;
       display: none;
       align-items: center;
       gap: 4px;
-      z-index: 50;
+      z-index: 60;
       white-space: nowrap;
-      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+      box-shadow: 0 6px 18px rgba(0,0,0,0.6);
     }
 
     .shape-box-overlay.selected .shape-quick-bar {
@@ -543,11 +603,19 @@ export function getWebviewContent(
       border-radius: 4px;
       color: white;
       font-size: 11px;
-      padding: 2px 6px;
+      padding: 2px 7px;
       cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      transition: background 0.15s;
     }
     .shape-quick-bar button:hover {
       background: rgba(255, 255, 255, 0.25);
+    }
+    .shape-quick-bar button.btn-del-shape:hover {
+      background: rgba(239, 68, 68, 0.5);
+      border-color: rgba(239, 68, 68, 0.8);
     }
 
     /* FLOATING NAV BUTTONS */
@@ -1122,14 +1190,15 @@ export function getWebviewContent(
       });
     }
 
+    let isEditingText = false;
+    const baseW = 960.0;
+    const baseH = 540.0;
+
     function renderShapeOverlays() {
       shapeOverlayLayer.innerHTML = '';
       selectedShape = null;
 
       const shapes = shapesCache[currentIndex] || [];
-      // Native DeckCraft coordinates are based on 960x540
-      const baseW = 960.0;
-      const baseH = 540.0;
 
       shapes.forEach((shape) => {
         if (!shape.box || shape.box.length < 4) return;
@@ -1146,29 +1215,61 @@ export function getWebviewContent(
         el.style.width = widthPct + '%';
         el.style.height = heightPct + '%';
         el.setAttribute('data-id', shape.id);
-        el.setAttribute('title', (shape.text || shape.name || '도형') + ' (클릭하여 편집)');
+        el.setAttribute('title', (shape.text || shape.name || '도형') + ' (더블클릭하여 인라인 편집 / 드래그 이동)');
 
+        // 8 Resize Handles
+        const handles = ['nw', 'n', 'ne', 'e', 'se', 's', 'sw', 'w'];
+        handles.forEach((hName) => {
+          const hEl = document.createElement('div');
+          hEl.className = 'resize-handle handle-' + hName;
+          hEl.setAttribute('data-handle', hName);
+          el.appendChild(hEl);
+
+          hEl.addEventListener('mousedown', (e) => {
+            e.stopPropagation();
+            e.preventDefault();
+            startResize(e, shape, el, hName);
+          });
+        });
+
+        // Quick action floating bar
         const quickBar = document.createElement('div');
         quickBar.className = 'shape-quick-bar';
         quickBar.innerHTML = \`
-          <button class="btn-edit-text" title="텍스트 수정">✏️ 텍스트 수정</button>
-          <button class="btn-del-shape" title="도형 삭제">🗑️ 삭제</button>
+          <button class="btn-inline-edit" title="슬라이드 위에서 직접 수정">✏️ 직접 수정</button>
+          <button class="btn-quick-bold" title="굵게"><b>B</b></button>
+          <button class="btn-quick-modal" title="모달 창으로 편집">🪟 모달</button>
+          <button class="btn-del-shape" title="도형 삭제 (Del)">🗑️ 삭제</button>
         \`;
         el.appendChild(quickBar);
 
-        el.addEventListener('click', (e) => {
+        // Select on click & start dragging
+        el.addEventListener('mousedown', (e) => {
+          if (e.target.classList.contains('resize-handle') || e.target.closest('.shape-quick-bar') || e.target.classList.contains('inline-text-editor')) {
+            return;
+          }
           e.stopPropagation();
-          document.querySelectorAll('.shape-box-overlay').forEach((o) => o.classList.remove('selected'));
-          el.classList.add('selected');
-          selectedShape = shape;
+          selectShape(shape, el);
+          startMove(e, shape, el);
         });
 
+        // Double click: Inline Editing right on the slide!
         el.addEventListener('dblclick', (e) => {
           e.stopPropagation();
-          openTextEditModal(shape);
+          startInlineEdit(shape, el);
         });
 
-        quickBar.querySelector('.btn-edit-text').addEventListener('click', (e) => {
+        quickBar.querySelector('.btn-inline-edit').addEventListener('click', (e) => {
+          e.stopPropagation();
+          startInlineEdit(shape, el);
+        });
+
+        quickBar.querySelector('.btn-quick-bold').addEventListener('click', (e) => {
+          e.stopPropagation();
+          vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: shape.id, bold: true });
+        });
+
+        quickBar.querySelector('.btn-quick-modal').addEventListener('click', (e) => {
           e.stopPropagation();
           openTextEditModal(shape);
         });
@@ -1183,6 +1284,256 @@ export function getWebviewContent(
         shapeOverlayLayer.appendChild(el);
       });
     }
+
+    function selectShape(shape, el) {
+      document.querySelectorAll('.shape-box-overlay').forEach((o) => o.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedShape = shape;
+    }
+
+    function startInlineEdit(shape, el) {
+      if (el.querySelector('.inline-text-editor')) return;
+      isEditingText = true;
+
+      const editor = document.createElement('div');
+      editor.className = 'inline-text-editor';
+      editor.contentEditable = 'true';
+      editor.spellcheck = false;
+      editor.innerText = shape.text || '';
+      el.appendChild(editor);
+
+      editor.focus();
+
+      try {
+        const range = document.createRange();
+        range.selectNodeContents(editor);
+        const sel = window.getSelection();
+        sel.removeAllRanges();
+        sel.addRange(range);
+      } catch (err) {}
+
+      let committed = false;
+      function commitAndClose() {
+        if (committed) return;
+        committed = true;
+        isEditingText = false;
+        const newText = editor.innerText.trim();
+        if (editor.parentNode) {
+          editor.parentNode.removeChild(editor);
+        }
+        if (newText !== shape.text) {
+          shape.text = newText;
+          vscode.postMessage({
+            command: 'setText',
+            index: currentIndex,
+            shapeId: shape.id,
+            text: newText,
+          });
+        }
+      }
+
+      editor.addEventListener('blur', () => {
+        commitAndClose();
+      });
+
+      editor.addEventListener('keydown', (e) => {
+        e.stopPropagation();
+        if (e.key === 'Escape') {
+          commitAndClose();
+        } else if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) {
+          commitAndClose();
+        }
+      });
+    }
+
+    function startMove(startEvent, shape, el) {
+      const stageRect = shapeOverlayLayer.getBoundingClientRect();
+      const startMouseX = startEvent.clientX;
+      const startMouseY = startEvent.clientY;
+      const [origX, origY, origW, origH] = shape.box;
+      let hasMoved = false;
+      let finalX = origX;
+      let finalY = origY;
+
+      el.classList.add('dragging');
+
+      function onMouseMove(moveEvent) {
+        hasMoved = true;
+        const deltaPxX = moveEvent.clientX - startMouseX;
+        const deltaPxY = moveEvent.clientY - startMouseY;
+        const deltaX = (deltaPxX / stageRect.width) * baseW;
+        const deltaY = (deltaPxY / stageRect.height) * baseH;
+
+        finalX = Math.round(Math.max(0, Math.min(baseW - origW, origX + deltaX)));
+        finalY = Math.round(Math.max(0, Math.min(baseH - origH, origY + deltaY)));
+
+        el.style.left = (finalX / baseW) * 100 + '%';
+        el.style.top = (finalY / baseH) * 100 + '%';
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        el.classList.remove('dragging');
+
+        if (hasMoved) {
+          shape.box = [finalX, finalY, origW, origH];
+          vscode.postMessage({
+            command: 'moveShape',
+            index: currentIndex,
+            shapeId: shape.id,
+            x: finalX,
+            y: finalY,
+            w: origW,
+            h: origH,
+          });
+        }
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    function startResize(startEvent, shape, el, handleName) {
+      const stageRect = shapeOverlayLayer.getBoundingClientRect();
+      const startMouseX = startEvent.clientX;
+      const startMouseY = startEvent.clientY;
+      const [origX, origY, origW, origH] = shape.box;
+      let currentBox = [origX, origY, origW, origH];
+
+      el.classList.add('dragging');
+
+      function onMouseMove(moveEvent) {
+        const deltaPxX = moveEvent.clientX - startMouseX;
+        const deltaPxY = moveEvent.clientY - startMouseY;
+        const deltaX = (deltaPxX / stageRect.width) * baseW;
+        const deltaY = (deltaPxY / stageRect.height) * baseH;
+
+        let nx = origX;
+        let ny = origY;
+        let nw = origW;
+        let nh = origH;
+
+        if (handleName.includes('e')) {
+          nw = Math.max(30, origW + deltaX);
+        }
+        if (handleName.includes('s')) {
+          nh = Math.max(20, origH + deltaY);
+        }
+        if (handleName.includes('w')) {
+          const potW = origW - deltaX;
+          if (potW >= 30) {
+            nx = origX + deltaX;
+            nw = potW;
+          }
+        }
+        if (handleName.includes('n')) {
+          const potH = origH - deltaY;
+          if (potH >= 20) {
+            ny = origY + deltaY;
+            nh = potH;
+          }
+        }
+
+        currentBox = [Math.round(nx), Math.round(ny), Math.round(nw), Math.round(nh)];
+        el.style.left = (currentBox[0] / baseW) * 100 + '%';
+        el.style.top = (currentBox[1] / baseH) * 100 + '%';
+        el.style.width = (currentBox[2] / baseW) * 100 + '%';
+        el.style.height = (currentBox[3] / baseH) * 100 + '%';
+      }
+
+      function onMouseUp() {
+        window.removeEventListener('mousemove', onMouseMove);
+        window.removeEventListener('mouseup', onMouseUp);
+        el.classList.remove('dragging');
+
+        shape.box = currentBox;
+        vscode.postMessage({
+          command: 'moveShape',
+          index: currentIndex,
+          shapeId: shape.id,
+          x: currentBox[0],
+          y: currentBox[1],
+          w: currentBox[2],
+          h: currentBox[3],
+        });
+      }
+
+      window.addEventListener('mousemove', onMouseMove);
+      window.addEventListener('mouseup', onMouseUp);
+    }
+
+    // Double-click empty canvas to insert text box
+    shapeOverlayLayer.addEventListener('dblclick', (e) => {
+      if (e.target !== shapeOverlayLayer) return;
+      const rect = shapeOverlayLayer.getBoundingClientRect();
+      const clickX = Math.round(((e.clientX - rect.left) / rect.width) * baseW);
+      const clickY = Math.round(((e.clientY - rect.top) / rect.height) * baseH);
+      vscode.postMessage({
+        command: 'insertTextBox',
+        index: currentIndex,
+        rect: [Math.max(20, clickX - 100), Math.max(20, clickY - 25), 260, 60],
+        text: '새 텍스트 상자',
+      });
+    });
+
+    // Keyboard shortcuts: Delete, Arrows, Cmd+B, Cmd+I
+    window.addEventListener('keydown', (e) => {
+      if (isEditingText) return;
+      const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName || '');
+      if (isInput) return;
+
+      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedShape) {
+        e.preventDefault();
+        vscode.postMessage({
+          command: 'deleteShape',
+          index: currentIndex,
+          shapeId: selectedShape.id,
+        });
+        selectedShape = null;
+      } else if (e.key.startsWith('Arrow') && selectedShape) {
+        e.preventDefault();
+        const step = e.shiftKey ? 10 : (e.altKey ? 1 : 3);
+        const [sx, sy, sw, sh] = selectedShape.box;
+        let nx = sx;
+        let ny = sy;
+        if (e.key === 'ArrowLeft') nx = Math.max(0, sx - step);
+        if (e.key === 'ArrowRight') nx = Math.min(baseW - sw, sx + step);
+        if (e.key === 'ArrowUp') ny = Math.max(0, sy - step);
+        if (e.key === 'ArrowDown') ny = Math.min(baseH - sh, sy + step);
+
+        selectedShape.box = [nx, ny, sw, sh];
+        renderShapeOverlays();
+        vscode.postMessage({
+          command: 'moveShape',
+          index: currentIndex,
+          shapeId: selectedShape.id,
+          x: nx,
+          y: ny,
+          w: sw,
+          h: sh,
+        });
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b' && selectedShape) {
+        e.preventDefault();
+        vscode.postMessage({
+          command: 'formatShape',
+          index: currentIndex,
+          shapeId: selectedShape.id,
+          bold: true,
+        });
+      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'i' && selectedShape) {
+        e.preventDefault();
+        vscode.postMessage({
+          command: 'formatShape',
+          index: currentIndex,
+          shapeId: selectedShape.id,
+          italic: true,
+        });
+      } else if (e.key === 'Escape') {
+        document.querySelectorAll('.shape-box-overlay').forEach((o) => o.classList.remove('selected'));
+        selectedShape = null;
+      }
+    });
 
     function openTextEditModal(shape) {
       selectedShape = shape;
@@ -1204,11 +1555,22 @@ export function getWebviewContent(
 
     document.getElementById('btnEditTextOverlay').addEventListener('click', () => {
       if (selectedShape) {
-        openTextEditModal(selectedShape);
+        const el = shapeOverlayLayer.querySelector(\`[data-id="\${selectedShape.id}"]\`);
+        if (el) {
+          startInlineEdit(selectedShape, el);
+        } else {
+          openTextEditModal(selectedShape);
+        }
       } else {
         const shapes = shapesCache[currentIndex] || [];
         if (shapes.length > 0) {
-          openTextEditModal(shapes[0]);
+          const firstEl = shapeOverlayLayer.querySelector(\`[data-id="\${shapes[0].id}"]\`);
+          if (firstEl) {
+            selectShape(shapes[0], firstEl);
+            startInlineEdit(shapes[0], firstEl);
+          } else {
+            openTextEditModal(shapes[0]);
+          }
         } else {
           openModal('modalTextBox');
         }
@@ -1216,9 +1578,11 @@ export function getWebviewContent(
     });
 
     // Deselect shape on background click
-    shapeOverlayLayer.addEventListener('click', () => {
-      document.querySelectorAll('.shape-box-overlay').forEach((o) => o.classList.remove('selected'));
-      selectedShape = null;
+    shapeOverlayLayer.addEventListener('click', (e) => {
+      if (e.target === shapeOverlayLayer) {
+        document.querySelectorAll('.shape-box-overlay').forEach((o) => o.classList.remove('selected'));
+        selectedShape = null;
+      }
     });
 
     function updateSlide(index) {

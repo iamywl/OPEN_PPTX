@@ -279,10 +279,11 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
             const index = message.index ?? 0;
             const preset = message.preset || 'roundRect';
             const text = message.text || '';
+            const rect = message.rect ? message.rect.map((v: number) => Math.round(v)) : [200, 180, 360, 140];
             const goCmd = JSON.stringify({ index });
             const shapeCmd = JSON.stringify({
               preset,
-              rect: [200, 180, 360, 140],
+              rect,
               text,
             });
             await DeckcraftCli.runCommand(
@@ -305,10 +306,11 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
           try {
             const index = message.index ?? 0;
             const text = message.text || '새 텍스트 상자';
+            const rect = message.rect ? message.rect.map((v: number) => Math.round(v)) : [160, 180, 360, 80];
             const goCmd = JSON.stringify({ index });
             const shapeCmd = JSON.stringify({
               preset: 'rect',
-              rect: [160, 180, 400, 100],
+              rect,
               text,
             });
             await DeckcraftCli.runCommand(
@@ -325,9 +327,42 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
             const { info, slideUris } = await loadPresentationData();
             info.slideShapes![index] = await DeckcraftCli.inspectSlide(filePath, index, this.context);
             webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
-            vscode.window.showInformationMessage(`슬라이드 #${index + 1}에 텍스트 상자 추가 완료`);
+            vscode.window.showInformationMessage(`텍스트 상자 추가 완료`);
           } catch (err: any) {
             vscode.window.showErrorMessage(`텍스트 추가 실패: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'formatShape': {
+          try {
+            const index = message.index ?? 0;
+            const shapeId = message.shapeId;
+            const commands: string[] = [
+              `slide.go=${JSON.stringify({ index })}`,
+              `edit.select=${JSON.stringify({ ids: [shapeId] })}`,
+            ];
+            if (message.bold) {
+              commands.push('format.bold');
+            }
+            if (message.italic) {
+              commands.push('format.italic');
+            }
+            if (message.size) {
+              commands.push(`format.size=${JSON.stringify({ size: message.size })}`);
+            }
+            if (message.color) {
+              commands.push(`format.color=${JSON.stringify({ color: message.color })}`);
+            }
+            if (message.align) {
+              commands.push(`format.align=${JSON.stringify({ align: message.align })}`);
+            }
+            await DeckcraftCli.runCommand(commands, this.context, filePath, filePath);
+            const { info, slideUris } = await loadPresentationData();
+            info.slideShapes![index] = await DeckcraftCli.inspectSlide(filePath, index, this.context);
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`서식 변경 실패: ${err.message}`);
           }
           break;
         }

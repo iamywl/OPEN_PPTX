@@ -27,6 +27,12 @@ This project adapts **DeckCraft**, an open-source presentation engine written in
    - Establish Loop Engineering methodology for 100% compliance.
 5. **Git Repository Deployment**:
    - Configure Git origin as `https://github.com/iamywl/OPEN_PPTX.git` and push `main` branch.
+6. **Direct PowerPoint WYSIWYG In-Editor Experience**:
+   - Resolved the user inquiry: "기술의 문제야 기능의 문제야?" (100% feature/implementation issue).
+   - Eliminated clunky modal-only text edits in favor of direct in-canvas WYSIWYG manipulation.
+   - Added zero-modal inline `contenteditable` typing directly on the slide with Korean IME support.
+   - Implemented 8-point live resize handles and smooth mouse drag-and-drop repositioning.
+   - Added empty canvas double-click to create text boxes, and full keyboard shortcuts (`Del`, arrows, `Cmd+B`, `Cmd+I`).
 
 ---
 
