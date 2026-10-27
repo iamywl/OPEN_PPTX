@@ -67,11 +67,14 @@ To achieve 100% quality and verify compliance across all deliverables, the proje
 | Loop Stage | Verification Target | Test Method | Status |
 |---|---|---|---|
 | **Loop 1** | TypeScript compilation & Bundling | `npm run compile && npm run build` | **PASS (0 errors)** |
-| **Loop 2** | Multi-platform CLI execution | `deckcraft-cli --version` | **PASS (v0.11.1)** |
+| **Loop 2** | Multi-platform CLI execution | `deckcraft-cli --version` | **PASS (v0.11.1 Universal)** |
 | **Loop 3** | PPTX metadata extraction | `deckcraft-cli info samples/sample.pptx` | **PASS (8 slides)** |
 | **Loop 4** | High-Res PNG rendering & conversions | Vector PDF (862.5 KB) & Markdown outline | **PASS (100%)** |
 | **Loop 5** | Glassmorphism UI & Screenshot assets | `scripts/qa-test.ts` (All 6 images verified) | **PASS (100%)** |
-| **Loop 6** | Packaging & Git synchronization | `git push -u origin main` | **PASS** |
+| **Loop 6** | Webview DOM & CSP Integrity | `scripts/verify-webview.ts` (28 DOM IDs) | **PASS (100%)** |
+| **Loop 7** | End-to-End Creation Roundtrip | `scripts/verify-full-roundtrip.ts` | **PASS (100%)** |
+| **Loop 8** | VSIX Package & VS Code Install | `vsce package` & `code --install-extension` | **PASS (Installed)** |
+| **Loop 9** | Git Origin Synchronization | `git push -u origin main` | **PASS** |
 
 ---
 

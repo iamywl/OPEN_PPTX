@@ -1,0 +1,12 @@
+.vscode/**
+deckcraft_upstream/**
+qa_output/**
+src/**
+scripts/**
+tsconfig.json
+esbuild.js
+*.ts
+*.map
+node_modules/**
+.gitignore
+.git/**

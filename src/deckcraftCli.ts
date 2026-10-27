@@ -193,7 +193,7 @@ export class DeckcraftCli {
     const outDir = path.dirname(outPath);
     fs.mkdirSync(outDir, { recursive: true });
     const cmd = JSON.stringify({ layout: 'titleOnly', title });
-    await execAsync(`"${cli}" run --cmd 'slide.new=${cmd}' --save "${outPath}"`);
+    await execAsync(`"${cli}" run --cmd 'slide.new=${cmd}' --cmd 'slide.delete={"index":0}' --save "${outPath}"`);
   }
 
   public static async downloadBinary(context: vscode.ExtensionContext): Promise<string> {
