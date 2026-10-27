@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { DeckCraftInfo } from '../deckcraftCli';
+import { DeckCraftInfo, DeckCraftShape } from '../deckcraftCli';
 
 export function getWebviewContent(
   webview: vscode.Webview,
@@ -13,6 +13,7 @@ export function getWebviewContent(
   const slideCount = info.slides.length;
   const theme = info.theme || 'Default';
   const slideSize = info.slideSize ? `${info.slideSize[0]}×${info.slideSize[1]}` : '16:9';
+  const initialShapes = info.slideShapes || {};
 
   return `<!DOCTYPE html>
 <html lang="ko">
@@ -449,7 +450,7 @@ export function getWebviewContent(
       background: rgba(255, 255, 255, 0.15);
     }
 
-    /* STAGE CANVAS */
+    /* STAGE CANVAS & INTERACTIVE OVERLAY */
     .stage-container {
       flex: 1;
       display: flex;
@@ -480,6 +481,73 @@ export function getWebviewContent(
       object-fit: contain;
       border-radius: 8px;
       display: block;
+      pointer-events: none;
+    }
+
+    /* INTERACTIVE WYSIWYG SHAPE OVERLAY LAYER */
+    .shape-overlay-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: auto;
+    }
+
+    .shape-box-overlay {
+      position: absolute;
+      border: 1px dashed transparent;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .shape-box-overlay:hover {
+      border-color: rgba(14, 165, 233, 0.6);
+      background: rgba(14, 165, 233, 0.08);
+    }
+
+    .shape-box-overlay.selected {
+      border: 2px solid var(--accent-orange) !important;
+      background: rgba(242, 107, 29, 0.12) !important;
+      box-shadow: 0 0 12px var(--accent-orange-glow);
+    }
+
+    .shape-quick-bar {
+      position: absolute;
+      top: -34px;
+      left: 0;
+      background: rgba(20, 24, 34, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      padding: 3px 6px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      z-index: 50;
+      white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    }
+
+    .shape-box-overlay.selected .shape-quick-bar {
+      display: flex;
+    }
+
+    .shape-quick-bar button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      color: white;
+      font-size: 11px;
+      padding: 2px 6px;
+      cursor: pointer;
+    }
+    .shape-quick-bar button:hover {
+      background: rgba(255, 255, 255, 0.25);
     }
 
     /* FLOATING NAV BUTTONS */
@@ -740,6 +808,12 @@ export function getWebviewContent(
       <button class="btn-glass btn-glass-primary" id="btnPresent" title="전체화면 슬라이드 쇼 (F5 / Cmd+Enter)">
         ▶ 슬라이드 쇼
       </button>
+      <button class="btn-glass" id="btnPowerPointApp" title="Microsoft PowerPoint 앱에서 열기">
+        📊 PowerPoint 앱
+      </button>
+      <button class="btn-glass" id="btnDesktopApp" title="네이티브 DeckCraft 앱에서 열기">
+        💻 DeckCraft 앱
+      </button>
       <button class="btn-glass" id="btnExportPdf" title="벡터 PDF로 내보내기">
         📑 PDF
       </button>
@@ -748,9 +822,6 @@ export function getWebviewContent(
       </button>
       <button class="btn-glass" id="btnSavePng" title="현재 슬라이드 PNG 저장">
         🖼️ 슬라이드 PNG
-      </button>
-      <button class="btn-glass" id="btnDesktopApp" title="네이티브 DeckCraft 앱에서 열기">
-        💻 데스크톱 앱
       </button>
       <button class="btn-glass" id="btnRefresh" title="새로고침">
         🔄
@@ -780,8 +851,11 @@ export function getWebviewContent(
     </div>
 
     <div class="ribbon-group">
+      <button class="btn-glass" id="btnEditTextOverlay" title="선택한 텍스트/도형 편집">
+        ✏️ 텍스트 직접 수정
+      </button>
       <button class="btn-glass" id="btnRenameModal" title="슬라이드 제목 수정">
-        ✏️ 제목 수정
+        🏷️ 제목 수정
       </button>
       <button class="btn-glass" id="btnTextBoxModal" title="텍스트 상자 삽입">
         📝 텍스트 추가
@@ -804,6 +878,7 @@ export function getWebviewContent(
         ${info.slides
           .map((slide, i) => {
             const imgUri = slideImageUris[i] || '';
+            const titleText = slide.title || ('슬라이드 ' + (i + 1));
             return `
             <div class="thumb-card ${i === 0 ? 'active' : ''}" data-index="${i}">
               <div class="thumb-card-top">
@@ -813,8 +888,8 @@ export function getWebviewContent(
               <div class="thumb-img-box">
                 <img src="${imgUri}" alt="Slide ${i + 1}" loading="lazy" />
               </div>
-              <div class="thumb-title" title="${escapeHtml(slide.title || '슬라이드 ' + (i + 1))}">
-                ${escapeHtml(slide.title || '(슬라이드 ' + (i + 1) + ')')}
+              <div class="thumb-title" title="${escapeHtml(titleText)}">
+                ${escapeHtml(titleText)}
               </div>
             </div>`;
           })
@@ -840,6 +915,8 @@ export function getWebviewContent(
       <div class="stage-container" id="stageContainer">
         <div class="slide-glass-frame" id="slideFrame">
           <img id="mainSlideImg" src="${slideImageUris[0] || ''}" alt="Slide View" />
+          <!-- INTERACTIVE WYSIWYG OVERLAY LAYER -->
+          <div class="shape-overlay-layer" id="shapeOverlayLayer"></div>
         </div>
       </div>
 
@@ -877,6 +954,24 @@ export function getWebviewContent(
     </div>
   </div>
 
+  <!-- MODAL: DIRECT TEXT EDIT (WYSIWYG) -->
+  <div class="modal-backdrop" id="modalEditText">
+    <div class="glass-modal">
+      <div class="modal-title">
+        <span>✏️ 슬라이드 텍스트 직접 수정</span>
+        <button class="btn-glass modal-close" data-close="modalEditText">✕</button>
+      </div>
+      <div class="modal-input-group">
+        <label class="modal-label">선택된 요소 내용</label>
+        <textarea class="notes-textarea" id="inputEditTextContent" style="min-height:90px;" placeholder="텍스트를 입력하세요"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-glass modal-close" data-close="modalEditText">취소</button>
+        <button class="btn-glass btn-glass-primary" id="btnConfirmEditText">적용하기</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: NEW SLIDE -->
   <div class="modal-backdrop" id="modalNewSlide">
     <div class="glass-modal">
@@ -911,7 +1006,7 @@ export function getWebviewContent(
   <div class="modal-backdrop" id="modalRename">
     <div class="glass-modal">
       <div class="modal-title">
-        <span>✏️ 슬라이드 제목 수정</span>
+        <span>🏷️ 슬라이드 제목 수정</span>
         <button class="btn-glass modal-close" data-close="modalRename">✕</button>
       </div>
       <div class="modal-input-group">
@@ -977,11 +1072,14 @@ export function getWebviewContent(
     const vscode = acquireVsCodeApi();
     let slidesData = ${JSON.stringify(info.slides)};
     let images = ${JSON.stringify(slideImageUris)};
+    let shapesCache = ${JSON.stringify(initialShapes)};
     let currentIndex = 0;
     let zoomLevel = 1.0;
+    let selectedShape = null;
 
     const mainImg = document.getElementById('mainSlideImg');
     const slideFrame = document.getElementById('slideFrame');
+    const shapeOverlayLayer = document.getElementById('shapeOverlayLayer');
     const presentImg = document.getElementById('presentImg');
     const slideIndicator = document.getElementById('slideIndicator');
     const presentCounter = document.getElementById('presentCounter');
@@ -1024,6 +1122,105 @@ export function getWebviewContent(
       });
     }
 
+    function renderShapeOverlays() {
+      shapeOverlayLayer.innerHTML = '';
+      selectedShape = null;
+
+      const shapes = shapesCache[currentIndex] || [];
+      // Native DeckCraft coordinates are based on 960x540
+      const baseW = 960.0;
+      const baseH = 540.0;
+
+      shapes.forEach((shape) => {
+        if (!shape.box || shape.box.length < 4) return;
+        const [x, y, w, h] = shape.box;
+        const leftPct = (x / baseW) * 100;
+        const topPct = (y / baseH) * 100;
+        const widthPct = (w / baseW) * 100;
+        const heightPct = (h / baseH) * 100;
+
+        const el = document.createElement('div');
+        el.className = 'shape-box-overlay';
+        el.style.left = leftPct + '%';
+        el.style.top = topPct + '%';
+        el.style.width = widthPct + '%';
+        el.style.height = heightPct + '%';
+        el.setAttribute('data-id', shape.id);
+        el.setAttribute('title', (shape.text || shape.name || '도형') + ' (클릭하여 편집)');
+
+        const quickBar = document.createElement('div');
+        quickBar.className = 'shape-quick-bar';
+        quickBar.innerHTML = \`
+          <button class="btn-edit-text" title="텍스트 수정">✏️ 텍스트 수정</button>
+          <button class="btn-del-shape" title="도형 삭제">🗑️ 삭제</button>
+        \`;
+        el.appendChild(quickBar);
+
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          document.querySelectorAll('.shape-box-overlay').forEach((o) => o.classList.remove('selected'));
+          el.classList.add('selected');
+          selectedShape = shape;
+        });
+
+        el.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          openTextEditModal(shape);
+        });
+
+        quickBar.querySelector('.btn-edit-text').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openTextEditModal(shape);
+        });
+
+        quickBar.querySelector('.btn-del-shape').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm('선택한 도형/텍스트를 삭제하시겠습니까?')) {
+            vscode.postMessage({ command: 'deleteShape', index: currentIndex, shapeId: shape.id });
+          }
+        });
+
+        shapeOverlayLayer.appendChild(el);
+      });
+    }
+
+    function openTextEditModal(shape) {
+      selectedShape = shape;
+      document.getElementById('inputEditTextContent').value = shape.text || '';
+      openModal('modalEditText');
+    }
+
+    document.getElementById('btnConfirmEditText').addEventListener('click', () => {
+      if (!selectedShape) return;
+      const newText = document.getElementById('inputEditTextContent').value;
+      closeModal('modalEditText');
+      vscode.postMessage({
+        command: 'setText',
+        index: currentIndex,
+        shapeId: selectedShape.id,
+        text: newText,
+      });
+    });
+
+    document.getElementById('btnEditTextOverlay').addEventListener('click', () => {
+      if (selectedShape) {
+        openTextEditModal(selectedShape);
+      } else {
+        const shapes = shapesCache[currentIndex] || [];
+        if (shapes.length > 0) {
+          openTextEditModal(shapes[0]);
+        } else {
+          openModal('modalTextBox');
+        }
+      }
+    });
+
+    // Deselect shape on background click
+    shapeOverlayLayer.addEventListener('click', () => {
+      document.querySelectorAll('.shape-box-overlay').forEach((o) => o.classList.remove('selected'));
+      selectedShape = null;
+    });
+
     function updateSlide(index) {
       if (index < 0 || index >= slidesData.length) return;
       currentIndex = index;
@@ -1051,10 +1248,17 @@ export function getWebviewContent(
       animCount.textContent = '애니메이션: ' + (slide?.animations || 0);
       shapeCount.textContent = '도형: ' + (slide?.shapes || 0);
       transitionType.textContent = '전환: ' + (slide?.transition || '없음');
+
+      if (!shapesCache[currentIndex]) {
+        vscode.postMessage({ command: 'fetchSlideShapes', index: currentIndex });
+      } else {
+        renderShapeOverlays();
+      }
     }
 
-    // Initial render of thumbnails
+    // Initial render
     renderThumbnails();
+    renderShapeOverlays();
 
     // Listen to updates from extension
     window.addEventListener('message', (event) => {
@@ -1062,9 +1266,17 @@ export function getWebviewContent(
       if (msg.type === 'updateData') {
         slidesData = msg.info.slides;
         images = msg.slideUris;
+        if (msg.info.slideShapes) {
+          shapesCache = { ...shapesCache, ...msg.info.slideShapes };
+        }
         renderThumbnails();
         const nextIdx = msg.targetIndex !== undefined ? msg.targetIndex : currentIndex;
         updateSlide(Math.min(nextIdx, slidesData.length - 1));
+      } else if (msg.type === 'shapesLoaded') {
+        shapesCache[msg.index] = msg.shapes;
+        if (msg.index === currentIndex) {
+          renderShapeOverlays();
+        }
       }
     });
 
@@ -1263,6 +1475,10 @@ export function getWebviewContent(
 
     document.getElementById('btnDesktopApp').addEventListener('click', () => {
       vscode.postMessage({ command: 'openDesktopApp' });
+    });
+
+    document.getElementById('btnPowerPointApp').addEventListener('click', () => {
+      vscode.postMessage({ command: 'openInPowerPoint' });
     });
 
     document.getElementById('btnRefresh').addEventListener('click', () => {

@@ -7,6 +7,7 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
   const slideCount = info.slides.length;
   const theme = info.theme || "Default";
   const slideSize = info.slideSize ? `${info.slideSize[0]}\xD7${info.slideSize[1]}` : "16:9";
+  const initialShapes = info.slideShapes || {};
   return `<!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -442,7 +443,7 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
       background: rgba(255, 255, 255, 0.15);
     }
 
-    /* STAGE CANVAS */
+    /* STAGE CANVAS & INTERACTIVE OVERLAY */
     .stage-container {
       flex: 1;
       display: flex;
@@ -473,6 +474,73 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
       object-fit: contain;
       border-radius: 8px;
       display: block;
+      pointer-events: none;
+    }
+
+    /* INTERACTIVE WYSIWYG SHAPE OVERLAY LAYER */
+    .shape-overlay-layer {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: auto;
+    }
+
+    .shape-box-overlay {
+      position: absolute;
+      border: 1px dashed transparent;
+      border-radius: 3px;
+      cursor: pointer;
+      transition: border-color 0.15s, background 0.15s;
+      box-sizing: border-box;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .shape-box-overlay:hover {
+      border-color: rgba(14, 165, 233, 0.6);
+      background: rgba(14, 165, 233, 0.08);
+    }
+
+    .shape-box-overlay.selected {
+      border: 2px solid var(--accent-orange) !important;
+      background: rgba(242, 107, 29, 0.12) !important;
+      box-shadow: 0 0 12px var(--accent-orange-glow);
+    }
+
+    .shape-quick-bar {
+      position: absolute;
+      top: -34px;
+      left: 0;
+      background: rgba(20, 24, 34, 0.9);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-border);
+      border-radius: 6px;
+      padding: 3px 6px;
+      display: none;
+      align-items: center;
+      gap: 4px;
+      z-index: 50;
+      white-space: nowrap;
+      box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+    }
+
+    .shape-box-overlay.selected .shape-quick-bar {
+      display: flex;
+    }
+
+    .shape-quick-bar button {
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 4px;
+      color: white;
+      font-size: 11px;
+      padding: 2px 6px;
+      cursor: pointer;
+    }
+    .shape-quick-bar button:hover {
+      background: rgba(255, 255, 255, 0.25);
     }
 
     /* FLOATING NAV BUTTONS */
@@ -733,6 +801,12 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
       <button class="btn-glass btn-glass-primary" id="btnPresent" title="\uC804\uCCB4\uD654\uBA74 \uC2AC\uB77C\uC774\uB4DC \uC1FC (F5 / Cmd+Enter)">
         \u25B6 \uC2AC\uB77C\uC774\uB4DC \uC1FC
       </button>
+      <button class="btn-glass" id="btnPowerPointApp" title="Microsoft PowerPoint \uC571\uC5D0\uC11C \uC5F4\uAE30">
+        \u{1F4CA} PowerPoint \uC571
+      </button>
+      <button class="btn-glass" id="btnDesktopApp" title="\uB124\uC774\uD2F0\uBE0C DeckCraft \uC571\uC5D0\uC11C \uC5F4\uAE30">
+        \u{1F4BB} DeckCraft \uC571
+      </button>
       <button class="btn-glass" id="btnExportPdf" title="\uBCA1\uD130 PDF\uB85C \uB0B4\uBCF4\uB0B4\uAE30">
         \u{1F4D1} PDF
       </button>
@@ -741,9 +815,6 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
       </button>
       <button class="btn-glass" id="btnSavePng" title="\uD604\uC7AC \uC2AC\uB77C\uC774\uB4DC PNG \uC800\uC7A5">
         \u{1F5BC}\uFE0F \uC2AC\uB77C\uC774\uB4DC PNG
-      </button>
-      <button class="btn-glass" id="btnDesktopApp" title="\uB124\uC774\uD2F0\uBE0C DeckCraft \uC571\uC5D0\uC11C \uC5F4\uAE30">
-        \u{1F4BB} \uB370\uC2A4\uD06C\uD1B1 \uC571
       </button>
       <button class="btn-glass" id="btnRefresh" title="\uC0C8\uB85C\uACE0\uCE68">
         \u{1F504}
@@ -773,8 +844,11 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
     </div>
 
     <div class="ribbon-group">
+      <button class="btn-glass" id="btnEditTextOverlay" title="\uC120\uD0DD\uD55C \uD14D\uC2A4\uD2B8/\uB3C4\uD615 \uD3B8\uC9D1">
+        \u270F\uFE0F \uD14D\uC2A4\uD2B8 \uC9C1\uC811 \uC218\uC815
+      </button>
       <button class="btn-glass" id="btnRenameModal" title="\uC2AC\uB77C\uC774\uB4DC \uC81C\uBAA9 \uC218\uC815">
-        \u270F\uFE0F \uC81C\uBAA9 \uC218\uC815
+        \u{1F3F7}\uFE0F \uC81C\uBAA9 \uC218\uC815
       </button>
       <button class="btn-glass" id="btnTextBoxModal" title="\uD14D\uC2A4\uD2B8 \uC0C1\uC790 \uC0BD\uC785">
         \u{1F4DD} \uD14D\uC2A4\uD2B8 \uCD94\uAC00
@@ -796,6 +870,7 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
       <div class="thumbnail-scroll" id="thumbList">
         ${info.slides.map((slide, i) => {
     const imgUri = slideImageUris[i] || "";
+    const titleText = slide.title || "\uC2AC\uB77C\uC774\uB4DC " + (i + 1);
     return `
             <div class="thumb-card ${i === 0 ? "active" : ""}" data-index="${i}">
               <div class="thumb-card-top">
@@ -805,8 +880,8 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
               <div class="thumb-img-box">
                 <img src="${imgUri}" alt="Slide ${i + 1}" loading="lazy" />
               </div>
-              <div class="thumb-title" title="${escapeHtml(slide.title || "\uC2AC\uB77C\uC774\uB4DC " + (i + 1))}">
-                ${escapeHtml(slide.title || "(\uC2AC\uB77C\uC774\uB4DC " + (i + 1) + ")")}
+              <div class="thumb-title" title="${escapeHtml(titleText)}">
+                ${escapeHtml(titleText)}
               </div>
             </div>`;
   }).join("")}
@@ -831,6 +906,8 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
       <div class="stage-container" id="stageContainer">
         <div class="slide-glass-frame" id="slideFrame">
           <img id="mainSlideImg" src="${slideImageUris[0] || ""}" alt="Slide View" />
+          <!-- INTERACTIVE WYSIWYG OVERLAY LAYER -->
+          <div class="shape-overlay-layer" id="shapeOverlayLayer"></div>
         </div>
       </div>
 
@@ -868,6 +945,24 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
     </div>
   </div>
 
+  <!-- MODAL: DIRECT TEXT EDIT (WYSIWYG) -->
+  <div class="modal-backdrop" id="modalEditText">
+    <div class="glass-modal">
+      <div class="modal-title">
+        <span>\u270F\uFE0F \uC2AC\uB77C\uC774\uB4DC \uD14D\uC2A4\uD2B8 \uC9C1\uC811 \uC218\uC815</span>
+        <button class="btn-glass modal-close" data-close="modalEditText">\u2715</button>
+      </div>
+      <div class="modal-input-group">
+        <label class="modal-label">\uC120\uD0DD\uB41C \uC694\uC18C \uB0B4\uC6A9</label>
+        <textarea class="notes-textarea" id="inputEditTextContent" style="min-height:90px;" placeholder="\uD14D\uC2A4\uD2B8\uB97C \uC785\uB825\uD558\uC138\uC694"></textarea>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-glass modal-close" data-close="modalEditText">\uCDE8\uC18C</button>
+        <button class="btn-glass btn-glass-primary" id="btnConfirmEditText">\uC801\uC6A9\uD558\uAE30</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL: NEW SLIDE -->
   <div class="modal-backdrop" id="modalNewSlide">
     <div class="glass-modal">
@@ -902,7 +997,7 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
   <div class="modal-backdrop" id="modalRename">
     <div class="glass-modal">
       <div class="modal-title">
-        <span>\u270F\uFE0F \uC2AC\uB77C\uC774\uB4DC \uC81C\uBAA9 \uC218\uC815</span>
+        <span>\u{1F3F7}\uFE0F \uC2AC\uB77C\uC774\uB4DC \uC81C\uBAA9 \uC218\uC815</span>
         <button class="btn-glass modal-close" data-close="modalRename">\u2715</button>
       </div>
       <div class="modal-input-group">
@@ -968,11 +1063,14 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
     const vscode = acquireVsCodeApi();
     let slidesData = ${JSON.stringify(info.slides)};
     let images = ${JSON.stringify(slideImageUris)};
+    let shapesCache = ${JSON.stringify(initialShapes)};
     let currentIndex = 0;
     let zoomLevel = 1.0;
+    let selectedShape = null;
 
     const mainImg = document.getElementById('mainSlideImg');
     const slideFrame = document.getElementById('slideFrame');
+    const shapeOverlayLayer = document.getElementById('shapeOverlayLayer');
     const presentImg = document.getElementById('presentImg');
     const slideIndicator = document.getElementById('slideIndicator');
     const presentCounter = document.getElementById('presentCounter');
@@ -1015,6 +1113,105 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
       });
     }
 
+    function renderShapeOverlays() {
+      shapeOverlayLayer.innerHTML = '';
+      selectedShape = null;
+
+      const shapes = shapesCache[currentIndex] || [];
+      // Native DeckCraft coordinates are based on 960x540
+      const baseW = 960.0;
+      const baseH = 540.0;
+
+      shapes.forEach((shape) => {
+        if (!shape.box || shape.box.length < 4) return;
+        const [x, y, w, h] = shape.box;
+        const leftPct = (x / baseW) * 100;
+        const topPct = (y / baseH) * 100;
+        const widthPct = (w / baseW) * 100;
+        const heightPct = (h / baseH) * 100;
+
+        const el = document.createElement('div');
+        el.className = 'shape-box-overlay';
+        el.style.left = leftPct + '%';
+        el.style.top = topPct + '%';
+        el.style.width = widthPct + '%';
+        el.style.height = heightPct + '%';
+        el.setAttribute('data-id', shape.id);
+        el.setAttribute('title', (shape.text || shape.name || '\uB3C4\uD615') + ' (\uD074\uB9AD\uD558\uC5EC \uD3B8\uC9D1)');
+
+        const quickBar = document.createElement('div');
+        quickBar.className = 'shape-quick-bar';
+        quickBar.innerHTML = \`
+          <button class="btn-edit-text" title="\uD14D\uC2A4\uD2B8 \uC218\uC815">\u270F\uFE0F \uD14D\uC2A4\uD2B8 \uC218\uC815</button>
+          <button class="btn-del-shape" title="\uB3C4\uD615 \uC0AD\uC81C">\u{1F5D1}\uFE0F \uC0AD\uC81C</button>
+        \`;
+        el.appendChild(quickBar);
+
+        el.addEventListener('click', (e) => {
+          e.stopPropagation();
+          document.querySelectorAll('.shape-box-overlay').forEach((o) => o.classList.remove('selected'));
+          el.classList.add('selected');
+          selectedShape = shape;
+        });
+
+        el.addEventListener('dblclick', (e) => {
+          e.stopPropagation();
+          openTextEditModal(shape);
+        });
+
+        quickBar.querySelector('.btn-edit-text').addEventListener('click', (e) => {
+          e.stopPropagation();
+          openTextEditModal(shape);
+        });
+
+        quickBar.querySelector('.btn-del-shape').addEventListener('click', (e) => {
+          e.stopPropagation();
+          if (confirm('\uC120\uD0DD\uD55C \uB3C4\uD615/\uD14D\uC2A4\uD2B8\uB97C \uC0AD\uC81C\uD558\uC2DC\uACA0\uC2B5\uB2C8\uAE4C?')) {
+            vscode.postMessage({ command: 'deleteShape', index: currentIndex, shapeId: shape.id });
+          }
+        });
+
+        shapeOverlayLayer.appendChild(el);
+      });
+    }
+
+    function openTextEditModal(shape) {
+      selectedShape = shape;
+      document.getElementById('inputEditTextContent').value = shape.text || '';
+      openModal('modalEditText');
+    }
+
+    document.getElementById('btnConfirmEditText').addEventListener('click', () => {
+      if (!selectedShape) return;
+      const newText = document.getElementById('inputEditTextContent').value;
+      closeModal('modalEditText');
+      vscode.postMessage({
+        command: 'setText',
+        index: currentIndex,
+        shapeId: selectedShape.id,
+        text: newText,
+      });
+    });
+
+    document.getElementById('btnEditTextOverlay').addEventListener('click', () => {
+      if (selectedShape) {
+        openTextEditModal(selectedShape);
+      } else {
+        const shapes = shapesCache[currentIndex] || [];
+        if (shapes.length > 0) {
+          openTextEditModal(shapes[0]);
+        } else {
+          openModal('modalTextBox');
+        }
+      }
+    });
+
+    // Deselect shape on background click
+    shapeOverlayLayer.addEventListener('click', () => {
+      document.querySelectorAll('.shape-box-overlay').forEach((o) => o.classList.remove('selected'));
+      selectedShape = null;
+    });
+
     function updateSlide(index) {
       if (index < 0 || index >= slidesData.length) return;
       currentIndex = index;
@@ -1042,10 +1239,17 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
       animCount.textContent = '\uC560\uB2C8\uBA54\uC774\uC158: ' + (slide?.animations || 0);
       shapeCount.textContent = '\uB3C4\uD615: ' + (slide?.shapes || 0);
       transitionType.textContent = '\uC804\uD658: ' + (slide?.transition || '\uC5C6\uC74C');
+
+      if (!shapesCache[currentIndex]) {
+        vscode.postMessage({ command: 'fetchSlideShapes', index: currentIndex });
+      } else {
+        renderShapeOverlays();
+      }
     }
 
-    // Initial render of thumbnails
+    // Initial render
     renderThumbnails();
+    renderShapeOverlays();
 
     // Listen to updates from extension
     window.addEventListener('message', (event) => {
@@ -1053,9 +1257,17 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
       if (msg.type === 'updateData') {
         slidesData = msg.info.slides;
         images = msg.slideUris;
+        if (msg.info.slideShapes) {
+          shapesCache = { ...shapesCache, ...msg.info.slideShapes };
+        }
         renderThumbnails();
         const nextIdx = msg.targetIndex !== undefined ? msg.targetIndex : currentIndex;
         updateSlide(Math.min(nextIdx, slidesData.length - 1));
+      } else if (msg.type === 'shapesLoaded') {
+        shapesCache[msg.index] = msg.shapes;
+        if (msg.index === currentIndex) {
+          renderShapeOverlays();
+        }
       }
     });
 
@@ -1254,6 +1466,10 @@ function getWebviewContent(webview, extensionUri, documentUri, info, slideImageU
 
     document.getElementById('btnDesktopApp').addEventListener('click', () => {
       vscode.postMessage({ command: 'openDesktopApp' });
+    });
+
+    document.getElementById('btnPowerPointApp').addEventListener('click', () => {
+      vscode.postMessage({ command: 'openInPowerPoint' });
     });
 
     document.getElementById('btnRefresh').addEventListener('click', () => {

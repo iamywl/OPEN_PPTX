@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
-import { exec, spawn } from 'child_process';
+import { exec } from 'child_process';
 import { promisify } from 'util';
 
 const execAsync = promisify(exec);
@@ -16,6 +16,17 @@ export interface DeckCraftSlide {
   transition: string;
   animations: number;
   hidden: boolean;
+}
+
+export interface DeckCraftShape {
+  id: number;
+  box: [number, number, number, number]; // [x, y, w, h] in 960x540 pt
+  name?: string;
+  kind?: string;
+  preset?: string;
+  text?: string;
+  fill?: string;
+  rotation?: number;
 }
 
 export interface DeckCraftSection {
@@ -40,6 +51,7 @@ export interface DeckCraftInfo {
   sections?: DeckCraftSection[];
   layouts?: DeckCraftLayout[];
   slides: DeckCraftSlide[];
+  slideShapes?: Record<number, DeckCraftShape[]>; // slideIndex -> shapes
 }
 
 export class DeckcraftCli {
@@ -100,7 +112,6 @@ export class DeckcraftCli {
     try {
       fs.chmodSync(filePath, 0o755);
       if (process.platform === 'darwin') {
-        // Remove macOS Gatekeeper quarantine attribute if present
         await execAsync(`xattr -d com.apple.quarantine "${filePath}" 2>/dev/null || true`);
       }
     } catch (e) {
@@ -111,14 +122,35 @@ export class DeckcraftCli {
   public static async getInfo(filePath: string, context: vscode.ExtensionContext): Promise<DeckCraftInfo> {
     const cli = await this.getExecutablePath(context);
     const { stdout, stderr } = await execAsync(`"${cli}" info "${filePath}"`, {
-      maxBuffer: 10 * 1024 * 1024,
+      maxBuffer: 20 * 1024 * 1024,
     });
 
     if (!stdout.trim()) {
       throw new Error(`Failed to read presentation info: ${stderr}`);
     }
 
-    return JSON.parse(stdout) as DeckCraftInfo;
+    const info = JSON.parse(stdout) as DeckCraftInfo;
+    return info;
+  }
+
+  public static async inspectSlide(
+    filePath: string,
+    slideIndex: number,
+    context: vscode.ExtensionContext
+  ): Promise<DeckCraftShape[]> {
+    const cli = await this.getExecutablePath(context);
+    const cmd = JSON.stringify({ index: slideIndex });
+    const { stdout } = await execAsync(
+      `"${cli}" run --in "${filePath}" --print --cmd 'slide.inspect=${cmd}'`,
+      { maxBuffer: 10 * 1024 * 1024 }
+    );
+
+    const match = stdout.match(/slide\.inspect\s*→\s*(\{[\s\S]*\})/);
+    if (match) {
+      const data = JSON.parse(match[1]);
+      return (data.shapes || []) as DeckCraftShape[];
+    }
+    return [];
   }
 
   public static async renderAll(
@@ -131,7 +163,7 @@ export class DeckcraftCli {
     fs.mkdirSync(outDir, { recursive: true });
 
     await execAsync(`"${cli}" render "${filePath}" --all --scale ${scale} "${outDir}"`, {
-      maxBuffer: 10 * 1024 * 1024,
+      maxBuffer: 20 * 1024 * 1024,
     });
 
     const files = fs.readdirSync(outDir)
@@ -176,7 +208,7 @@ export class DeckcraftCli {
     cmdLine += ' --print';
 
     const { stdout } = await execAsync(cmdLine, {
-      maxBuffer: 10 * 1024 * 1024,
+      maxBuffer: 20 * 1024 * 1024,
     });
     return stdout;
   }
@@ -232,7 +264,6 @@ export class DeckcraftCli {
           await this.ensureExecutable(targetBinary);
         }
 
-        // Clean up
         try {
           fs.unlinkSync(tempZip);
           fs.rmSync(tempExtractDir, { recursive: true, force: true });

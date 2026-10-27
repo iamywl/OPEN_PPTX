@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as crypto from 'crypto';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { DeckcraftCli, DeckCraftInfo } from './deckcraftCli';
+import { DeckcraftCli, DeckCraftInfo, DeckCraftShape } from './deckcraftCli';
 import { getWebviewContent } from './webview/template';
 
 const execAsync = promisify(exec);
@@ -84,6 +84,14 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
         }
       });
 
+      // Pre-load shapes for the initial slide
+      info.slideShapes = {};
+      try {
+        info.slideShapes[0] = await DeckcraftCli.inspectSlide(document.uri.fsPath, 0, this.context);
+      } catch (e) {
+        info.slideShapes[0] = [];
+      }
+
       return { info, slideUris };
     };
 
@@ -118,18 +126,87 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
           break;
         }
 
-        // --- EDITING COMMANDS ---
+        case 'fetchSlideShapes': {
+          try {
+            const index = message.index ?? 0;
+            const shapes = await DeckcraftCli.inspectSlide(filePath, index, this.context);
+            webview.postMessage({ type: 'shapesLoaded', index, shapes });
+          } catch (e) {
+            webview.postMessage({ type: 'shapesLoaded', index: message.index ?? 0, shapes: [] });
+          }
+          break;
+        }
+
+        // --- DIRECT WYSIWYG CANVAS EDITING ---
+        case 'setText': {
+          try {
+            const index = message.index ?? 0;
+            const shapeId = message.shapeId;
+            const text = message.text ?? '';
+            const goCmd = JSON.stringify({ index });
+            const setCmd = JSON.stringify({ id: shapeId, text });
+            await DeckcraftCli.runCommand([`slide.go=${goCmd}`, `text.set=${setCmd}`], this.context, filePath, filePath);
+            
+            const { info, slideUris } = await loadPresentationData();
+            info.slideShapes![index] = await DeckcraftCli.inspectSlide(filePath, index, this.context);
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
+            vscode.window.showInformationMessage(`텍스트 수정 완료: "${text.slice(0, 20)}..."`);
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`텍스트 수정 실패: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'moveShape': {
+          try {
+            const index = message.index ?? 0;
+            const shapeId = message.shapeId;
+            const { x, y, w, h } = message;
+            const goCmd = JSON.stringify({ index });
+            const setCmd = JSON.stringify({ x, y, w, h, ids: [shapeId] });
+            await DeckcraftCli.runCommand([`slide.go=${goCmd}`, `shape.setBounds=${setCmd}`], this.context, filePath, filePath);
+            
+            const { info, slideUris } = await loadPresentationData();
+            info.slideShapes![index] = await DeckcraftCli.inspectSlide(filePath, index, this.context);
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`도형 이동 실패: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'deleteShape': {
+          try {
+            const index = message.index ?? 0;
+            const shapeId = message.shapeId;
+            const goCmd = JSON.stringify({ index });
+            const delCmd = JSON.stringify({ ids: [shapeId] });
+            await DeckcraftCli.runCommand([`slide.go=${goCmd}`, `edit.delete=${delCmd}`], this.context, filePath, filePath);
+            
+            const { info, slideUris } = await loadPresentationData();
+            info.slideShapes![index] = await DeckcraftCli.inspectSlide(filePath, index, this.context);
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
+            vscode.window.showInformationMessage(`도형 #${shapeId} 삭제 완료`);
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`도형 삭제 실패: ${err.message}`);
+          }
+          break;
+        }
+
+        // --- SLIDE MANAGEMENT ---
         case 'addSlide': {
           try {
             const layout = message.layout || 'titleAndContent';
-            const title = message.title || 'New Slide';
+            const title = message.title || '새 슬라이드';
             const cmd = JSON.stringify({ layout, title });
             await DeckcraftCli.runCommand([`slide.new=${cmd}`], this.context, filePath, filePath);
             const { info, slideUris } = await loadPresentationData();
-            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: info.slides.length - 1 });
-            vscode.window.showInformationMessage(`Added slide "${title}"`);
+            const newIndex = info.slides.length - 1;
+            info.slideShapes![newIndex] = await DeckcraftCli.inspectSlide(filePath, newIndex, this.context);
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: newIndex });
+            vscode.window.showInformationMessage(`새 슬라이드 "${title}" 추가 완료`);
           } catch (err: any) {
-            vscode.window.showErrorMessage(`Failed to add slide: ${err.message}`);
+            vscode.window.showErrorMessage(`슬라이드 추가 실패: ${err.message}`);
           }
           break;
         }
@@ -141,10 +218,11 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
             await DeckcraftCli.runCommand([`slide.delete=${cmd}`], this.context, filePath, filePath);
             const { info, slideUris } = await loadPresentationData();
             const nextIdx = Math.max(0, Math.min(index, info.slides.length - 1));
+            info.slideShapes![nextIdx] = await DeckcraftCli.inspectSlide(filePath, nextIdx, this.context);
             webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: nextIdx });
-            vscode.window.showInformationMessage(`Deleted slide #${index + 1}`);
+            vscode.window.showInformationMessage(`슬라이드 #${index + 1} 삭제 완료`);
           } catch (err: any) {
-            vscode.window.showErrorMessage(`Failed to delete slide: ${err.message}`);
+            vscode.window.showErrorMessage(`슬라이드 삭제 실패: ${err.message}`);
           }
           break;
         }
@@ -155,10 +233,12 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
             const cmd = JSON.stringify({ index });
             await DeckcraftCli.runCommand([`slide.duplicate=${cmd}`], this.context, filePath, filePath);
             const { info, slideUris } = await loadPresentationData();
-            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index + 1 });
-            vscode.window.showInformationMessage(`Duplicated slide #${index + 1}`);
+            const targetIdx = index + 1;
+            info.slideShapes![targetIdx] = await DeckcraftCli.inspectSlide(filePath, targetIdx, this.context);
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: targetIdx });
+            vscode.window.showInformationMessage(`슬라이드 #${index + 1} 복제 완료`);
           } catch (err: any) {
-            vscode.window.showErrorMessage(`Failed to duplicate slide: ${err.message}`);
+            vscode.window.showErrorMessage(`슬라이드 복제 실패: ${err.message}`);
           }
           break;
         }
@@ -170,9 +250,10 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
             const cmd = JSON.stringify({ from, to });
             await DeckcraftCli.runCommand([`slide.move=${cmd}`], this.context, filePath, filePath);
             const { info, slideUris } = await loadPresentationData();
+            info.slideShapes![to] = await DeckcraftCli.inspectSlide(filePath, to, this.context);
             webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: to });
           } catch (err: any) {
-            vscode.window.showErrorMessage(`Failed to move slide: ${err.message}`);
+            vscode.window.showErrorMessage(`슬라이드 이동 실패: ${err.message}`);
           }
           break;
         }
@@ -184,10 +265,11 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
             const cmd = JSON.stringify({ name, index });
             await DeckcraftCli.runCommand([`slide.rename=${cmd}`], this.context, filePath, filePath);
             const { info, slideUris } = await loadPresentationData();
+            info.slideShapes![index] = await DeckcraftCli.inspectSlide(filePath, index, this.context);
             webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
-            vscode.window.showInformationMessage(`Renamed slide #${index + 1}`);
+            vscode.window.showInformationMessage(`슬라이드 #${index + 1} 제목 수정 완료`);
           } catch (err: any) {
-            vscode.window.showErrorMessage(`Failed to rename slide: ${err.message}`);
+            vscode.window.showErrorMessage(`제목 수정 실패: ${err.message}`);
           }
           break;
         }
@@ -200,7 +282,7 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
             const goCmd = JSON.stringify({ index });
             const shapeCmd = JSON.stringify({
               preset,
-              rect: [180, 160, 360, 140],
+              rect: [200, 180, 360, 140],
               text,
             });
             await DeckcraftCli.runCommand(
@@ -210,10 +292,11 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
               filePath
             );
             const { info, slideUris } = await loadPresentationData();
+            info.slideShapes![index] = await DeckcraftCli.inspectSlide(filePath, index, this.context);
             webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
-            vscode.window.showInformationMessage(`Inserted ${preset} on slide #${index + 1}`);
+            vscode.window.showInformationMessage(`슬라이드 #${index + 1}에 도형 추가 완료`);
           } catch (err: any) {
-            vscode.window.showErrorMessage(`Failed to insert shape: ${err.message}`);
+            vscode.window.showErrorMessage(`도형 삽입 실패: ${err.message}`);
           }
           break;
         }
@@ -221,11 +304,11 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
         case 'insertTextBox': {
           try {
             const index = message.index ?? 0;
-            const text = message.text || 'New Text Box';
+            const text = message.text || '새 텍스트 상자';
             const goCmd = JSON.stringify({ index });
             const shapeCmd = JSON.stringify({
               preset: 'rect',
-              rect: [140, 160, 420, 100],
+              rect: [160, 180, 400, 100],
               text,
             });
             await DeckcraftCli.runCommand(
@@ -240,10 +323,11 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
               filePath
             );
             const { info, slideUris } = await loadPresentationData();
+            info.slideShapes![index] = await DeckcraftCli.inspectSlide(filePath, index, this.context);
             webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
-            vscode.window.showInformationMessage(`Added text box to slide #${index + 1}`);
+            vscode.window.showInformationMessage(`슬라이드 #${index + 1}에 텍스트 상자 추가 완료`);
           } catch (err: any) {
-            vscode.window.showErrorMessage(`Failed to add text box: ${err.message}`);
+            vscode.window.showErrorMessage(`텍스트 추가 실패: ${err.message}`);
           }
           break;
         }
@@ -256,14 +340,25 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
             await DeckcraftCli.runCommand([`slide.notes=${cmd}`], this.context, filePath, filePath);
             const { info, slideUris } = await loadPresentationData();
             webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
-            vscode.window.showInformationMessage(`Saved speaker notes for slide #${index + 1}`);
+            vscode.window.showInformationMessage(`발표자 메모 저장 완료`);
           } catch (err: any) {
-            vscode.window.showErrorMessage(`Failed to save notes: ${err.message}`);
+            vscode.window.showErrorMessage(`메모 저장 실패: ${err.message}`);
           }
           break;
         }
 
-        // --- EXPORT & DESKTOP ACTIONS ---
+        // --- NATIVE APPLICATION LAUNCHERS ---
+        case 'openDesktopApp': {
+          await this.openInDesktopApp(document.uri);
+          break;
+        }
+
+        case 'openInPowerPoint': {
+          await this.openInPowerPoint(document.uri);
+          break;
+        }
+
+        // --- EXPORT ACTIONS ---
         case 'exportPdf': {
           await this.exportPdf(document.uri);
           break;
@@ -278,15 +373,9 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
           await this.exportSlidePng(document.uri, cacheDir, message.index);
           break;
         }
-
-        case 'openDesktopApp': {
-          await this.openInDesktopApp(document.uri);
-          break;
-        }
       }
     });
 
-    // Watch for file changes on disk and reload
     const fileWatcher = vscode.workspace.createFileSystemWatcher(document.uri.fsPath);
     fileWatcher.onDidChange(async () => {
       await renderAndUpdate();
@@ -295,6 +384,17 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
     webviewPanel.onDidDispose(() => {
       fileWatcher.dispose();
     });
+  }
+
+  private async openInPowerPoint(documentUri: vscode.Uri): Promise<void> {
+    const pptApp = '/Applications/Microsoft PowerPoint.app';
+    if (process.platform === 'darwin' && fs.existsSync(pptApp)) {
+      await execAsync(`open -a "${pptApp}" "${documentUri.fsPath}"`);
+      vscode.window.showInformationMessage('Microsoft PowerPoint에서 프레젠테이션을 열었습니다.');
+    } else {
+      await execAsync(`open "${documentUri.fsPath}"`);
+      vscode.window.showInformationMessage('기본 프레젠테이션 앱에서 열었습니다.');
+    }
   }
 
   private async exportPdf(documentUri: vscode.Uri): Promise<void> {
