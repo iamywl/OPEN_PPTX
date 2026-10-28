@@ -38,6 +38,19 @@ This project adapts **DeckCraft**, an open-source presentation engine written in
    - Established `SPECIFICATION.md` as the single source of truth for feature scope, shortcut mappings, and implementation audit.
    - Unified keyboard shortcut router resolving multi-listener conflicts (Presentation, Slide Management, WYSIWYG Canvas, Text Formatting).
    - Structured three-tier roadmap: Tier 1 (Core Interactive & Shortcuts), Tier 2 (Design & Formatting), Tier 3 (Advanced Multimedia & Masters).
+8. **Microsoft PowerPoint Office Ribbon & Native Status Bar Parity**:
+   - **User Philosophy Enforcement**: "VS Code 안에서 실제 마이크로소프트 파워포인트의 룩앤필과 기능성을 1:1로 온전히 체감할 수 있어야 함".
+   - Upstream parity (`deckcraft/docs/ui-parity.md` & macOS PowerPoint 365 screenshot reference):
+     - **Office Titlebar**: Orange `P` PowerPoint badge, quick access bar (Undo, Redo, Present, Export, Refresh), document title.
+     - **Office Ribbon Tabs**: `홈`, `삽입`, `디자인`, `전환`, `슬라이드 쇼`, `보기` with active tab pane toggling.
+     - **Office Ribbon Groups & Controls**:
+       - *슬라이드*: 새 슬라이드 (Cmd+M), 슬라이드 복제 (Cmd+D), 슬라이드 삭제 (Del), 제목 수정.
+       - *글꼴 및 서식*: 글꼴 패밀리 (Pretendard, Apple SD 산돌고딕 Neo, Arial 등), 폰트 크기, 가+/가- (Cmd+]/Cmd+[), 굵게 (Cmd+B), 기울임 (Cmd+I), 밑줄 (Cmd+U), 글자색/채우기색 컬러 피커.
+       - *단락*: 좌측/가운데/우측 정렬 (`format.align`), 인라인 텍스트 수정.
+       - *그리기*: 텍스트 상자 삽입, 도형 삽입, 빠른 사각형/타원 삽입, 레이어 순서 조절 (맨 앞으로/맨 뒤로).
+     - **Office Bottom Status Bar (`footer.office-status-bar`)**: `슬라이드 N / M`, `한국어`, `접근성: 검토 완료`, `메모` 서랍 토글, `슬라이드 쇼` 원클릭 실행, 실시간 줌 슬라이더 (- [====] +), 줌 배율 표시, `⛶ 맞춤`.
+     - **Thumbnail Strip**: 실제 파워포인트 좌측 열 번호 배지 (`1`, `2`, `3`...) 레이아웃 적용.
+     - **QA Verification**: 80개 DOM ID 검증 및 TypeScript 컴파일, VSIX 패키징 완료.
 
 ---
 
@@ -82,7 +95,7 @@ To achieve 100% quality and verify compliance across all deliverables, the proje
 | **Loop 3** | PPTX metadata extraction | `deckcraft-cli info samples/sample.pptx` | **PASS (8 slides)** |
 | **Loop 4** | High-Res PNG rendering & conversions | Vector PDF (862.5 KB) & Markdown outline | **PASS (100%)** |
 | **Loop 5** | Glassmorphism UI & Screenshot assets | `scripts/qa-test.ts` (All 6 images verified) | **PASS (100%)** |
-| **Loop 6** | Webview DOM & CSP Integrity | `scripts/verify-webview.ts` (28 DOM IDs) | **PASS (100%)** |
+| **Loop 6** | Webview DOM & CSP Integrity | `scripts/verify-webview.ts` (80 DOM IDs) | **PASS (100%)** |
 | **Loop 7** | End-to-End Creation Roundtrip | `scripts/verify-full-roundtrip.ts` | **PASS (100%)** |
 | **Loop 8** | VSIX Package & VS Code Install | `vsce package` & `code --install-extension` | **PASS (Installed)** |
 | **Loop 9** | Git Origin Synchronization | `git push -u origin main` | **PASS** |

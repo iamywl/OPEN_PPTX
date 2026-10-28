@@ -90,110 +90,299 @@ export function getWebviewContent(
       z-index: 0;
     }
 
-    /* TOP HEADER */
-    header.glass-header {
-      position: relative;
-      z-index: 10;
-      height: 48px;
-      min-height: 48px;
-      margin: 6px 10px 0 10px;
-      background: var(--glass-panel);
-      backdrop-filter: blur(24px) saturate(180%);
-      -webkit-backdrop-filter: blur(24px) saturate(180%);
-      border: 1px solid var(--glass-border);
-      box-shadow: var(--glass-highlight), var(--glass-shadow);
-      border-radius: 10px 10px 0 0;
+    /* ========================================================
+       MICROSOFT POWERPOINT OFFICIAL OFFICE RIBBON & SHELL
+       ======================================================== */
+    .office-titlebar {
+      height: 40px;
+      min-height: 40px;
+      background: #1a1d26;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding: 0 14px;
+      padding: 0 12px;
       gap: 10px;
+      z-index: 100;
     }
 
-    .header-left {
+    .office-titlebar-left {
       display: flex;
       align-items: center;
       gap: 10px;
       overflow: hidden;
     }
 
-    .brand-badge {
-      width: 26px;
-      height: 26px;
-      border-radius: 6px;
-      background: linear-gradient(135deg, #f26b1d, #d44d08);
+    .office-brand-badge {
+      width: 24px;
+      height: 24px;
+      border-radius: 4px;
+      background: linear-gradient(135deg, #d24726, #b0361a);
       display: flex;
       align-items: center;
       justify-content: center;
       color: white;
-      font-weight: 700;
+      font-weight: 800;
       font-size: 14px;
-      box-shadow: 0 0 14px var(--accent-orange-glow);
-      border: 1px solid rgba(255, 255, 255, 0.25);
+      box-shadow: 0 2px 6px rgba(210, 71, 38, 0.4);
+      flex-shrink: 0;
     }
 
-    .deck-title {
+    .office-doc-title {
       font-size: 13px;
       font-weight: 600;
+      color: #f1f5f9;
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
-      max-width: 240px;
-      color: #ffffff;
+      max-width: 260px;
     }
 
-    .badge-pill {
-      font-size: 11px;
-      padding: 2px 8px;
+    .office-quick-access {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .office-quick-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      color: #94a3b8;
+      width: 26px;
+      height: 26px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 13px;
+      transition: all 0.15s;
+    }
+    .office-quick-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .office-titlebar-right {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    /* RIBBON TABS (홈, 삽입, 디자인, 전환, 애니메이션, 슬라이드 쇼, 검토, 보기) */
+    .office-ribbon-tabs {
+      height: 32px;
+      min-height: 32px;
+      background: #161822;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+      gap: 2px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 90;
+    }
+
+    .ribbon-tab {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      font-size: 12px;
+      font-weight: 500;
+      padding: 6px 14px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s;
+    }
+    .ribbon-tab:hover {
+      color: #ffffff;
+      background: rgba(255, 255, 255, 0.04);
+    }
+    .ribbon-tab.active {
+      color: #ffffff;
+      font-weight: 600;
+      border-bottom: 2px solid #ea580c;
       background: rgba(255, 255, 255, 0.06);
-      backdrop-filter: blur(8px);
-      color: var(--fg-secondary);
-      border: 1px solid var(--glass-border);
-      border-radius: 20px;
+    }
+
+    /* RIBBON CONTENT PANELS (OFFICE TOOLBAR) */
+    .office-ribbon-content {
+      background: #202430;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+      z-index: 80;
+      height: 92px;
+      min-height: 92px;
+      position: relative;
+    }
+
+    .ribbon-tab-pane {
+      display: none;
+      height: 100%;
+      align-items: stretch;
+      padding: 4px 10px;
+      gap: 6px;
+      overflow-x: auto;
+    }
+    .ribbon-tab-pane.active {
+      display: flex;
+    }
+
+    /* RIBBON GROUP BOX */
+    .ribbon-group-box {
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0 8px 3px 8px;
+      border-right: 1px solid rgba(255, 255, 255, 0.1);
+      flex-shrink: 0;
+    }
+
+    .ribbon-group-items {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex: 1;
+    }
+
+    .ribbon-group-title {
+      font-size: 9.5px;
+      color: #64748b;
+      letter-spacing: 0.3px;
+      font-weight: 500;
+      user-select: none;
+    }
+
+    /* LARGE RIBBON BUTTON */
+    .ribbon-btn-large {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 4px;
+      padding: 4px 8px;
+      min-width: 52px;
+      height: 58px;
+      cursor: pointer;
+      color: #e2e8f0;
+      gap: 3px;
+      transition: all 0.15s;
+    }
+    .ribbon-btn-large:hover {
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+    }
+    .ribbon-btn-large .btn-icon {
+      font-size: 20px;
+    }
+    .ribbon-btn-large .btn-label {
+      font-size: 11px;
       white-space: nowrap;
+    }
+
+    /* 2-ROW GRID & SMALL BUTTONS */
+    .ribbon-col-group {
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+      justify-content: center;
+    }
+
+    .ribbon-row-group {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+    }
+
+    .ribbon-btn-small {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      color: #cbd5e1;
+      font-size: 11px;
+      padding: 3px 7px;
+      cursor: pointer;
       display: inline-flex;
       align-items: center;
       gap: 4px;
+      white-space: nowrap;
+      height: 25px;
+      transition: all 0.15s;
+    }
+    .ribbon-btn-small:hover {
+      background: rgba(255, 255, 255, 0.12);
+      border-color: rgba(255, 255, 255, 0.2);
+      color: #ffffff;
     }
 
-    .badge-pill.highlight {
+    .ribbon-tool-btn {
+      width: 25px;
+      height: 25px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      color: #cbd5e1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 11.5px;
+      font-weight: 600;
+      transition: all 0.15s;
+    }
+    .ribbon-tool-btn:hover {
+      background: rgba(255, 255, 255, 0.15);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.25);
+    }
+    .ribbon-tool-btn.active {
+      background: rgba(234, 88, 12, 0.25);
+      border-color: #ea580c;
       color: #fed7aa;
-      border-color: rgba(242, 107, 29, 0.35);
-      background: rgba(242, 107, 29, 0.12);
     }
 
-    /* POWERPOINT STYLE EDITING RIBBON TOOLBAR */
-    .glass-ribbon {
+    .ribbon-select {
+      background: rgba(15, 23, 42, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      color: #f1f5f9;
+      border-radius: 3px;
+      padding: 2px 6px;
+      font-size: 11.5px;
+      height: 25px;
+      outline: none;
+    }
+
+    /* COLOR PICKER LABEL */
+    .ribbon-color-box {
+      width: 25px;
+      height: 25px;
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 3px;
+      display: inline-flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
       position: relative;
-      z-index: 9;
-      height: 44px;
-      min-height: 44px;
-      margin: 0 10px 4px 10px;
-      background: rgba(22, 26, 36, 0.62);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid var(--glass-border);
-      border-top: none;
-      border-radius: 0 0 10px 10px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 10px;
-      gap: 8px;
-      box-shadow: 0 6px 20px rgba(0,0,0,0.3);
     }
-
-    .ribbon-group {
-      display: flex;
-      align-items: center;
-      gap: 4px;
+    .ribbon-color-box:hover {
+      background: rgba(255, 255, 255, 0.15);
     }
-
-    .ribbon-divider {
-      width: 1px;
-      height: 20px;
-      background: var(--glass-border);
-      margin: 0 4px;
+    .ribbon-color-box span {
+      font-size: 10px;
+      font-weight: 700;
+    }
+    .color-bar {
+      width: 14px;
+      height: 3px;
+      margin-top: 1px;
+      background: #f26b1d;
+      border-radius: 1px;
     }
 
     /* BUTTONS */
@@ -251,10 +440,126 @@ export function getWebviewContent(
       flex: 1;
       display: flex;
       overflow: hidden;
-      margin: 4px 10px 10px 10px;
+      margin: 4px 10px 4px 10px;
       gap: 10px;
       position: relative;
       z-index: 1;
+    }
+
+    /* ========================================================
+       MICROSOFT POWERPOINT STATUS BAR (BOTTOM)
+       ======================================================== */
+    .office-status-bar {
+      height: 28px;
+      min-height: 28px;
+      background: #181b24;
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      font-size: 11px;
+      color: #94a3b8;
+      z-index: 100;
+      user-select: none;
+    }
+
+    .status-left, .status-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .status-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      cursor: default;
+    }
+
+    .status-separator {
+      color: rgba(255, 255, 255, 0.15);
+    }
+
+    .status-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 3px;
+      color: #94a3b8;
+      font-size: 11px;
+      padding: 2px 7px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      transition: all 0.15s;
+    }
+    .status-btn:hover {
+      background: rgba(255, 255, 255, 0.08);
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.15);
+    }
+
+    .status-zoom-group {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .status-zoom-btn {
+      background: transparent;
+      border: none;
+      color: #94a3b8;
+      width: 18px;
+      height: 18px;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 2px;
+    }
+    .status-zoom-btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #ffffff;
+    }
+
+    .status-zoom-slider {
+      width: 80px;
+      height: 4px;
+      accent-color: #ea580c;
+      cursor: pointer;
+    }
+
+    .status-zoom-pct {
+      min-width: 38px;
+      text-align: right;
+      color: #cbd5e1;
+      font-weight: 500;
+    }
+
+    /* THUMBNAIL ROW (SIDE NUMBER COLUMN) */
+    .thumb-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+      width: 100%;
+    }
+
+    .thumb-num {
+      font-size: 11px;
+      font-weight: 600;
+      color: #94a3b8;
+      min-width: 16px;
+      text-align: right;
+      padding-top: 6px;
+      user-select: none;
+    }
+
+    .thumb-row.active .thumb-num {
+      color: #ea580c;
+      font-weight: 700;
     }
 
     /* GLASS SIDEBAR FILMSTRIP */
@@ -862,17 +1167,21 @@ export function getWebviewContent(
   <div class="ambient-glow-1"></div>
   <div class="ambient-glow-2"></div>
 
-  <!-- TOP HEADER -->
-  <header class="glass-header">
-    <div class="header-left">
-      <div class="brand-badge" title="OPEN_PPTX Studio">P</div>
-      <div class="deck-title" id="deckTitle" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
+  <!-- TOP OFFICE TITLEBAR -->
+  <header class="office-titlebar">
+    <div class="office-titlebar-left">
+      <div class="office-brand-badge" title="OPEN_PPTX Studio (PowerPoint Engine)">P</div>
+      <div class="office-doc-title" id="deckTitle" title="${escapeHtml(title)}">${escapeHtml(title)}</div>
       <div class="badge-pill highlight" id="themeBadge">🎨 ${escapeHtml(theme)}</div>
       <div class="badge-pill" id="sizeBadge">📐 ${escapeHtml(slideSize)}</div>
       <div class="badge-pill" id="slideIndicator">1 / ${slideCount}</div>
+      <div class="office-quick-access">
+        <button class="office-quick-btn" id="btnQuickUndo" title="실행 취소 (Cmd+Z)">↩️</button>
+        <button class="office-quick-btn" id="btnQuickRedo" title="다시 실행 (Cmd+Y)">↪️</button>
+      </div>
     </div>
 
-    <div class="header-actions">
+    <div class="office-titlebar-right">
       <button class="btn-glass btn-glass-primary" id="btnPresent" title="전체화면 슬라이드 쇼 (F5 / Cmd+Enter)">
         ▶ 슬라이드 쇼
       </button>
@@ -897,40 +1206,224 @@ export function getWebviewContent(
     </div>
   </header>
 
-  <!-- POWERPOINT EDITING RIBBON -->
-  <div class="glass-ribbon">
-    <div class="ribbon-group">
-      <button class="btn-glass btn-glass-primary" id="btnNewSlideModal" title="새 슬라이드 추가">
-        ➕ 새 슬라이드
-      </button>
-      <button class="btn-glass" id="btnDuplicateSlide" title="현재 슬라이드 복제">
-        📋 복제
-      </button>
-      <button class="btn-glass btn-glass-danger" id="btnDeleteSlide" title="현재 슬라이드 삭제">
-        🗑️ 삭제
-      </button>
-      <div class="ribbon-divider"></div>
-      <button class="btn-glass" id="btnMoveUp" title="슬라이드 위로 이동">
-        ⬆️ 위로
-      </button>
-      <button class="btn-glass" id="btnMoveDown" title="슬라이드 아래로 이동">
-        ⬇️ 아래로
-      </button>
+  <!-- MICROSOFT POWERPOINT RIBBON TABS -->
+  <nav class="office-ribbon-tabs">
+    <button class="ribbon-tab active" data-tab="tabHome">홈</button>
+    <button class="ribbon-tab" data-tab="tabInsert">삽입</button>
+    <button class="ribbon-tab" data-tab="tabDesign">디자인</button>
+    <button class="ribbon-tab" data-tab="tabTransitions">전환</button>
+    <button class="ribbon-tab" data-tab="tabSlideshow">슬라이드 쇼</button>
+    <button class="ribbon-tab" data-tab="tabView">보기</button>
+  </nav>
+
+  <!-- MICROSOFT POWERPOINT RIBBON TOOLBAR PANELS -->
+  <div class="office-ribbon-content">
+    <!-- TAB 1: 홈 (HOME) -->
+    <div class="ribbon-tab-pane active" id="tabHome">
+      <!-- GROUP: 슬라이드 -->
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <button class="ribbon-btn-large" id="btnNewSlideModal" title="새 슬라이드 추가 (Cmd+M)">
+            <span class="btn-icon">➕</span>
+            <span class="btn-label">새 슬라이드</span>
+          </button>
+          <div class="ribbon-col-group">
+            <button class="ribbon-btn-small" id="btnDuplicateSlide" title="현재 슬라이드 복제 (Cmd+D)">📋 슬라이드 복제</button>
+            <button class="ribbon-btn-small" id="btnDeleteSlide" title="현재 슬라이드 삭제">🗑️ 슬라이드 삭제</button>
+            <button class="ribbon-btn-small" id="btnRenameModal" title="슬라이드 제목 수정">🏷️ 제목 수정</button>
+          </div>
+        </div>
+        <span class="ribbon-group-title">슬라이드</span>
+      </div>
+
+      <!-- GROUP: 글꼴 -->
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <div class="ribbon-col-group">
+            <div class="ribbon-row-group">
+              <select class="ribbon-select" id="ribbonFontFamily" title="글꼴 선택" style="width: 140px;">
+                <option value="Pretendard">Pretendard</option>
+                <option value="Apple SD Gothic Neo">Apple SD 산돌고딕 Neo</option>
+                <option value="Malgun Gothic">맑은 고딕</option>
+                <option value="Arial">Arial</option>
+                <option value="Georgia">Georgia</option>
+              </select>
+              <select class="ribbon-select" id="ribbonFontSize" title="글꼴 크기" style="width: 58px;">
+                <option value="12">12</option>
+                <option value="14">14</option>
+                <option value="16">16</option>
+                <option value="18" selected>18</option>
+                <option value="20">20</option>
+                <option value="24">24</option>
+                <option value="28">28</option>
+                <option value="32">32</option>
+                <option value="40">40</option>
+                <option value="54">54</option>
+                <option value="72">72</option>
+              </select>
+              <button class="ribbon-tool-btn" id="btnRibbonGrow" title="글자 확대 (Cmd+])">가+</button>
+              <button class="ribbon-tool-btn" id="btnRibbonShrink" title="글자 축소 (Cmd+[)">가-</button>
+            </div>
+            <div class="ribbon-row-group">
+              <button class="ribbon-tool-btn font-bold" id="btnRibbonBold" title="굵게 (Cmd+B)"><b>B</b></button>
+              <button class="ribbon-tool-btn font-italic" id="btnRibbonItalic" title="기울임꼴 (Cmd+I)"><i>I</i></button>
+              <button class="ribbon-tool-btn font-underline" id="btnRibbonUnderline" title="밑줄 (Cmd+U)"><u>U</u></button>
+              <button class="ribbon-tool-btn" id="btnRibbonShadow" title="텍스트 그림자">S</button>
+              <label class="ribbon-color-box" title="글자 색상 변경">
+                <span>Aa</span>
+                <div class="color-bar" id="fontColorBar"></div>
+                <input type="color" id="ribbonFontColor" value="#f26b1d" style="opacity:0; position:absolute; width:1px; height:1px;" />
+              </label>
+              <label class="ribbon-color-box" title="도형 채우기 색상">
+                <span>🎨</span>
+                <div class="color-bar" id="fillColorBar" style="background:#0ea5e9;"></div>
+                <input type="color" id="ribbonFillColor" value="#0ea5e9" style="opacity:0; position:absolute; width:1px; height:1px;" />
+              </label>
+            </div>
+          </div>
+        </div>
+        <span class="ribbon-group-title">글꼴 및 서식</span>
+      </div>
+
+      <!-- GROUP: 단락 -->
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <div class="ribbon-col-group">
+            <div class="ribbon-row-group">
+              <button class="ribbon-tool-btn" id="btnAlignLeft" title="왼쪽 맞춤">⫷</button>
+              <button class="ribbon-tool-btn" id="btnAlignCenter" title="가운데 맞춤">≡</button>
+              <button class="ribbon-tool-btn" id="btnAlignRight" title="오른쪽 맞춤">⫸</button>
+            </div>
+            <div class="ribbon-row-group">
+              <button class="ribbon-btn-small" id="btnEditTextOverlay" title="선택 텍스트 직접 편집 (Enter)">✏️ 인라인 수정</button>
+            </div>
+          </div>
+        </div>
+        <span class="ribbon-group-title">단락</span>
+      </div>
+
+      <!-- GROUP: 그리기 -->
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <button class="ribbon-btn-large" id="btnTextBoxModal" title="텍스트 상자 삽입">
+            <span class="btn-icon">📝</span>
+            <span class="btn-label">텍스트 상자</span>
+          </button>
+          <button class="ribbon-btn-large" id="btnShapeModal" title="도형 삽입">
+            <span class="btn-icon">🔲</span>
+            <span class="btn-label">도형 삽입</span>
+          </button>
+          <div class="ribbon-col-group">
+            <button class="ribbon-btn-small" id="btnQuickRect" title="직사각형 삽입">⬜ 직사각형</button>
+            <button class="ribbon-btn-small" id="btnQuickEllipse" title="타원 삽입">⭕ 타원</button>
+          </div>
+          <div class="ribbon-col-group">
+            <button class="ribbon-btn-small" id="btnBringFront" title="맨 앞으로 가져오기">⬆️ 맨 앞</button>
+            <button class="ribbon-btn-small" id="btnSendBack" title="맨 뒤로 보내기">⬇️ 맨 뒤</button>
+          </div>
+        </div>
+        <span class="ribbon-group-title">그리기</span>
+      </div>
     </div>
 
-    <div class="ribbon-group">
-      <button class="btn-glass" id="btnEditTextOverlay" title="선택한 텍스트/도형 편집">
-        ✏️ 텍스트 직접 수정
-      </button>
-      <button class="btn-glass" id="btnRenameModal" title="슬라이드 제목 수정">
-        🏷️ 제목 수정
-      </button>
-      <button class="btn-glass" id="btnTextBoxModal" title="텍스트 상자 삽입">
-        📝 텍스트 추가
-      </button>
-      <button class="btn-glass" id="btnShapeModal" title="도형 삽입">
-        🔲 도형 삽입
-      </button>
+    <!-- TAB 2: 삽입 (INSERT) -->
+    <div class="ribbon-tab-pane" id="tabInsert">
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <button class="ribbon-btn-large" onclick="document.getElementById('btnNewSlideModal').click()">
+            <span class="btn-icon">➕</span>
+            <span class="btn-label">새 슬라이드</span>
+          </button>
+          <button class="ribbon-btn-large" onclick="document.getElementById('btnTextBoxModal').click()">
+            <span class="btn-icon">📝</span>
+            <span class="btn-label">텍스트 상자</span>
+          </button>
+          <button class="ribbon-btn-large" onclick="document.getElementById('btnShapeModal').click()">
+            <span class="btn-icon">🔲</span>
+            <span class="btn-label">도형 삽입</span>
+          </button>
+        </div>
+        <span class="ribbon-group-title">요소 삽입</span>
+      </div>
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <button class="ribbon-btn-large" onclick="document.getElementById('btnExportPdf').click()">
+            <span class="btn-icon">📑</span>
+            <span class="btn-label">PDF 변환</span>
+          </button>
+          <button class="ribbon-btn-large" onclick="document.getElementById('btnExportMd').click()">
+            <span class="btn-icon">📝</span>
+            <span class="btn-label">마크다운</span>
+          </button>
+          <button class="ribbon-btn-large" onclick="document.getElementById('btnSavePng').click()">
+            <span class="btn-icon">🖼️</span>
+            <span class="btn-label">슬라이드 PNG</span>
+          </button>
+        </div>
+        <span class="ribbon-group-title">내보내기</span>
+      </div>
+    </div>
+
+    <!-- TAB 3: 디자인 (DESIGN) -->
+    <div class="ribbon-tab-pane" id="tabDesign">
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <button class="ribbon-btn-small" onclick="alert('테마: DeckCraft가 적용되어 있습니다.')">🎨 기본 테마</button>
+          <button class="ribbon-btn-small" onclick="alert('슬라이드 배경 서식이 적용되어 있습니다.')">🌌 모던 테마</button>
+        </div>
+        <span class="ribbon-group-title">테마</span>
+      </div>
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <button class="ribbon-btn-small">📐 16:9 와이드스크린 (기본)</button>
+          <button class="ribbon-btn-small">📐 4:3 표준</button>
+        </div>
+        <span class="ribbon-group-title">슬라이드 크기</span>
+      </div>
+    </div>
+
+    <!-- TAB 4: 전환 (TRANSITIONS) -->
+    <div class="ribbon-tab-pane" id="tabTransitions">
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <button class="ribbon-btn-small">없음</button>
+          <button class="ribbon-btn-small" style="color:#38bdf8;">페이드 (Fade)</button>
+          <button class="ribbon-btn-small">밀어내기 (Push)</button>
+          <button class="ribbon-btn-small">닦아내기 (Wipe)</button>
+          <button class="ribbon-btn-small">분할 (Split)</button>
+        </div>
+        <span class="ribbon-group-title">이 슬라이드로 전환</span>
+      </div>
+    </div>
+
+    <!-- TAB 5: 슬라이드 쇼 (SLIDE SHOW) -->
+    <div class="ribbon-tab-pane" id="tabSlideshow">
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <button class="ribbon-btn-large" onclick="document.getElementById('btnPresent').click()">
+            <span class="btn-icon">▶</span>
+            <span class="btn-label">처음부터 (F5)</span>
+          </button>
+          <div class="ribbon-col-group">
+            <button class="ribbon-btn-small" id="btnMoveUp" title="슬라이드 위로 이동">⬆️ 슬라이드 위로</button>
+            <button class="ribbon-btn-small" id="btnMoveDown" title="슬라이드 아래로 이동">⬇️ 슬라이드 아래로</button>
+          </div>
+        </div>
+        <span class="ribbon-group-title">슬라이드 쇼 시작</span>
+      </div>
+    </div>
+
+    <!-- TAB 6: 보기 (VIEW) -->
+    <div class="ribbon-tab-pane" id="tabView">
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <button class="ribbon-btn-small" onclick="document.getElementById('btnZoomFit').click()">화면 맞춤 (Fit)</button>
+          <button class="ribbon-btn-small" onclick="document.getElementById('btnZoomIn').click()">확대 (+)</button>
+          <button class="ribbon-btn-small" onclick="document.getElementById('btnZoomOut').click()">축소 (-)</button>
+          <button class="ribbon-btn-small" onclick="document.getElementById('notesToggle').click()">📝 메모 서랍 토글</button>
+        </div>
+        <span class="ribbon-group-title">확대/축소 및 표시</span>
+      </div>
     </div>
   </div>
 
@@ -1008,6 +1501,28 @@ export function getWebviewContent(
       </div>
     </main>
   </div>
+
+  <!-- MICROSOFT POWERPOINT OFFICE BOTTOM STATUS BAR -->
+  <footer class="office-status-bar">
+    <div class="status-left">
+      <span class="status-item" id="statusSlideIndex">슬라이드 1 / ${slideCount}</span>
+      <span class="status-separator">|</span>
+      <span class="status-item">한국어</span>
+      <span class="status-separator">|</span>
+      <span class="status-item" id="statusAccessibility">접근성: 검토 완료</span>
+    </div>
+    <div class="status-right">
+      <button class="status-btn" id="btnStatusNotes" title="슬라이드 메모 보기/숨기기">📝 메모</button>
+      <button class="status-btn" id="btnStatusPresent" title="슬라이드 쇼 시작 (F5)">▶ 슬라이드 쇼</button>
+      <div class="status-zoom-group">
+        <button class="status-zoom-btn" id="btnStatusZoomOut" title="축소">-</button>
+        <input type="range" min="50" max="250" value="100" class="status-zoom-slider" id="statusZoomSlider" title="확대/축소 슬라이더" />
+        <button class="status-zoom-btn" id="btnStatusZoomIn" title="확대">+</button>
+        <span class="status-zoom-pct" id="statusZoomPct">100%</span>
+        <button class="status-btn" id="btnStatusZoomFit" title="현재 창에 맞춤">⛶ 맞춤</button>
+      </div>
+    </div>
+  </footer>
 
   <!-- FULLSCREEN PRESENTATION OVERLAY -->
   <div class="present-glass-overlay" id="presentOverlay">
@@ -1168,23 +1683,26 @@ export function getWebviewContent(
         const imgUri = images[i] || '';
         const titleText = slide.title || ('슬라이드 ' + (i + 1));
         return \`
-        <div class="thumb-card \${i === currentIndex ? 'active' : ''}" data-index="\${i}">
-          <div class="thumb-card-top">
-            <span class="thumb-idx">#\${i + 1}</span>
-            <span class="thumb-layout-tag">\${escapeHtml(slide.layout || 'Slide')}</span>
-          </div>
-          <div class="thumb-img-box">
-            <img src="\${imgUri}" alt="Slide \${i + 1}" loading="lazy" />
-          </div>
-          <div class="thumb-title" title="\${escapeHtml(titleText)}">
-            \${escapeHtml(titleText)}
+        <div class="thumb-row \${i === currentIndex ? 'active' : ''}" data-index="\${i}">
+          <div class="thumb-num">\${i + 1}</div>
+          <div class="thumb-card \${i === currentIndex ? 'active' : ''}" data-index="\${i}">
+            <div class="thumb-card-top">
+              <span class="thumb-idx">#\${i + 1}</span>
+              <span class="thumb-layout-tag">\${escapeHtml(slide.layout || 'Slide')}</span>
+            </div>
+            <div class="thumb-img-box">
+              <img src="\${imgUri}" alt="Slide \${i + 1}" loading="lazy" />
+            </div>
+            <div class="thumb-title" title="\${escapeHtml(titleText)}">
+              \${escapeHtml(titleText)}
+            </div>
           </div>
         </div>\`;
       }).join('');
 
-      document.querySelectorAll('.thumb-card').forEach((card) => {
-        card.addEventListener('click', () => {
-          const idx = parseInt(card.getAttribute('data-index'), 10);
+      document.querySelectorAll('.thumb-row').forEach((row) => {
+        row.addEventListener('click', () => {
+          const idx = parseInt(row.getAttribute('data-index'), 10);
           updateSlide(idx);
         });
       });
@@ -1812,12 +2330,20 @@ export function getWebviewContent(
       presentCounter.textContent = countText;
       slideTotalBadge.textContent = slidesData.length;
 
-      document.querySelectorAll('.thumb-card').forEach((card, i) => {
+      const statusSlideIndex = document.getElementById('statusSlideIndex');
+      if (statusSlideIndex) {
+        statusSlideIndex.textContent = '슬라이드 ' + (currentIndex + 1) + ' / ' + slidesData.length;
+      }
+
+      document.querySelectorAll('.thumb-row').forEach((row, i) => {
+        const card = row.querySelector('.thumb-card');
         if (i === currentIndex) {
-          card.classList.add('active');
-          card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+          row.classList.add('active');
+          if (card) card.classList.add('active');
+          row.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
         } else {
-          card.classList.remove('active');
+          row.classList.remove('active');
+          if (card) card.classList.remove('active');
         }
       });
 
@@ -1872,12 +2398,158 @@ export function getWebviewContent(
     function setZoom(level) {
       zoomLevel = Math.max(0.5, Math.min(2.5, level));
       slideFrame.style.transform = 'scale(' + zoomLevel + ')';
-      zoomLabel.textContent = Math.round(zoomLevel * 100) + '%';
+      const pct = Math.round(zoomLevel * 100) + '%';
+      zoomLabel.textContent = pct;
+      const statusZoomPct = document.getElementById('statusZoomPct');
+      if (statusZoomPct) statusZoomPct.textContent = pct;
+      const statusZoomSlider = document.getElementById('statusZoomSlider');
+      if (statusZoomSlider) statusZoomSlider.value = Math.round(zoomLevel * 100);
     }
 
     document.getElementById('btnZoomIn').addEventListener('click', () => setZoom(zoomLevel + 0.15));
     document.getElementById('btnZoomOut').addEventListener('click', () => setZoom(zoomLevel - 0.15));
     document.getElementById('btnZoomFit').addEventListener('click', () => setZoom(1.0));
+
+    // Status Bar controls
+    document.getElementById('btnStatusNotes')?.addEventListener('click', () => {
+      notesToggle.click();
+    });
+    document.getElementById('btnStatusPresent')?.addEventListener('click', () => {
+      document.getElementById('btnPresent')?.click();
+    });
+    document.getElementById('btnStatusZoomIn')?.addEventListener('click', () => {
+      setZoom(zoomLevel + 0.15);
+    });
+    document.getElementById('btnStatusZoomOut')?.addEventListener('click', () => {
+      setZoom(zoomLevel - 0.15);
+    });
+    document.getElementById('btnStatusZoomFit')?.addEventListener('click', () => {
+      setZoom(1.0);
+    });
+    document.getElementById('statusZoomSlider')?.addEventListener('input', (e) => {
+      setZoom(parseInt(e.target.value, 10) / 100);
+    });
+
+    // --- MICROSOFT POWERPOINT RIBBON INTERACTION ---
+    document.querySelectorAll('.ribbon-tab').forEach((tab) => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.ribbon-tab').forEach((t) => t.classList.remove('active'));
+        document.querySelectorAll('.ribbon-tab-pane').forEach((p) => p.classList.remove('active'));
+        tab.classList.add('active');
+        const targetId = tab.getAttribute('data-tab');
+        if (targetId) {
+          const pane = document.getElementById(targetId);
+          if (pane) pane.classList.add('active');
+        }
+      });
+    });
+
+    function getTargetShape() {
+      if (selectedShape) return selectedShape;
+      const shapes = shapesCache[currentIndex] || [];
+      if (shapes.length > 0) {
+        const el = shapeOverlayLayer.querySelector(\`[data-id="\${shapes[0].id}"]\`);
+        if (el) selectShape(shapes[0], el);
+        return shapes[0];
+      }
+      return null;
+    }
+
+    // Font Family & Size
+    const ribbonFontFamily = document.getElementById('ribbonFontFamily');
+    if (ribbonFontFamily) {
+      ribbonFontFamily.addEventListener('change', () => {
+        const sh = getTargetShape();
+        if (sh) {
+          vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, family: ribbonFontFamily.value });
+        }
+      });
+    }
+
+    const ribbonFontSize = document.getElementById('ribbonFontSize');
+    if (ribbonFontSize) {
+      ribbonFontSize.addEventListener('change', () => {
+        const sh = getTargetShape();
+        if (sh) {
+          vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, size: parseInt(ribbonFontSize.value, 10) });
+        }
+      });
+    }
+
+    // Grow / Shrink Font
+    document.getElementById('btnRibbonGrow')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, grow: true });
+    });
+    document.getElementById('btnRibbonShrink')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, shrink: true });
+    });
+
+    // Bold / Italic / Underline
+    document.getElementById('btnRibbonBold')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, bold: true });
+    });
+    document.getElementById('btnRibbonItalic')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, italic: true });
+    });
+    document.getElementById('btnRibbonUnderline')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, underline: true });
+    });
+
+    // Font & Shape Fill Color Pickers
+    const ribbonFontColor = document.getElementById('ribbonFontColor');
+    if (ribbonFontColor) {
+      ribbonFontColor.addEventListener('input', () => {
+        const fontColorBar = document.getElementById('fontColorBar');
+        if (fontColorBar) fontColorBar.style.background = ribbonFontColor.value;
+        const sh = getTargetShape();
+        if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, color: ribbonFontColor.value });
+      });
+    }
+
+    const ribbonFillColor = document.getElementById('ribbonFillColor');
+    if (ribbonFillColor) {
+      ribbonFillColor.addEventListener('input', () => {
+        const fillColorBar = document.getElementById('fillColorBar');
+        if (fillColorBar) fillColorBar.style.background = ribbonFillColor.value;
+        const sh = getTargetShape();
+        if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, fill: ribbonFillColor.value });
+      });
+    }
+
+    // Paragraph Alignment
+    document.getElementById('btnAlignLeft')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, align: 'left' });
+    });
+    document.getElementById('btnAlignCenter')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, align: 'center' });
+    });
+    document.getElementById('btnAlignRight')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, align: 'right' });
+    });
+
+    // Quick Shapes & Arrange
+    document.getElementById('btnQuickRect')?.addEventListener('click', () => {
+      vscode.postMessage({ command: 'insertShape', index: currentIndex, preset: 'rect', text: '' });
+    });
+    document.getElementById('btnQuickEllipse')?.addEventListener('click', () => {
+      vscode.postMessage({ command: 'insertShape', index: currentIndex, preset: 'ellipse', text: '' });
+    });
+    document.getElementById('btnBringFront')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'arrangeShape', index: currentIndex, shapeId: sh.id, action: 'bringToFront' });
+    });
+    document.getElementById('btnSendBack')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'arrangeShape', index: currentIndex, shapeId: sh.id, action: 'sendToBack' });
+    });
 
     // Notes Toggle & Save
     notesToggle.addEventListener('click', () => {

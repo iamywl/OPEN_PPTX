@@ -357,11 +357,17 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
             if (message.shrink) {
               commands.push('format.shrink');
             }
+            if (message.family) {
+              commands.push(`format.font=${JSON.stringify({ family: message.family })}`);
+            }
             if (message.size) {
               commands.push(`format.size=${JSON.stringify({ size: message.size })}`);
             }
             if (message.color) {
               commands.push(`format.color=${JSON.stringify({ color: message.color })}`);
+            }
+            if (message.fill) {
+              commands.push(`shape.fill=${JSON.stringify({ color: message.fill })}`);
             }
             if (message.align) {
               commands.push(`format.align=${JSON.stringify({ align: message.align })}`);

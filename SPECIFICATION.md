@@ -126,7 +126,7 @@ DeckCraft 엔진 코어의 120개 커맨드를 8개 모듈로 분류하고, 각 
 | `shape.setBounds`| `{x, y, w, h, ids: [id]}` | 도형의 캔버스 위치 및 가로/세로 크기 변경 | 100% |
 | `edit.delete` | `{ids: [id]}` | 선택된 도형 즉시 삭제 | 100% |
 | `edit.duplicate`| `{ids: [id]}` | 선택된 도형 즉시 복제 | 100% |
-| `shape.fill` | `{color?, none?, gradient?}` | 도형 채우기 색상/투명도 변경 | 90% |
+| `shape.fill` | `{color?, none?, gradient?}` | 도형 채우기 색상/투명도 변경 (리본 팔레트 연동) | 100% |
 | `shape.line` | `{color?, width?, dash?}` | 도형 윤곽선 색상 및 두께 변경 | 85% |
 | `shape.rotate` | `{deg, ids}` | 도형 회전 각도 조절 | 70% |
 | `insert.table` | `{rows, cols, rect}` | 표(Table) 삽입 및 데이터 관리 | 65% |
@@ -145,6 +145,7 @@ DeckCraft 엔진 코어의 120개 커맨드를 8개 모듈로 분류하고, 각 
 ### [모듈 5] 서식 및 타이포그래피 (`format.*`)
 | 엔진 커맨드 | 파라미터 규격 | 기능 및 설명 | 구현율 |
 |---|---|---|:---:|
+| `format.font` | `{family: string}` | 글꼴 패밀리 선택 (Pretendard, Apple SD 산돌고딕 Neo 등) | 100% |
 | `format.bold` | `{on?}` | 굵게 토글 | 100% |
 | `format.italic` | `{on?}` | 기울임꼴 토글 | 100% |
 | `format.underline` | `{on?, style?}` | 밑줄 토글 | 100% |
