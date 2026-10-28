@@ -46,16 +46,39 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
     token: vscode.CancellationToken
   ): Promise<void> {
     const webview = webviewPanel.webview;
+    const localRoots: vscode.Uri[] = [
+      this.context.extensionUri,
+      this.context.globalStorageUri,
+      vscode.Uri.file('/tmp'),
+      vscode.Uri.file(path.dirname(document.uri.fsPath)),
+    ];
+    for (const fontDir of ['/Library/Fonts', '/System/Library/Fonts', 'C:\\Windows\\Fonts', '/usr/share/fonts']) {
+      if (fs.existsSync(fontDir)) {
+        localRoots.push(vscode.Uri.file(fontDir));
+      }
+    }
     webview.options = {
       enableScripts: true,
-      localResourceRoots: [
-        this.context.extensionUri,
-        this.context.globalStorageUri,
-        vscode.Uri.file('/tmp'),
-      ],
+      localResourceRoots: localRoots,
     };
 
     const renderScale = vscode.workspace.getConfiguration('deckcraft').get<number>('renderScale') || 1.5;
+    let lastSavedByWasmAt = 0;
+
+    // Locate a system Korean TTF font so the WASM vector engine can shape & render Hangul
+    const koreanFontCandidates = [
+      '/Library/Fonts/LGSmHaR.ttf',
+      '/System/Library/Fonts/Supplemental/AppleGothic.ttf',
+      'C:\\Windows\\Fonts\\malgun.ttf',
+      '/usr/share/fonts/truetype/nanum/NanumGothic.ttf',
+    ];
+    let koreanFontWebviewUri = '';
+    for (const candidate of koreanFontCandidates) {
+      if (fs.existsSync(candidate)) {
+        koreanFontWebviewUri = webview.asWebviewUri(vscode.Uri.file(candidate)).toString();
+        break;
+      }
+    }
 
     // Use a unique cache dir per document in OS temp or storage
     const docHash = crypto.createHash('md5').update(document.uri.fsPath).digest('hex').slice(0, 10);
@@ -100,12 +123,30 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
         const { info, slideUris } = await loadPresentationData();
         if (token.isCancellationRequested) return;
 
+        let initialFileBase64 = '';
+        try {
+          initialFileBase64 = fs.readFileSync(document.uri.fsPath).toString('base64');
+        } catch (readErr) {
+          console.error('Failed to read raw file bytes for WASM engine:', readErr);
+        }
+
+        const wasmJsUri = webview
+          .asWebviewUri(vscode.Uri.file(path.join(this.context.extensionUri.fsPath, 'assets', 'wasm', 'deckcraft-web.js')))
+          .toString();
+        const wasmBgUri = webview
+          .asWebviewUri(vscode.Uri.file(path.join(this.context.extensionUri.fsPath, 'assets', 'wasm', 'deckcraft-web_bg.wasm')))
+          .toString();
+
         webview.html = getWebviewContent(
           webview,
           this.context.extensionUri,
           document.uri,
           info,
-          slideUris
+          slideUris,
+          initialFileBase64,
+          koreanFontWebviewUri,
+          wasmJsUri,
+          wasmBgUri
         );
       } catch (err: any) {
         console.error('Error rendering presentation:', err);
@@ -493,11 +534,96 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
           await this.exportSlidePng(document.uri, cacheDir, message.index);
           break;
         }
+
+        // --- NATIVE WASM ENGINE FILE BRIDGE ---
+        case 'saveFileBytes': {
+          try {
+            const bytes = Buffer.from(message.base64 || '', 'base64');
+            if (bytes.length > 0) {
+              lastSavedByWasmAt = Date.now();
+              fs.writeFileSync(filePath, bytes);
+            }
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`파일 저장 실패: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'exportFileBytes': {
+          try {
+            const suggestedName = message.name || path.basename(filePath);
+            const defaultUri = vscode.Uri.file(path.join(path.dirname(filePath), suggestedName));
+            const targetUri = await vscode.window.showSaveDialog({
+              defaultUri,
+              saveLabel: 'Save Presentation / Export',
+            });
+            if (targetUri && message.base64) {
+              const bytes = Buffer.from(message.base64, 'base64');
+              if (targetUri.fsPath === filePath) {
+                lastSavedByWasmAt = Date.now();
+              }
+              fs.writeFileSync(targetUri.fsPath, bytes);
+              vscode.window.showInformationMessage(`저장 완료: ${path.basename(targetUri.fsPath)}`);
+            }
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`내보내기 실패: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'pickFile': {
+          try {
+            const purpose = message.purpose || 'open';
+            const requestId = message.requestId ?? 0;
+            let filters: { [name: string]: string[] } = {
+              Presentations: ['pptx', 'deckcraft', 'potx', 'ppsx', 'md', 'txt'],
+            };
+            if (purpose === 'picture') {
+              filters = { Pictures: ['png', 'jpg', 'jpeg', 'gif', 'webp', 'bmp', 'svg'] };
+            } else if (purpose === 'audio') {
+              filters = { Audio: ['wav', 'mp3', 'm4a', 'aac', 'flac', 'ogg'] };
+            } else if (purpose === 'video') {
+              filters = { Video: ['mp4', 'm4v', 'mov', 'webm'] };
+            } else if (purpose === 'theme') {
+              filters = { Themes: ['thmx', 'pptx', 'potx'] };
+            }
+            const picked = await vscode.window.showOpenDialog({
+              canSelectMany: false,
+              filters,
+              defaultUri: vscode.Uri.file(path.dirname(filePath)),
+            });
+            if (picked && picked.length > 0) {
+              const pickedPath = picked[0].fsPath;
+              const bytes = fs.readFileSync(pickedPath);
+              webview.postMessage({
+                type: 'pickedFile',
+                requestId,
+                purpose,
+                name: path.basename(pickedPath),
+                base64: bytes.toString('base64'),
+              });
+            } else {
+              webview.postMessage({
+                type: 'pickedFileCancel',
+                requestId,
+              });
+            }
+          } catch (err: any) {
+            webview.postMessage({
+              type: 'pickedFileCancel',
+              requestId: message.requestId ?? 0,
+            });
+          }
+          break;
+        }
       }
     });
 
     const fileWatcher = vscode.workspace.createFileSystemWatcher(document.uri.fsPath);
     fileWatcher.onDidChange(async () => {
+      if (Date.now() - lastSavedByWasmAt < 3000) {
+        return;
+      }
       await renderAndUpdate();
     });
 
@@ -600,7 +726,17 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
 
   private async openInDesktopApp(documentUri: vscode.Uri): Promise<void> {
     const config = vscode.workspace.getConfiguration('deckcraft');
-    const customAppPath = config.get<string>('desktopAppPath') || '/Applications/DeckCraft.app';
+    const bundledGlassApp = path.join(this.context.extensionUri.fsPath, 'bin', 'DeckCraft.app');
+    const userGlassApp = path.join(process.env.HOME || '', 'Applications', 'DeckCraft.app');
+    const configuredApp = config.get<string>('desktopAppPath');
+    const customAppPath =
+      (configuredApp && configuredApp !== '/Applications/DeckCraft.app' && fs.existsSync(configuredApp)
+        ? configuredApp
+        : fs.existsSync(bundledGlassApp)
+        ? bundledGlassApp
+        : fs.existsSync(userGlassApp)
+        ? userGlassApp
+        : '/Applications/DeckCraft.app');
 
     if (process.platform === 'darwin') {
       if (fs.existsSync(customAppPath)) {

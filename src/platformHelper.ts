@@ -21,11 +21,12 @@ export class PlatformHelper {
     const arch = process.arch;
 
     if (platform === 'darwin') {
+      const userApp = path.join(os.homedir(), 'Applications', 'DeckCraft.app');
       return {
         os: 'darwin',
         arch,
         cliBinaryName: 'deckcraft-cli',
-        desktopAppDefaultPath: '/Applications/DeckCraft.app',
+        desktopAppDefaultPath: fs.existsSync(userApp) ? userApp : '/Applications/DeckCraft.app',
         downloadArchiveUrl:
           'https://github.com/storytold/deckcraft/releases/download/v0.11.1/deckcraft-cli-0.11.1-macos-universal.zip',
         desktopAppDownloadUrl:

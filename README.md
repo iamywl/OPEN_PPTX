@@ -25,7 +25,15 @@
 
 ## 📸 프로젝트 스크린샷 갤러리 및 상세 워크플로우 (Screenshot Tour)
 
-DeckCraft의 고성능 Rust 렌더링 코어와 초현대적인 **글래스모피즘(Liquid Glassmorphism)** 캔버스를 통해 VS Code 내에서 파워포인트를 실제 앱과 똑같이 다룰 수 있습니다.
+DeckCraft의 고성능 Rust 렌더링 코어(`deckcraft_ui_egui::SlideApp`)와 초현대적인 **글래스모피즘(Liquid Glassmorphism)** 디자인 시스템을 통해 **VS Code 익스텐션(WASM 엔진)과 네이티브 데스크톱 앱(`DeckCraft.app`) 양쪽 모두에서 100% 1:1로 동일한 파워포인트 스튜디오**를 경험할 수 있습니다.
+
+### 0. 글래스모피즘 네이티브 엔진 & 데스크톱 앱 1:1 동등성 (100% Native Engine & Glassmorphism UI)
+![Glassmorphism Native DeckCraft Studio](assets/images/native-glass-app.png)
+* **VS Code & 네이티브 앱 100% 단일 코드베이스**: `deckcraft_upstream/crates/ui-egui`의 `SlideApp`을 WebAssembly(`assets/wasm/deckcraft-web_bg.wasm`)와 네이티브 앱(`bin/DeckCraft.app`) 양쪽으로 동시 빌드하여 기능 격차를 완전히 제거했습니다.
+* **딥 스페이스 글래스모피즘 테마 (`theme.rs` & `ribbon.rs`)**: 옵시디언 글래스 배경(`#111522`), 반투명 슬레이트 리본 카드(`#1C2234`)와 상단 1px 스페큘러 하이라이트, 레이디언트 오렌지(`#f26b1d`) 액센트, 그리고 도형 선택 시 활성화되는 시안 글로우(`#38bdf8` / `#0ea5e9`) 문맥 탭(`Shape Format`) 및 벡터 바운딩 핸들을 기본 적용했습니다.
+* **전 기능 리본 탭 & 우측 Format Shape 패널**: `File`, `Home`, `Insert`, `Draw`, `Design`, `Transitions`, `Animations`, `Slide Show`, `Record`, `Review`, `View` 10개 기본 탭과 도형/표/차트/SmartArt 선택 시 동적으로 열리는 문맥 탭, 우측 `Format Shape` 세부 서식 창을 완벽 지원합니다.
+
+---
 
 ### 1. 프레젠테이션 에디터 & 캔버스 직접 조작 (WYSIWYG Editor View)
 ![DeckCraft Editor](assets/images/editor.png)

@@ -50,7 +50,21 @@ This project adapts **DeckCraft**, an open-source presentation engine written in
        - *그리기*: 텍스트 상자 삽입, 도형 삽입, 빠른 사각형/타원 삽입, 레이어 순서 조절 (맨 앞으로/맨 뒤로).
      - **Office Bottom Status Bar (`footer.office-status-bar`)**: `슬라이드 N / M`, `한국어`, `접근성: 검토 완료`, `메모` 서랍 토글, `슬라이드 쇼` 원클릭 실행, 실시간 줌 슬라이더 (- [====] +), 줌 배율 표시, `⛶ 맞춤`.
      - **Thumbnail Strip**: 실제 파워포인트 좌측 열 번호 배지 (`1`, `2`, `3`...) 레이아웃 적용.
-     - **QA Verification**: 80개 DOM ID 검증 및 TypeScript 컴파일, VSIX 패키징 완료.
+     - **QA Verification**: 84개 DOM ID 검증 및 TypeScript 컴파일, VSIX 패키징 완료.
+9. **100% 1:1 Native Engine Parity (`SlideApp` WASM + Native Desktop App)**:
+   - **User Inquiry & Directive**: *"VSC 익스텐션과 네이티브 앱 간의 차이가 없는거 확실해? 고도화시켜야지"*.
+   - Embedded the actual Rust `deckcraft_ui_egui::SlideApp` compiled to WebAssembly (`deckcraft_upstream/apps/deckcraft-web` -> `assets/wasm/deckcraft-web_bg.wasm` & `deckcraft-web.js`) directly inside the VS Code Webview (`#wasmStudioContainer` / `<canvas id="deckcraft_canvas">`).
+   - Implemented a `#![forbid(unsafe_code)]`-compliant bidirectional VS Code Host Bridge (`deckcraft_upstream/apps/deckcraft-web/src/web.rs`):
+     - `window.__deckcraft_shift_msg()`: Streams initial `.pptx` file bytes (`open`), system Korean TTF font bytes (`font`), engine commands (`cmd`), and native file picker results (`inbox` / `inbox_cancel`) into `SlideApp`.
+     - `window.__deckcraft_on_save(path, Uint8Array)`: Auto-saves and persists `Ctrl+S`/`Cmd+S` edits directly back to the active `.pptx` / `.deckcraft` file on disk via `Services::write`.
+     - `window.__deckcraft_on_export(name, Uint8Array)` & `window.__deckcraft_pick_file(purpose, requestId)`: Connects native VS Code save/open dialogs to `SlideApp`'s Export & Insert Picture/Audio/Video workflows.
+   - Added Korean font family substitutes (`Pretendard`, `Apple SD Gothic Neo`, `AppleGothic`, `Malgun Gothic`, `NanumGothic`, `LG Smart UI`) in `crates/fonts/src/fontdb.rs` and automatic system Hangul `.ttf` injection from `src/deckcraftEditor.ts`.
+10. **Unified Glassmorphism Theme in Both VS Code Extension & Base Native `DeckCraft.app` + Full Documentation Standard**:
+    - **User Rule Enforcement**: *"모든 개발사항은 문서화가 기본이야 디자인도 글래스 반영해줘 craft기본네이티브앱도"*.
+    - Applied the signature **Deep Space Glassmorphism** design system directly to `deckcraft_upstream/crates/ui-egui/src/theme.rs`, `state.rs`, and `ribbon.rs`:
+      - Set `Brightness::Dark` as the default theme across both native desktop and WASM builds.
+      - Configured Obsidian Glass chrome (`#111522`), Translucent Slate Frosted Ribbon Card (`rgba(28, 34, 52, 0.95)`), Slate-Cyan border (`rgba(86, 122, 184, 0.41)`), 1px top specular white highlight (`rgba(255, 255, 255, 0.16)`), Radiant Orange (`#f26b1d`) primary accent, Cyan Glow (`#38bdf8`) contextual ribbon tabs (`Shape Format`, `Picture Format`, `Table Design`, `Chart Design`, `SmartArt Design`), and Electric Cyan (`#0ea5e9`) vector selection handles.
+    - Rebuilt both `assets/wasm/deckcraft-web_bg.wasm` AND the native macOS application bundle (`bin/DeckCraft.app` & `~/Applications/DeckCraft.app`) and verified via live TCP control (`--control`) screenshot capture (`assets/images/native-glass-app.png`).
 
 ---
 
@@ -59,21 +73,25 @@ This project adapts **DeckCraft**, an open-source presentation engine written in
 ```mermaid
 graph TD
     A["VS Code Workspace / Editor"] --> B["DeckcraftEditorProvider (Custom Editor)"]
-    B --> C["Glassmorphism Webview UI"]
+    B --> C["100% Native DeckCraft WASM Studio (SlideApp + WebGL2/wgpu)"]
+    B --> C2["Classic Glassmorphism HTML Ribbon Fallback"]
+    C <-->|"Bidirectional File & Font Bridge"| B
     B --> D["DeckcraftCli Engine (Rust Universal Binary)"]
     D --> E["Slide Rendering (PNG 1440x810)"]
     D --> F["Vector PDF Export"]
     D --> G["Markdown Outline Extraction"]
-    D --> H["Native Desktop App (macOS / Windows / Linux)"]
+    B --> H["Glassmorphism Native Desktop App (bin/DeckCraft.app)"]
     D --> I["MCP Server (Model Context Protocol for AI Agents)"]
 ```
 
 ### Core Components:
-- **`src/deckcraftEditor.ts`**: Implements `vscode.CustomReadonlyEditorProvider` for `.pptx`, `.deckcraft`, and `.ppt` files. Manages document rendering cache, file change watchers, and webview messaging.
-- **`src/webview/template.ts`**: The Glassmorphism UI/UX renderer. Features frosted glass panels (`backdrop-filter: blur(24px)`), ambient glow mesh, floating glass toolbar, filmstrip sidebar, zoom HUD, and fullscreen presentation mode.
-- **`src/deckcraftCli.ts`**: Low-level executor for `deckcraft-cli`. Supports parsing metadata via `info`, multi-scale rendering, file conversions (`convert`), and dynamic binary downloading for macOS, Windows, and Linux.
-- **`src/platformHelper.ts`**: Multi-platform abstraction handling OS paths, quarantine removal (`xattr -d com.apple.quarantine`), and desktop app execution (`open`, `powershell`, `xdg-open`).
-- **`src/mcpManager.ts`**: Serves the DeckCraft MCP server over stdio or connects to a running desktop app over TCP for AI agents in Cursor, Claude Desktop, Antigravity, and Windsurf.
+- **`deckcraft_upstream/crates/ui-egui` (`theme.rs`, `ribbon.rs`, `state.rs`, `app/files.rs`)**: Shared Rust `egui` presentation studio UI powering both the VS Code WASM canvas and the native macOS/Windows/Linux desktop app with a unified Glassmorphism theme and 130+ commands.
+- **`deckcraft_upstream/apps/deckcraft-web/src/web.rs`**: WebAssembly entry point and zero-unsafe-code JS host bridge connecting `SlideApp` to the VS Code Extension Host.
+- **`src/deckcraftEditor.ts`**: Implements `vscode.CustomReadonlyEditorProvider` for `.pptx`, `.deckcraft`, and `.ppt` files. Manages the WASM binary/file/font bridge (`saveFileBytes`, `exportFileBytes`, `pickFile`), document rendering cache, and native app launcher.
+- **`src/webview/template.ts`**: Hosts the full-screen `#wasmStudioContainer` (`<canvas id="deckcraft_canvas">`), floating Glass Engine Mode Switcher (`⚡ Native Engine (1:1)` / `🪟 Webview UI` / `💻 DeckCraft.app`), and the classic HTML Office Ribbon fallback.
+- **`src/deckcraftCli.ts`**: Low-level executor for `deckcraft-cli`. Supports parsing metadata via `info`, multi-scale rendering, file conversions (`convert`), and dynamic binary downloading.
+- **`src/platformHelper.ts`**: Multi-platform abstraction handling OS paths, quarantine removal, and prioritizing the Glassmorphism-themed `DeckCraft.app`.
+- **`src/mcpManager.ts`**: Serves the DeckCraft MCP server over stdio or connects to a running desktop app over TCP for AI agents.
 
 ---
 

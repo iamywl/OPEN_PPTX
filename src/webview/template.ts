@@ -6,10 +6,16 @@ export function getWebviewContent(
   extensionUri: vscode.Uri,
   documentUri: vscode.Uri,
   info: DeckCraftInfo,
-  slideImageUris: string[]
+  slideImageUris: string[],
+  initialFileBase64: string = '',
+  koreanFontWebviewUri: string = '',
+  wasmJsUri: string = '',
+  wasmBgUri: string = ''
 ): string {
   const nonce = getNonce();
-  const title = info.title || documentUri.path.split('/').pop() || 'Presentation';
+  const fileName = documentUri.path.split('/').pop() || 'presentation.pptx';
+  const filePath = (documentUri as any).fsPath || documentUri.path || fileName;
+  const title = info.title || fileName || 'Presentation';
   const slideCount = info.slides.length;
   const theme = info.theme || 'Default';
   const slideSize = info.slideSize ? `${info.slideSize[0]}×${info.slideSize[1]}` : '16:9';
@@ -20,7 +26,7 @@ export function getWebviewContent(
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} data: blob: https:; style-src 'unsafe-inline'; script-src 'nonce-${nonce}';">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; img-src ${webview.cspSource} data: blob: https:; style-src 'unsafe-inline'; font-src ${webview.cspSource} data: https:; connect-src ${webview.cspSource} https: data: blob:; script-src 'nonce-${nonce}' 'wasm-unsafe-eval' ${webview.cspSource};">
   <title>${escapeHtml(title)} - OPEN_PPTX Studio</title>
   <style>
     :root {
@@ -1161,11 +1167,114 @@ export function getWebviewContent(
       gap: 8px;
       margin-top: 4px;
     }
+
+    /* NATIVE WASM ENGINE FULL-STUDIO CONTAINER */
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .wasm-studio-container {
+      position: fixed;
+      inset: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 500;
+      background: #0b0e17;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .wasm-studio-container.hidden {
+      display: none !important;
+    }
+
+    #deckcraft_canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      outline: none;
+    }
+
+    #deckcraft_loading {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 14px;
+      background: radial-gradient(circle at 50% 35%, rgba(28, 34, 52, 0.94), rgba(11, 14, 23, 0.98));
+      backdrop-filter: blur(24px);
+      color: #f1f5f9;
+      z-index: 510;
+      font-size: 14px;
+      letter-spacing: 0.3px;
+    }
+
+    .engine-mode-switcher {
+      position: fixed;
+      bottom: 3px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 600;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 8px;
+      border-radius: 999px;
+      background: rgba(17, 21, 34, 0.84);
+      backdrop-filter: blur(20px) saturate(180%);
+      -webkit-backdrop-filter: blur(20px) saturate(180%);
+      border: 1px solid rgba(86, 122, 184, 0.42);
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), 0 6px 20px rgba(0, 0, 0, 0.55);
+      font-size: 11px;
+      color: #cbd5e1;
+    }
+
+    .engine-mode-btn {
+      background: transparent;
+      border: 1px solid transparent;
+      color: #94a3b8;
+      font-size: 11px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.15s ease;
+    }
+
+    .engine-mode-btn:hover {
+      color: #f8fafc;
+      background: rgba(56, 189, 248, 0.14);
+    }
+
+    .engine-mode-btn.active {
+      background: linear-gradient(135deg, #f26b1d, #d9530f);
+      color: #ffffff;
+      box-shadow: 0 2px 8px rgba(242, 107, 29, 0.45);
+    }
   </style>
 </head>
 <body>
   <div class="ambient-glow-1"></div>
   <div class="ambient-glow-2"></div>
+
+  <!-- 100% NATIVE DECKCRAFT RUST/EGUI WASM ENGINE CONTAINER -->
+  <div class="wasm-studio-container" id="wasmStudioContainer">
+    <div id="deckcraft_loading">
+      <div style="width:38px;height:38px;border:3px solid rgba(56,189,248,0.2);border-top-color:#f26b1d;border-radius:50%;animation:spin 0.8s linear infinite;"></div>
+      <div>⚡ DeckCraft Native Engine (WASM + Glassmorphism UI) 로딩 중&hellip;</div>
+    </div>
+    <canvas id="deckcraft_canvas"></canvas>
+  </div>
+
+  <!-- FLOATING GLASS ENGINE SWITCHER HUD -->
+  <div class="engine-mode-switcher" id="engineModeSwitcher">
+    <button class="engine-mode-btn active" id="btnModeWasm" title="네이티브 앱과 100% 동일한 Rust egui/WebGL2 엔진">⚡ Native Engine (1:1)</button>
+    <button class="engine-mode-btn" id="btnModeClassic" title="HTML 글래스모피즘 리본 모드">🪟 Webview UI</button>
+    <button class="engine-mode-btn" id="btnModeNativeApp" title="macOS DeckCraft.app 데스크톱 앱 실행">💻 DeckCraft.app</button>
+  </div>
 
   <!-- TOP OFFICE TITLEBAR -->
   <header class="office-titlebar">
@@ -2711,6 +2820,158 @@ export function getWebviewContent(
     document.getElementById('btnRefresh').addEventListener('click', () => {
       vscode.postMessage({ command: 'refresh' });
     });
+
+    // =========================================================================
+    // 100% NATIVE DECKCRAFT WASM ENGINE (SlideApp + WebGPU/WebGL2) BRIDGE
+    // =========================================================================
+    const wasmStudioContainer = document.getElementById('wasmStudioContainer');
+    const btnModeWasm = document.getElementById('btnModeWasm');
+    const btnModeClassic = document.getElementById('btnModeClassic');
+    const btnModeNativeApp = document.getElementById('btnModeNativeApp');
+
+    const initialFileBase64 = ${JSON.stringify(initialFileBase64)};
+    const initialFileName = ${JSON.stringify(fileName)};
+    const initialFilePath = ${JSON.stringify(filePath)};
+    const koreanFontUri = ${JSON.stringify(koreanFontWebviewUri)};
+    const wasmJsUri = ${JSON.stringify(wasmJsUri)};
+    const wasmBgUri = ${JSON.stringify(wasmBgUri)};
+
+    function base64ToUint8Array(b64) {
+      if (!b64) return new Uint8Array(0);
+      const bin = atob(b64);
+      const len = bin.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = bin.charCodeAt(i);
+      }
+      return bytes;
+    }
+
+    function uint8ArrayToBase64(bytes) {
+      let binary = '';
+      const chunk = 0x8000;
+      for (let i = 0; i < bytes.length; i += chunk) {
+        binary += String.fromCharCode.apply(null, bytes.subarray(i, i + chunk));
+      }
+      return btoa(binary);
+    }
+
+    window.__DECKCRAFT_VSCODE__ = true;
+    window.__DECKCRAFT_QUEUE__ = [];
+    window.__deckcraft_shift_msg = function() {
+      if (window.__DECKCRAFT_QUEUE__ && window.__DECKCRAFT_QUEUE__.length > 0) {
+        return window.__DECKCRAFT_QUEUE__.shift();
+      }
+      return null;
+    };
+
+    window.__deckcraft_on_save = function(pathOrName, bytes) {
+      const b64 = uint8ArrayToBase64(bytes);
+      vscode.postMessage({
+        command: 'saveFileBytes',
+        path: pathOrName,
+        base64: b64
+      });
+    };
+
+    window.__deckcraft_on_export = function(name, bytes) {
+      const b64 = uint8ArrayToBase64(bytes);
+      vscode.postMessage({
+        command: 'exportFileBytes',
+        name: name,
+        base64: b64
+      });
+    };
+
+    window.__deckcraft_pick_file = function(purpose, requestId) {
+      vscode.postMessage({
+        command: 'pickFile',
+        purpose: purpose,
+        requestId: requestId
+      });
+    };
+
+    window.addEventListener('message', (event) => {
+      const msg = event.data;
+      if (!msg) return;
+      if (msg.type === 'pickedFile') {
+        window.__DECKCRAFT_QUEUE__.push({
+          kind: 'inbox',
+          requestId: msg.requestId,
+          purpose: msg.purpose,
+          name: msg.name,
+          data: base64ToUint8Array(msg.base64)
+        });
+      } else if (msg.type === 'pickedFileCancel') {
+        window.__DECKCRAFT_QUEUE__.push({
+          kind: 'inbox_cancel',
+          requestId: msg.requestId
+        });
+      }
+    });
+
+    btnModeWasm.addEventListener('click', () => {
+      wasmStudioContainer.classList.remove('hidden');
+      btnModeWasm.classList.add('active');
+      btnModeClassic.classList.remove('active');
+    });
+
+    btnModeClassic.addEventListener('click', () => {
+      wasmStudioContainer.classList.add('hidden');
+      btnModeClassic.classList.add('active');
+      btnModeWasm.classList.remove('active');
+    });
+
+    btnModeNativeApp.addEventListener('click', () => {
+      vscode.postMessage({ command: 'openDesktopApp' });
+    });
+
+    async function bootNativeWasmEngine() {
+      if (!wasmJsUri || !wasmBgUri) {
+        wasmStudioContainer.classList.add('hidden');
+        btnModeClassic.classList.add('active');
+        btnModeWasm.classList.remove('active');
+        return;
+      }
+      try {
+        // 1. Pre-load system Korean font into FontDb before opening presentation so Hangul shapes & renders crisply
+        if (koreanFontUri) {
+          try {
+            const fontResp = await fetch(koreanFontUri);
+            if (fontResp.ok) {
+              const fontBuf = await fontResp.arrayBuffer();
+              window.__DECKCRAFT_QUEUE__.push({
+                kind: 'font',
+                data: new Uint8Array(fontBuf)
+              });
+            }
+          } catch (fontErr) {
+            console.warn('Optional system Korean font preload skipped:', fontErr);
+          }
+        }
+
+        // 2. Enqueue the active presentation file bytes for SlideApp
+        if (initialFileBase64) {
+          window.__DECKCRAFT_QUEUE__.push({
+            kind: 'open',
+            name: initialFileName,
+            path: initialFilePath,
+            data: base64ToUint8Array(initialFileBase64)
+          });
+        }
+
+        // 3. Dynamically import and initialize the compiled deckcraft-web WASM module
+        const mod = await import(wasmJsUri);
+        await mod.default({ module_or_path: wasmBgUri });
+      } catch (err) {
+        console.error('Failed to boot DeckCraft WASM engine, falling back to Classic UI:', err);
+        wasmStudioContainer.classList.add('hidden');
+        btnModeClassic.classList.add('active');
+        btnModeWasm.classList.remove('active');
+      }
+    }
+
+    bootNativeWasmEngine();
 
     function escapeHtml(text) {
       return (text || '')

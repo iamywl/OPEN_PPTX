@@ -2,6 +2,7 @@ node_modules/
 dist/
 out/
 bin/deckcraft-cli*
+bin/DeckCraft.app/
 bin/*.zip
 bin/temp*
 qa_output/

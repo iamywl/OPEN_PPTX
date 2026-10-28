@@ -1,5 +1,6 @@
 .vscode/**
 deckcraft_upstream/**
+bin/DeckCraft.app/**
 qa_output/**
 src/**
 scripts/**
