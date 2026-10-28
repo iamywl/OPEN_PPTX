@@ -33,6 +33,11 @@ This project adapts **DeckCraft**, an open-source presentation engine written in
    - Added zero-modal inline `contenteditable` typing directly on the slide with Korean IME support.
    - Implemented 8-point live resize handles and smooth mouse drag-and-drop repositioning.
    - Added empty canvas double-click to create text boxes, and full keyboard shortcuts (`Del`, arrows, `Cmd+B`, `Cmd+I`).
+7. **Engine-Based Functional Specification & Development Protocol**:
+   - Analyzed 120+ native DeckCraft Rust core CLI commands (`file.*`, `slide.*`, `shape.*`, `text.*`, `format.*`, `arrange.*`, `show.*`, etc.).
+   - Established `SPECIFICATION.md` as the single source of truth for feature scope, shortcut mappings, and implementation audit.
+   - Unified keyboard shortcut router resolving multi-listener conflicts (Presentation, Slide Management, WYSIWYG Canvas, Text Formatting).
+   - Structured three-tier roadmap: Tier 1 (Core Interactive & Shortcuts), Tier 2 (Design & Formatting), Tier 3 (Advanced Multimedia & Masters).
 
 ---
 

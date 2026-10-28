@@ -342,11 +342,20 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
               `slide.go=${JSON.stringify({ index })}`,
               `edit.select=${JSON.stringify({ ids: [shapeId] })}`,
             ];
-            if (message.bold) {
+            if (message.bold !== undefined) {
               commands.push('format.bold');
             }
-            if (message.italic) {
+            if (message.italic !== undefined) {
               commands.push('format.italic');
+            }
+            if (message.underline !== undefined) {
+              commands.push('format.underline');
+            }
+            if (message.grow) {
+              commands.push('format.grow');
+            }
+            if (message.shrink) {
+              commands.push('format.shrink');
             }
             if (message.size) {
               commands.push(`format.size=${JSON.stringify({ size: message.size })}`);
@@ -363,6 +372,76 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
             webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
           } catch (err: any) {
             vscode.window.showErrorMessage(`서식 변경 실패: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'duplicateShape': {
+          try {
+            const index = message.index ?? 0;
+            const shapeId = message.shapeId;
+            const goCmd = JSON.stringify({ index });
+            const dupCmd = JSON.stringify({ ids: [shapeId] });
+            await DeckcraftCli.runCommand(
+              [`slide.go=${goCmd}`, `edit.duplicate=${dupCmd}`],
+              this.context,
+              filePath,
+              filePath
+            );
+            const { info, slideUris } = await loadPresentationData();
+            info.slideShapes![index] = await DeckcraftCli.inspectSlide(filePath, index, this.context);
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
+            vscode.window.showInformationMessage(`도형 #${shapeId} 복제 완료`);
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`도형 복제 실패: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'arrangeShape': {
+          try {
+            const index = message.index ?? 0;
+            const shapeId = message.shapeId;
+            const action = message.action || 'bringToFront';
+            const goCmd = JSON.stringify({ index });
+            const arrCmd = JSON.stringify({ ids: [shapeId] });
+            await DeckcraftCli.runCommand(
+              [`slide.go=${goCmd}`, `arrange.${action}=${arrCmd}`],
+              this.context,
+              filePath,
+              filePath
+            );
+            const { info, slideUris } = await loadPresentationData();
+            info.slideShapes![index] = await DeckcraftCli.inspectSlide(filePath, index, this.context);
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`레이어 순서 변경 실패: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'undo': {
+          try {
+            await DeckcraftCli.runCommand(['edit.undo'], this.context, filePath, filePath);
+            const { info, slideUris } = await loadPresentationData();
+            const currIdx = message.index ?? 0;
+            info.slideShapes![currIdx] = await DeckcraftCli.inspectSlide(filePath, currIdx, this.context);
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: currIdx });
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`실행 취소 실패: ${err.message}`);
+          }
+          break;
+        }
+
+        case 'redo': {
+          try {
+            await DeckcraftCli.runCommand(['edit.redo'], this.context, filePath, filePath);
+            const { info, slideUris } = await loadPresentationData();
+            const currIdx = message.index ?? 0;
+            info.slideShapes![currIdx] = await DeckcraftCli.inspectSlide(filePath, currIdx, this.context);
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: currIdx });
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`다시 실행 실패: ${err.message}`);
           }
           break;
         }

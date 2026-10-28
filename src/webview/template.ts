@@ -1236,10 +1236,17 @@ export function getWebviewContent(
         const quickBar = document.createElement('div');
         quickBar.className = 'shape-quick-bar';
         quickBar.innerHTML = \`
-          <button class="btn-inline-edit" title="슬라이드 위에서 직접 수정">✏️ 직접 수정</button>
-          <button class="btn-quick-bold" title="굵게"><b>B</b></button>
-          <button class="btn-quick-modal" title="모달 창으로 편집">🪟 모달</button>
-          <button class="btn-del-shape" title="도형 삭제 (Del)">🗑️ 삭제</button>
+          <button class="btn-inline-edit" title="텍스트 직접 수정 (Enter)">✏️ 직접 수정</button>
+          <button class="btn-quick-bold" title="굵게 (Cmd+B)"><b>B</b></button>
+          <button class="btn-quick-italic" title="기울임 (Cmd+I)"><i>I</i></button>
+          <button class="btn-quick-underline" title="밑줄 (Cmd+U)"><u>U</u></button>
+          <button class="btn-quick-grow" title="글자 확대 (Cmd+])">A+</button>
+          <button class="btn-quick-shrink" title="글자 축소 (Cmd+[)">A-</button>
+          <button class="btn-quick-dup" title="도형 복제 (Cmd+D)">📋 복제</button>
+          <button class="btn-quick-front" title="맨 앞으로 가져오기">⬆️ 앞</button>
+          <button class="btn-quick-back" title="맨 뒤로 보내기">⬇️ 뒤</button>
+          <button class="btn-quick-modal" title="모달 편집">🪟</button>
+          <button class="btn-del-shape" title="도형 삭제 (Del)">🗑️</button>
         \`;
         el.appendChild(quickBar);
 
@@ -1267,6 +1274,41 @@ export function getWebviewContent(
         quickBar.querySelector('.btn-quick-bold').addEventListener('click', (e) => {
           e.stopPropagation();
           vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: shape.id, bold: true });
+        });
+
+        quickBar.querySelector('.btn-quick-italic').addEventListener('click', (e) => {
+          e.stopPropagation();
+          vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: shape.id, italic: true });
+        });
+
+        quickBar.querySelector('.btn-quick-underline').addEventListener('click', (e) => {
+          e.stopPropagation();
+          vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: shape.id, underline: true });
+        });
+
+        quickBar.querySelector('.btn-quick-grow').addEventListener('click', (e) => {
+          e.stopPropagation();
+          vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: shape.id, grow: true });
+        });
+
+        quickBar.querySelector('.btn-quick-shrink').addEventListener('click', (e) => {
+          e.stopPropagation();
+          vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: shape.id, shrink: true });
+        });
+
+        quickBar.querySelector('.btn-quick-dup').addEventListener('click', (e) => {
+          e.stopPropagation();
+          vscode.postMessage({ command: 'duplicateShape', index: currentIndex, shapeId: shape.id });
+        });
+
+        quickBar.querySelector('.btn-quick-front').addEventListener('click', (e) => {
+          e.stopPropagation();
+          vscode.postMessage({ command: 'arrangeShape', index: currentIndex, shapeId: shape.id, action: 'bringToFront' });
+        });
+
+        quickBar.querySelector('.btn-quick-back').addEventListener('click', (e) => {
+          e.stopPropagation();
+          vscode.postMessage({ command: 'arrangeShape', index: currentIndex, shapeId: shape.id, action: 'sendToBack' });
         });
 
         quickBar.querySelector('.btn-quick-modal').addEventListener('click', (e) => {
@@ -1477,61 +1519,234 @@ export function getWebviewContent(
       });
     });
 
-    // Keyboard shortcuts: Delete, Arrows, Cmd+B, Cmd+I
+    // UNIFIED MASTER KEYBOARD SHORTCUT ROUTER
     window.addEventListener('keydown', (e) => {
+      // 1. Guard against active text inputs and open modals
       if (isEditingText) return;
+      if (document.querySelector('.modal-backdrop.open')) return;
       const isInput = ['INPUT', 'TEXTAREA'].includes(document.activeElement?.tagName || '');
       if (isInput) return;
 
-      if ((e.key === 'Delete' || e.key === 'Backspace') && selectedShape) {
-        e.preventDefault();
-        vscode.postMessage({
-          command: 'deleteShape',
-          index: currentIndex,
-          shapeId: selectedShape.id,
-        });
-        selectedShape = null;
-      } else if (e.key.startsWith('Arrow') && selectedShape) {
-        e.preventDefault();
-        const step = e.shiftKey ? 10 : (e.altKey ? 1 : 3);
-        const [sx, sy, sw, sh] = selectedShape.box;
-        let nx = sx;
-        let ny = sy;
-        if (e.key === 'ArrowLeft') nx = Math.max(0, sx - step);
-        if (e.key === 'ArrowRight') nx = Math.min(baseW - sw, sx + step);
-        if (e.key === 'ArrowUp') ny = Math.max(0, sy - step);
-        if (e.key === 'ArrowDown') ny = Math.min(baseH - sh, sy + step);
+      const isMac = navigator.platform.toUpperCase().indexOf('MAC') >= 0;
+      const mod = isMac ? e.metaKey : e.ctrlKey;
 
-        selectedShape.box = [nx, ny, sw, sh];
-        renderShapeOverlays();
-        vscode.postMessage({
-          command: 'moveShape',
-          index: currentIndex,
-          shapeId: selectedShape.id,
-          x: nx,
-          y: ny,
-          w: sw,
-          h: sh,
-        });
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'b' && selectedShape) {
+      // 2. Fullscreen Presentation Mode shortcuts
+      const isPresenting = presentOverlay.classList.contains('active');
+      if (isPresenting) {
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          exitPresentation();
+        } else if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown' || e.key === 'Enter') {
+          e.preventDefault();
+          if (currentIndex < slidesData.length - 1) updateSlide(currentIndex + 1);
+        } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') {
+          e.preventDefault();
+          if (currentIndex > 0) updateSlide(currentIndex - 1);
+        } else if (e.key === 'Home') {
+          e.preventDefault();
+          updateSlide(0);
+        } else if (e.key === 'End') {
+          e.preventDefault();
+          updateSlide(slidesData.length - 1);
+        } else if (e.key.toLowerCase() === 'b') {
+          e.preventDefault();
+          presentImg.style.visibility = presentImg.style.visibility === 'hidden' ? 'visible' : 'hidden';
+        } else if (e.key.toLowerCase() === 'w') {
+          e.preventDefault();
+          presentOverlay.style.background = presentOverlay.style.background === 'white' ? '#000000' : 'white';
+        }
+        return;
+      }
+
+      // 3. Presentation Launch (F5 / Cmd+Enter)
+      if (e.key === 'F5' || (mod && e.key === 'Enter')) {
         e.preventDefault();
-        vscode.postMessage({
-          command: 'formatShape',
-          index: currentIndex,
-          shapeId: selectedShape.id,
-          bold: true,
-        });
-      } else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'i' && selectedShape) {
+        startPresentation();
+        return;
+      }
+
+      // 4. Undo / Redo
+      if (mod && e.key.toLowerCase() === 'z') {
         e.preventDefault();
-        vscode.postMessage({
-          command: 'formatShape',
-          index: currentIndex,
-          shapeId: selectedShape.id,
-          italic: true,
-        });
-      } else if (e.key === 'Escape') {
-        document.querySelectorAll('.shape-box-overlay').forEach((o) => o.classList.remove('selected'));
-        selectedShape = null;
+        if (e.shiftKey) {
+          vscode.postMessage({ command: 'redo', index: currentIndex });
+        } else {
+          vscode.postMessage({ command: 'undo', index: currentIndex });
+        }
+        return;
+      }
+      if (mod && e.key.toLowerCase() === 'y') {
+        e.preventDefault();
+        vscode.postMessage({ command: 'redo', index: currentIndex });
+        return;
+      }
+
+      // 5. Slide Management: Cmd+M (New Slide)
+      if (mod && e.key.toLowerCase() === 'm') {
+        e.preventDefault();
+        openModal('modalNewSlide');
+        return;
+      }
+
+      // 6. Duplicate (Cmd+D): Shape if selected, else Slide!
+      if (mod && e.key.toLowerCase() === 'd') {
+        e.preventDefault();
+        if (selectedShape) {
+          vscode.postMessage({
+            command: 'duplicateShape',
+            index: currentIndex,
+            shapeId: selectedShape.id,
+          });
+        } else {
+          vscode.postMessage({
+            command: 'duplicateSlide',
+            index: currentIndex,
+          });
+        }
+        return;
+      }
+
+      // 7. Select All (Cmd+A)
+      if (mod && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        const shapes = shapesCache[currentIndex] || [];
+        if (shapes.length > 0) {
+          const firstEl = shapeOverlayLayer.querySelector(\`[data-id="\${shapes[0].id}"]\`);
+          if (firstEl) selectShape(shapes[0], firstEl);
+        }
+        return;
+      }
+
+      // 8. Shape-Specific Shortcuts (when a shape is selected)
+      if (selectedShape) {
+        if (e.key === 'Delete' || e.key === 'Backspace') {
+          e.preventDefault();
+          vscode.postMessage({
+            command: 'deleteShape',
+            index: currentIndex,
+            shapeId: selectedShape.id,
+          });
+          selectedShape = null;
+          return;
+        }
+
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          const el = shapeOverlayLayer.querySelector(\`[data-id="\${selectedShape.id}"]\`);
+          if (el) startInlineEdit(selectedShape, el);
+          return;
+        }
+
+        if (e.key.startsWith('Arrow')) {
+          e.preventDefault();
+          const step = e.shiftKey ? 10 : (e.altKey ? 1 : 2);
+          const [sx, sy, sw, sh] = selectedShape.box;
+          let nx = sx;
+          let ny = sy;
+          if (e.key === 'ArrowLeft') nx = Math.max(0, sx - step);
+          if (e.key === 'ArrowRight') nx = Math.min(baseW - sw, sx + step);
+          if (e.key === 'ArrowUp') ny = Math.max(0, sy - step);
+          if (e.key === 'ArrowDown') ny = Math.min(baseH - sh, sy + step);
+
+          selectedShape.box = [nx, ny, sw, sh];
+          renderShapeOverlays();
+          vscode.postMessage({
+            command: 'moveShape',
+            index: currentIndex,
+            shapeId: selectedShape.id,
+            x: nx,
+            y: ny,
+            w: sw,
+            h: sh,
+          });
+          return;
+        }
+
+        // Formatting
+        if (mod && e.key.toLowerCase() === 'b') {
+          e.preventDefault();
+          vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: selectedShape.id, bold: true });
+          return;
+        }
+        if (mod && e.key.toLowerCase() === 'i') {
+          e.preventDefault();
+          vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: selectedShape.id, italic: true });
+          return;
+        }
+        if (mod && e.key.toLowerCase() === 'u') {
+          e.preventDefault();
+          vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: selectedShape.id, underline: true });
+          return;
+        }
+        if (mod && (e.key === ']' || (e.shiftKey && e.key === '>'))) {
+          e.preventDefault();
+          vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: selectedShape.id, grow: true });
+          return;
+        }
+        if (mod && (e.key === '[' || (e.shiftKey && e.key === '<'))) {
+          e.preventDefault();
+          vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: selectedShape.id, shrink: true });
+          return;
+        }
+        if (mod && e.shiftKey && (e.key === '}' || e.key === ']')) {
+          e.preventDefault();
+          vscode.postMessage({ command: 'arrangeShape', index: currentIndex, shapeId: selectedShape.id, action: 'bringToFront' });
+          return;
+        }
+        if (mod && e.shiftKey && (e.key === '{' || e.key === '[')) {
+          e.preventDefault();
+          vscode.postMessage({ command: 'arrangeShape', index: currentIndex, shapeId: selectedShape.id, action: 'sendToBack' });
+          return;
+        }
+
+        if (e.key === 'Escape') {
+          e.preventDefault();
+          document.querySelectorAll('.shape-box-overlay').forEach((o) => o.classList.remove('selected'));
+          selectedShape = null;
+          return;
+        }
+      }
+
+      // 9. Slide Reorder Shortcuts (Alt/Option + Up/Down)
+      if (e.altKey && e.key === 'ArrowUp') {
+        e.preventDefault();
+        if (currentIndex > 0) {
+          vscode.postMessage({ command: 'moveSlide', from: currentIndex, to: currentIndex - 1 });
+        }
+        return;
+      }
+      if (e.altKey && e.key === 'ArrowDown') {
+        e.preventDefault();
+        if (currentIndex < slidesData.length - 1) {
+          vscode.postMessage({ command: 'moveSlide', from: currentIndex, to: currentIndex + 1 });
+        }
+        return;
+      }
+
+      // 10. General Slide Navigation (when no shape is selected)
+      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
+        e.preventDefault();
+        if (currentIndex < slidesData.length - 1) {
+          updateSlide(currentIndex + 1);
+        }
+        return;
+      }
+      if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+        e.preventDefault();
+        if (currentIndex > 0) {
+          updateSlide(currentIndex - 1);
+        }
+        return;
+      }
+      if (e.key === 'Home') {
+        e.preventDefault();
+        updateSlide(0);
+        return;
+      }
+      if (e.key === 'End') {
+        e.preventDefault();
+        updateSlide(slidesData.length - 1);
+        return;
       }
     });
 
@@ -1797,30 +2012,6 @@ export function getWebviewContent(
         updateSlide(currentIndex + 1);
       } else {
         exitPresentation();
-      }
-    });
-
-    // Keyboard navigation
-    window.addEventListener('keydown', (e) => {
-      if (document.querySelector('.modal-backdrop.open')) return;
-      if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA')) return;
-
-      if (e.key === 'ArrowRight' || e.key === ' ' || e.key === 'PageDown') {
-        if (currentIndex < slidesData.length - 1) {
-          updateSlide(currentIndex + 1);
-        }
-      } else if (e.key === 'ArrowLeft' || e.key === 'PageUp' || e.key === 'Backspace') {
-        if (currentIndex > 0) {
-          updateSlide(currentIndex - 1);
-        }
-      } else if (e.key === 'F5' || (e.metaKey && e.key === 'Enter')) {
-        startPresentation();
-      } else if (e.key === 'Escape') {
-        exitPresentation();
-      } else if (e.key === 'Home') {
-        updateSlide(0);
-      } else if (e.key === 'End') {
-        updateSlide(slidesData.length - 1);
       }
     });
 
