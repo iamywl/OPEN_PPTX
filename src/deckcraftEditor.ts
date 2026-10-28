@@ -6,6 +6,7 @@ import { exec } from 'child_process';
 import { promisify } from 'util';
 import { DeckcraftCli, DeckCraftInfo, DeckCraftShape } from './deckcraftCli';
 import { getWebviewContent } from './webview/template';
+import { PlatformHelper } from './platformHelper';
 
 const execAsync = promisify(exec);
 
@@ -616,6 +617,23 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
           }
           break;
         }
+
+        // --- UNIVERSAL 327 ENGINE COMMAND DISPATCHER ---
+        case 'runEngineCommand': {
+          try {
+            const cmdId = message.cmdId;
+            const params = message.params ? `=${JSON.stringify(message.params)}` : '';
+            const index = message.index ?? 0;
+            const commands = [`slide.go=${JSON.stringify({ index })}`, `${cmdId}${params}`];
+            await DeckcraftCli.runCommand(commands, this.context, filePath, filePath);
+            const { info, slideUris } = await loadPresentationData();
+            info.slideShapes![index] = await DeckcraftCli.inspectSlide(filePath, index, this.context);
+            webview.postMessage({ type: 'updateData', info, slideUris, targetIndex: index });
+          } catch (err: any) {
+            vscode.window.showErrorMessage(`엔진 명령 실행 실패 (${message.cmdId}): ${err.message}`);
+          }
+          break;
+        }
       }
     });
 
@@ -637,8 +655,14 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
     if (process.platform === 'darwin' && fs.existsSync(pptApp)) {
       await execAsync(`open -a "${pptApp}" "${documentUri.fsPath}"`);
       vscode.window.showInformationMessage('Microsoft PowerPoint에서 프레젠테이션을 열었습니다.');
-    } else {
+    } else if (process.platform === 'win32') {
+      await execAsync(`cmd /c start "" "${documentUri.fsPath}"`);
+      vscode.window.showInformationMessage('Microsoft PowerPoint / 기본 앱에서 프레젠테이션을 열었습니다.');
+    } else if (process.platform === 'darwin') {
       await execAsync(`open "${documentUri.fsPath}"`);
+      vscode.window.showInformationMessage('기본 프레젠테이션 앱에서 열었습니다.');
+    } else {
+      await execAsync(`xdg-open "${documentUri.fsPath}"`);
       vscode.window.showInformationMessage('기본 프레젠테이션 앱에서 열었습니다.');
     }
   }
@@ -726,38 +750,31 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
 
   private async openInDesktopApp(documentUri: vscode.Uri): Promise<void> {
     const config = vscode.workspace.getConfiguration('deckcraft');
+    const platformConfig = PlatformHelper.getPlatformConfig();
     const bundledGlassApp = path.join(this.context.extensionUri.fsPath, 'bin', 'DeckCraft.app');
     const userGlassApp = path.join(process.env.HOME || '', 'Applications', 'DeckCraft.app');
     const configuredApp = config.get<string>('desktopAppPath');
     const customAppPath =
-      (configuredApp && configuredApp !== '/Applications/DeckCraft.app' && fs.existsSync(configuredApp)
+      configuredApp && configuredApp !== '/Applications/DeckCraft.app' && fs.existsSync(configuredApp)
         ? configuredApp
-        : fs.existsSync(bundledGlassApp)
+        : process.platform === 'darwin' && fs.existsSync(bundledGlassApp)
         ? bundledGlassApp
-        : fs.existsSync(userGlassApp)
+        : process.platform === 'darwin' && fs.existsSync(userGlassApp)
         ? userGlassApp
-        : '/Applications/DeckCraft.app');
+        : platformConfig.desktopAppDefaultPath;
 
-    if (process.platform === 'darwin') {
-      if (fs.existsSync(customAppPath)) {
-        await execAsync(`open -a "${customAppPath}" "${documentUri.fsPath}"`);
-        vscode.window.showInformationMessage(`Opening in DeckCraft desktop app...`);
-      } else {
-        const downloadAction = 'Download DeckCraft for Mac';
-        const choice = await vscode.window.showWarningMessage(
-          `DeckCraft.app not found at ${customAppPath}. Would you like to download it?`,
-          downloadAction
-        );
-        if (choice === downloadAction) {
-          vscode.env.openExternal(
-            vscode.Uri.parse('https://github.com/storytold/deckcraft/releases/latest')
-          );
-        }
-      }
+    if (fs.existsSync(customAppPath)) {
+      await PlatformHelper.openNativeApp(customAppPath, documentUri.fsPath);
+      vscode.window.showInformationMessage(`Opening in DeckCraft native desktop app (${platformConfig.os})...`);
     } else {
-      vscode.window.showInformationMessage(
-        'Desktop app opening is currently configured for macOS. Check settings for custom paths.'
+      const downloadAction = `Download DeckCraft for ${platformConfig.os}`;
+      const choice = await vscode.window.showWarningMessage(
+        `DeckCraft desktop app not found at ${customAppPath}. Would you like to download it?`,
+        downloadAction
       );
+      if (choice === downloadAction) {
+        vscode.env.openExternal(vscode.Uri.parse(platformConfig.desktopAppDownloadUrl));
+      }
     }
   }
 

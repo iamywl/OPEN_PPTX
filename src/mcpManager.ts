@@ -9,10 +9,10 @@ export class McpManager {
     const cliPath = await DeckcraftCli.getExecutablePath(context);
     const workspaceRoot = vscode.workspace.workspaceFolders?.[0]?.uri.fsPath || process.cwd();
 
-    let cmd = `"${cliPath}" mcp --automation-read-root "${workspaceRoot}" --automation-write-root "${workspaceRoot}"`;
-    if (controlPort) {
-      cmd += ` --connect ${controlPort}`;
-    }
+    // Per docs/mcp.md: --connect cannot be combined with --automation-read/write-root
+    const cmd = controlPort
+      ? `"${cliPath}" mcp --connect ${controlPort}`
+      : `"${cliPath}" mcp --automation-read-root "${workspaceRoot}" --automation-write-root "${workspaceRoot}"`;
 
     if (this.mcpTerminal) {
       this.mcpTerminal.dispose();

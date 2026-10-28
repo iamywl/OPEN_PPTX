@@ -3,6 +3,7 @@ import * as path from 'path';
 import * as fs from 'fs';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { PlatformHelper } from './platformHelper';
 
 const execAsync = promisify(exec);
 
@@ -69,18 +70,22 @@ export class DeckcraftCli {
       return userConfiguredPath;
     }
 
-    // 1. Check extension bundled binary (bin/deckcraft-cli)
-    const bundledPath = path.join(context.extensionPath, 'bin', 'deckcraft-cli');
+    const platformConfig = PlatformHelper.getPlatformConfig();
+    const binName = platformConfig.cliBinaryName;
+
+    // 1. Check extension bundled binary (bin/deckcraft-cli or bin/deckcraft-cli.exe)
+    const bundledPath = path.join(context.extensionPath, 'bin', binName);
     if (fs.existsSync(bundledPath)) {
       await this.ensureExecutable(bundledPath);
       this.cachedCliPath = bundledPath;
       return bundledPath;
     }
 
-    // 2. Check system PATH
+    // 2. Check system PATH (cross-platform: 'where' on Windows, 'which' on macOS/Linux)
     try {
-      const { stdout } = await execAsync('which deckcraft-cli');
-      const systemPath = stdout.trim();
+      const locateCmd = process.platform === 'win32' ? `where ${binName}` : `which ${binName}`;
+      const { stdout } = await execAsync(locateCmd);
+      const systemPath = stdout.split(/\r?\n/)[0].trim();
       if (systemPath && fs.existsSync(systemPath)) {
         this.cachedCliPath = systemPath;
         return systemPath;
@@ -89,12 +94,20 @@ export class DeckcraftCli {
       // not in system PATH
     }
 
-    // 3. Check common macOS paths
-    const commonPaths = [
-      '/usr/local/bin/deckcraft-cli',
-      path.join(process.env.HOME || '', '.local/bin/deckcraft-cli'),
-      path.join(process.env.HOME || '', '.cargo/bin/deckcraft-cli'),
-    ];
+    // 3. Check common OS-specific paths (macOS, Windows, Linux)
+    const commonPaths =
+      process.platform === 'win32'
+        ? [
+            path.join(process.env.LOCALAPPDATA || 'C:\\Program Files', 'DeckCraft', binName),
+            path.join('C:\\Program Files', 'DeckCraft', binName),
+            path.join(process.env.USERPROFILE || '', '.cargo', 'bin', binName),
+          ]
+        : [
+            '/usr/local/bin/deckcraft-cli',
+            '/opt/homebrew/bin/deckcraft-cli',
+            path.join(process.env.HOME || '', '.local/bin/deckcraft-cli'),
+            path.join(process.env.HOME || '', '.cargo/bin/deckcraft-cli'),
+          ];
 
     for (const p of commonPaths) {
       if (fs.existsSync(p)) {
@@ -104,7 +117,7 @@ export class DeckcraftCli {
     }
 
     throw new Error(
-      'DeckCraft CLI executable not found. Please install or download deckcraft-cli for macOS.'
+      `DeckCraft CLI executable (${binName}) not found for ${platformConfig.os}-${platformConfig.arch}.`
     );
   }
 
@@ -229,43 +242,60 @@ export class DeckcraftCli {
   }
 
   public static async downloadBinary(context: vscode.ExtensionContext): Promise<string> {
+    const platformConfig = PlatformHelper.getPlatformConfig();
     const binDir = path.join(context.extensionPath, 'bin');
     fs.mkdirSync(binDir, { recursive: true });
-    const targetBinary = path.join(binDir, 'deckcraft-cli');
+    const targetBinary = path.join(binDir, platformConfig.cliBinaryName);
 
-    const downloadUrl =
-      'https://github.com/storytold/deckcraft/releases/download/v0.11.1/deckcraft-cli-0.11.1-macos-universal.zip';
-
-    const tempZip = path.join(binDir, 'temp_cli.zip');
+    const downloadUrl = platformConfig.downloadArchiveUrl;
+    const isTarGz = downloadUrl.endsWith('.tar.gz');
+    const tempArchive = path.join(binDir, isTarGz ? 'temp_cli.tar.gz' : 'temp_cli.zip');
 
     await vscode.window.withProgress(
       {
         location: vscode.ProgressLocation.Notification,
-        title: 'Downloading DeckCraft Universal CLI for macOS...',
+        title: `Downloading DeckCraft CLI for ${platformConfig.os} (${platformConfig.arch})...`,
         cancellable: false,
       },
       async (progress) => {
-        progress.report({ message: 'Fetching zip archive from GitHub...' });
-        await execAsync(`curl -L -o "${tempZip}" "${downloadUrl}"`);
+        progress.report({ message: 'Fetching release archive from GitHub...' });
+        await execAsync(`curl -L -o "${tempArchive}" "${downloadUrl}"`);
 
-        progress.report({ message: 'Extracting deckcraft-cli executable...' });
+        progress.report({ message: `Extracting ${platformConfig.cliBinaryName}...` });
         const tempExtractDir = path.join(binDir, 'temp_extract');
         fs.mkdirSync(tempExtractDir, { recursive: true });
-        await execAsync(`unzip -q -o "${tempZip}" -d "${tempExtractDir}"`);
 
-        const extractedBin = path.join(
-          tempExtractDir,
-          'deckcraft-cli-0.11.1-macos-universal',
-          'deckcraft-cli'
-        );
+        if (process.platform === 'win32') {
+          await execAsync(
+            `powershell -Command "Expand-Archive -Force '${tempArchive}' '${tempExtractDir}'"`
+          );
+        } else if (isTarGz) {
+          await execAsync(`tar -xzf "${tempArchive}" -C "${tempExtractDir}"`);
+        } else {
+          await execAsync(`unzip -q -o "${tempArchive}" -d "${tempExtractDir}"`);
+        }
 
-        if (fs.existsSync(extractedBin)) {
+        const findBinaryRecursive = (dir: string): string | null => {
+          for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+            const full = path.join(dir, entry.name);
+            if (entry.isDirectory()) {
+              const found = findBinaryRecursive(full);
+              if (found) return found;
+            } else if (entry.name === platformConfig.cliBinaryName) {
+              return full;
+            }
+          }
+          return null;
+        };
+
+        const extractedBin = findBinaryRecursive(tempExtractDir);
+        if (extractedBin && fs.existsSync(extractedBin)) {
           fs.copyFileSync(extractedBin, targetBinary);
           await this.ensureExecutable(targetBinary);
         }
 
         try {
-          fs.unlinkSync(tempZip);
+          fs.unlinkSync(tempArchive);
           fs.rmSync(tempExtractDir, { recursive: true, force: true });
         } catch {
           // ignore

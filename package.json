@@ -44,6 +44,12 @@
             "filenamePattern": "*.deckcraft"
           },
           {
+            "filenamePattern": "*.potx"
+          },
+          {
+            "filenamePattern": "*.ppsx"
+          },
+          {
             "filenamePattern": "*.ppt"
           }
         ],
@@ -78,7 +84,7 @@
       },
       {
         "command": "deckcraft.openDesktopApp",
-        "title": "DeckCraft: Open in macOS Desktop App",
+        "title": "DeckCraft: Open in Native Desktop App (macOS / Windows / Linux)",
         "category": "DeckCraft"
       },
       {

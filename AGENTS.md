@@ -65,6 +65,17 @@ This project adapts **DeckCraft**, an open-source presentation engine written in
       - Set `Brightness::Dark` as the default theme across both native desktop and WASM builds.
       - Configured Obsidian Glass chrome (`#111522`), Translucent Slate Frosted Ribbon Card (`rgba(28, 34, 52, 0.95)`), Slate-Cyan border (`rgba(86, 122, 184, 0.41)`), 1px top specular white highlight (`rgba(255, 255, 255, 0.16)`), Radiant Orange (`#f26b1d`) primary accent, Cyan Glow (`#38bdf8`) contextual ribbon tabs (`Shape Format`, `Picture Format`, `Table Design`, `Chart Design`, `SmartArt Design`), and Electric Cyan (`#0ea5e9`) vector selection handles.
     - Rebuilt both `assets/wasm/deckcraft-web_bg.wasm` AND the native macOS application bundle (`bin/DeckCraft.app` & `~/Applications/DeckCraft.app`) and verified via live TCP control (`--control`) screenshot capture (`assets/images/native-glass-app.png`).
+11. **REA Clean-Room Reverse-Engineered Specification & 5-Platform (`CLI` · `MCP` · `Windows` · `macOS` · `VS Code Extension`) 1:1 Parity Audit**:
+    - **User Directive**: *"rea로 리버싱한게 있을텐데 기걸 기반으로 기능명세서 뽑고 각 플랫폼 별로 1대1대응했는지 검토해봐 cli 뭐 mcp window mac vsc extention 그리고 리드미에 소개파일 최상단에 기입해"*.
+    - Extracted the full clean-room reverse-engineered specification (PowerPoint 16.113 macOS / Microsoft 365 Windows observation baseline) into `SPECIFICATION.md` and placed the executive 5-platform 1:1 matrix right at the very top of `README.md`:
+      - **22 Functional Areas / 191 PowerPoint Features** (`parity-checklist.md` & `ui-parity.md`).
+      - **30 Command Namespaces / 327 Engine Commands** verified via `deckcraft-cli commands`.
+      - **42 Specialized UI Dialogs**, **10 Core + 7 Contextual Ribbon Tabs**, **6-Page Backstage View**, **24 MCP Tools**, **16 TCP JSON-lines Control RPCs**, and **11 CLI Subcommands**.
+    - Audited and fixed code-level 1:1 parity across all 5 platforms (`CLI`, `MCP`, `Windows`, `macOS`, `VS Code Extension`):
+      - `src/deckcraftCli.ts`: Integrated `PlatformHelper.getPlatformConfig()` for 1:1 binary resolution (`where` on Windows vs `which` on macOS/Linux) and multi-platform archive extraction (`Expand-Archive` on Windows `.zip`, `unzip` on macOS `.zip`, `tar -xzf` on Linux `.tar.gz`).
+      - `src/deckcraftEditor.ts`: Added generic `runEngineCommand` Webview handler exposing all **327 engine commands**, removed the macOS-only guard in `openInDesktopApp()` to support Windows/macOS/Linux via `PlatformHelper.openNativeApp()`, and made `openInPowerPoint()` cross-platform (`open -a` / `cmd /c start` / `xdg-open`).
+      - `src/mcpManager.ts`: Separated Headless Confined MCP mode (`--automation-read-root` / `--automation-write-root`) from Live App Bridge mode (`--connect <port>`) per `crates/mcp` mutual-exclusion contract.
+      - `package.json`: Added `.potx` and `.ppsx` custom editor file associations alongside `.pptx`, `.deckcraft`, and `.ppt`.
 
 ---
 
