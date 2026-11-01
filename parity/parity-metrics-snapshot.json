@@ -13,6 +13,14 @@
         "P1": 2,
         "P2": 1
       }
+    },
+    "reports": {
+      "layoutPrecisionGapReport": "LAYOUT_PRECISION_GAP_REPORT.md",
+      "layoutPrecisionScore": {
+        "nativeWasm": 46.5,
+        "htmlWebview": 9.3,
+        "checkedItems": 42
+      }
     }
   },
   "kpis": {

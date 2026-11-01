@@ -394,6 +394,11 @@ function main() {
   mdLines.push('7. **비활성화된 리본 버튼 6종**: `Screenshot`, `Ink to Text`, `Ink to Math`, `Record`, `Cameo`, `Translate` 6개 버튼이 UI에는 그려져 있으나 클릭 시 동작하지 않도록(`enabled=false`) 막혀 있습니다.');
   mdLines.push('8. **파일 저장 시 조용한 속성 유실 (#74, #77)**: 구형 `.ppt`(97–2003)·`.odp`·암호화 파일 미지원 외에도, 기존 `.pptx`를 열어 저장할 때 미디어 재생 옵션(#74)과 애니메이션 되감기 플래그(#77)가 저장 시 유실되는 버그가 존재합니다.');
   mdLines.push('');
+  mdLines.push('> [!IMPORTANT]');
+  mdLines.push('> **📖 [별도 심층 보고서 발간] 서식 복사 · 글자 위치 · 개체 정렬 · 그림 자르기 정밀 감사**:');
+  mdLines.push('> 사용자의 정밀 감사 지시에 따라 작성된 **[`LAYOUT_PRECISION_GAP_REPORT.md`](./LAYOUT_PRECISION_GAP_REPORT.md)**에서 4대 핵심 영역(서식 복사, 텍스트 상자 배치, 개체 맞춤/스마트가이드, 사진 자르기)의 42개 세부 기능 및 코드 레벨 결함(`painter.rs`, `paragraph.rs`, `geometry.rs`, `picture_format.rs`)을 1:1로 엄밀히 실측하였습니다.');
+  mdLines.push('> **실측 정밀도 성숙도**: Native/WASM **46.5%**, HTML Webview **9.3%**.');
+  mdLines.push('');
   mdLines.push('---');
   mdLines.push('');
   mdLines.push('## 1. 핵심 관리 지표 총괄 스코어카드 (Executive KPI Scorecard)');
@@ -428,6 +433,9 @@ function main() {
   );
   mdLines.push(
     `| **KPI-6** | **엔진 커맨드 & AI(MCP/CLI) 자동화 패리티** | **${engineCmdStats.total}개 명령** | **${engineCmdStats.total}개** (30개 네임스페이스) | 0개 | 0개 | **100.0%** | **100.0%** (MCP 24툴) |`
+  );
+  mdLines.push(
+    `| **KPI-7** | **레이아웃 & 서식 정밀도 (Layout Precision — [\`보고서\`](./LAYOUT_PRECISION_GAP_REPORT.md))** | **42개 정밀 항목** | **19.5개** (46.4%) | **14개** (33.3%) | **8.5개** (20.2%) | **46.4%** | **Native 46.5% / HTML 9.3%** |`
   );
   mdLines.push('');
   mdLines.push('### 우선순위 등급별 기능 달성 현황 (`P0` 필수 · `P1` 주요 · `P2` 확장)');

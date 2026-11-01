@@ -93,6 +93,15 @@ This project adapts **DeckCraft**, an open-source presentation engine written in
       - **Runtime Disparity (WASM 75.8% vs HTML 26.1%)**: Explicitly documented that the HTML Webview fallback lacks 43 of 67 UI blocks (no animation/review/draw tabs, no format/selection panes, no contextual tabs), explaining why users experience a massive downgrade if viewing HTML mode.
       - **The 8 Concrete Technical Gaps**: Documented the real barriers—no Excel integration (plain text grid that deletes embedded workbooks on save #335), equation dialog being a 41-line string substitution instead of OMML, font engine locking out non-Regular/Bold weights (#69), English-only UI, 6 disabled ribbon buttons, no SVG insert, no dual-monitor presenter view, and silent drop of media/rewind settings on PPTX roundtrip (#74, #77).
       - Synced this reality check into `README.md`, `PARITY_TRACKER.md`, `SPECIFICATION.md`, and `parity/powerpoint-parity.json`.
+14. **Layout Precision & Formatting Gap Audit (Format Painter · Text Placement · Object Alignment · Picture Crop)**:
+    - **User Directive**: *"파워포인트의 서식복사 글자위치 정렬 그림정렬 이런기능들 실제로 엄밀히 판단해 별도의 보고서로 작성해서 부족함을 명시해서 관리해"*.
+    - Published dedicated standalone report [`LAYOUT_PRECISION_GAP_REPORT.md`](./LAYOUT_PRECISION_GAP_REPORT.md) containing 42 granular precision tests across 4 key functional areas:
+      - **서식 복사 (Format Painter)**: Analyzed `crates/engine/src/cmd/format/painter.rs`. Discovered `painted.para` is completely omitted (`None`) on shape pick, and `TextBodyProps` (anchor, insets, wrap, autofit, columns) are absent from `Painted` struct. Paintbrush cursor missing (`CursorIcon::Copy` used). HTML Webview 0% support.
+      - **글자 위치 / 텍스트 정렬 (Text Placement & Alignment)**: Analyzed `crates/engine/src/cmd/format/paragraph.rs`. Discovered vertical anchor quick buttons missing from Home ribbon (isolated in Format Shape panel), CJK vertical writing (`TextDir::Stacked`) baseline/tate-chu-yoko flaws, and "At Least" line spacing missing.
+      - **개체 정렬 & 스마트 가이드 (Object Alignment & Smart Guides)**: Analyzed `crates/engine/src/cmd/arrange.rs` and `crates/engine/src/tools/geometry.rs`. Discovered `arrange.distribute` forcefully reverts to slide bounds when <3 shapes selected without user consent. Discovered `snap_edges` only checks edge/center coords—**0% implementation of Equal Spacing Smart Guides (equidistant red brackets)**.
+      - **그림 정렬 & 자르기 (Picture Crop & Framing)**: Analyzed `crates/ui-egui/src/ribbon/picture_format.rs`. Discovered **zero interactive canvas crop handles/mode**, ribbon literally only has 3 hardcoded buttons ("10% each side", "20% each side", "Reset"), `Crop to Shape` distorts aspect ratio, and Aspect Ratio presets & Fill/Fit commands are completely missing.
+      - **KPI Metrics Established**: Weighted Precision Score: Native/WASM **46.5%**, HTML Webview **9.3%**. Established 4-phase remediation roadmap (105 Agent Hours).
+      - Synced into `PARITY_TRACKER.md` (KPI-7), `SPECIFICATION.md`, `README.md`, and `parity/powerpoint-parity.json`.
 
 ---
 

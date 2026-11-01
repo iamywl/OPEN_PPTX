@@ -23,6 +23,7 @@
 
 > ⚠️ **솔직한 현실 공지 (No Exaggeration Policy)**:  
 > 체크리스트 상의 "기능 이름 존재율(Breadth)"은 **83.9%**이지만, 실제 직장인이 Microsoft PowerPoint 대신 업무에 즉시 투입할 수 있는 **"실무 체감 깊이(Ready for real work)"는 현재 ~53~55% (Alpha 단계)**입니다.  
+> 🔍 **레이아웃 & 서식 정밀도 격차 감사 보고서**: **[`LAYOUT_PRECISION_GAP_REPORT.md`](./LAYOUT_PRECISION_GAP_REPORT.md)** (서식복사 · 글자위치 · 개체정렬 · 사진자르기 **정밀도 성숙도 Native 46.5% / HTML 9.3%**, 42개 항목 전수 실측)  
 > 📈 **심층 추적관리 대시보드**: **[`PARITY_TRACKER.md`](./PARITY_TRACKER.md)** (`npm run parity:audit` 자동 검증)  
 > 📖 **엔진 커맨드 명세서**: **[`SPECIFICATION.md`](./SPECIFICATION.md)** (327개 엔진 커맨드 · 24개 MCP 툴 전수 규격)
 
@@ -53,6 +54,7 @@
 | **KPI-4** | **파일 포맷 & 내장 미디어 호환성** | **22종 포맷군** | **9종** (40.9%) | **6종** (27.3%) | **7종** (31.8%) | **40.9%** | **54.5%** |
 | **KPI-5** | **실무 전환 종합 준비도 (Readiness Index)** | **10대 차원** | Alpha 6/6 통과 | **14개 Beta Blocker** | 클라우드/VBA 제외 | — | **55.3%** (Beta 목표 75%) |
 | **KPI-6** | **엔진 커맨드 & AI(MCP/CLI) 스크립팅 패리티** | **327개 명령** | **327개** | 0개 | 0개 | **100.0%** | **100.0%** (MCP 24툴) |
+| **KPI-7** | **레이아웃 & 서식 정밀도 (Layout Precision — [`보고서`](./LAYOUT_PRECISION_GAP_REPORT.md))** | **42개 정밀 항목** | **19.5개** (46.4%) | **14개** (33.3%) | **8.5개** (20.2%) | **46.4%** | **Native 46.5% / HTML 9.3%** |
 
 * **주요 미구현(`❌`) 및 비활성 항목 요약** (상세 내역은 [`PARITY_TRACKER.md` 4절](./PARITY_TRACKER.md) 참조):
   * **UI/쉘**: macOS 네이티브 상단 메뉴바 미장착(`menus.rs`), `ui-egui` 다국어 UI 미번역(영문 고정; 슬라이드 한글 IME/폰트는 완비), `Record` 리본 탭 플레이스홀더, 리본 비활성 버튼 6종(`Screenshot`, `Ink to Text`, `Ink to Math`, `Record`, `Cameo`, `Translate`), `Chart Format`·`Video/Audio Format` 문맥 탭 미분리.
