@@ -1,0 +1,646 @@
+{
+  "schemaVersion": "1.0.0",
+  "baselineTarget": {
+    "product": "Microsoft PowerPoint (Microsoft 365)",
+    "macVersion": "16.113.4 (Build 16.113.26100421)",
+    "windowsVersion": "Microsoft 365 Version 2609",
+    "scoringFormula": {
+      "doneScore": 1,
+      "partialScore": 0.5,
+      "missingScore": 0,
+      "priorityWeights": {
+        "P0": 3,
+        "P1": 2,
+        "P2": 1
+      }
+    }
+  },
+  "kpis": {
+    "featureParity": {
+      "totalFeatures": 191,
+      "done": 124,
+      "partial": 51,
+      "missing": 16,
+      "strictDonePct": 64.9,
+      "weightedBreadthPct": 83.9,
+      "byPriority": {
+        "P0": {
+          "total": 72,
+          "done": 61,
+          "partial": 11,
+          "missing": 0,
+          "strictDonePct": 84.7,
+          "unweightedScore": 92.4,
+          "weightedPct": 92.4
+        },
+        "P1": {
+          "total": 65,
+          "done": 45,
+          "partial": 16,
+          "missing": 4,
+          "strictDonePct": 69.2,
+          "unweightedScore": 81.5,
+          "weightedPct": 81.5
+        },
+        "P2": {
+          "total": 54,
+          "done": 18,
+          "partial": 24,
+          "missing": 12,
+          "strictDonePct": 33.3,
+          "unweightedScore": 55.6,
+          "weightedPct": 55.6
+        }
+      }
+    },
+    "uiSurfaceParity": {
+      "totalUiBlocks": 67,
+      "vscodeWasmStudio": {
+        "total": 67,
+        "done": 36,
+        "partial": 21,
+        "missing": 10,
+        "strictDonePct": 53.7,
+        "unweightedScore": 69.4,
+        "weightedPct": 75.8
+      },
+      "nativeDesktopApp": {
+        "total": 67,
+        "done": 34,
+        "partial": 23,
+        "missing": 10,
+        "strictDonePct": 50.7,
+        "unweightedScore": 67.9,
+        "weightedPct": 74.5
+      },
+      "vscodeClassicHtmlFallback": {
+        "total": 67,
+        "done": 6,
+        "partial": 18,
+        "missing": 43,
+        "strictDonePct": 9,
+        "unweightedScore": 22.4,
+        "weightedPct": 26.1
+      },
+      "disabledRibbonButtonsCount": 6,
+      "mockHtmlAlertButtonsCount": 0
+    },
+    "dialogParity": {
+      "powerpointBaselineApprox": 60,
+      "registeredDialogs": 42,
+      "fullyFunctionalDialogs": 41,
+      "placeholderDialogs": 1,
+      "missingDialogsApprox": 18,
+      "registeredCoveragePct": 70,
+      "functionalCoveragePct": 68.3
+    },
+    "fileFormatParity": {
+      "totalFormatGroups": 22,
+      "done": 9,
+      "partial": 6,
+      "missing": 7,
+      "strictDonePct": 40.9,
+      "weightedScorePct": 54.5
+    },
+    "productionReadiness": {
+      "overallWeightedReadinessPct": 55.3,
+      "mainstreamPractitionerPct": 53.1,
+      "essentialsUserPct": 61.6,
+      "currentStage": "Alpha (6/6 Core Workflows Passed)",
+      "betaTargetPct": 75,
+      "openBetaBlockers": 14
+    },
+    "automationParity": {
+      "engineCommands": 327,
+      "commandNamespaces": 31,
+      "cliSubcommands": 11,
+      "mcpTools": 24,
+      "tcpControlRpcs": 16,
+      "scriptableCoveragePct": 100
+    }
+  },
+  "byArea": [
+    {
+      "area": "Application shell",
+      "total": 11,
+      "done": 7,
+      "partial": 3,
+      "missing": 1,
+      "strictDonePct": 63.6,
+      "unweightedScore": 77.3,
+      "weightedPct": 80.8
+    },
+    {
+      "area": "Files",
+      "total": 18,
+      "done": 10,
+      "partial": 4,
+      "missing": 4,
+      "strictDonePct": 55.6,
+      "unweightedScore": 66.7,
+      "weightedPct": 76.4
+    },
+    {
+      "area": "Slides",
+      "total": 9,
+      "done": 7,
+      "partial": 2,
+      "missing": 0,
+      "strictDonePct": 77.8,
+      "unweightedScore": 88.9,
+      "weightedPct": 92.5
+    },
+    {
+      "area": "Views",
+      "total": 10,
+      "done": 9,
+      "partial": 1,
+      "missing": 0,
+      "strictDonePct": 90,
+      "unweightedScore": 95,
+      "weightedPct": 97.6
+    },
+    {
+      "area": "Masters & themes",
+      "total": 14,
+      "done": 11,
+      "partial": 1,
+      "missing": 2,
+      "strictDonePct": 78.6,
+      "unweightedScore": 82.1,
+      "weightedPct": 91.7
+    },
+    {
+      "area": "Shapes",
+      "total": 14,
+      "done": 11,
+      "partial": 3,
+      "missing": 0,
+      "strictDonePct": 78.6,
+      "unweightedScore": 89.3,
+      "weightedPct": 91.4
+    },
+    {
+      "area": "Format",
+      "total": 11,
+      "done": 6,
+      "partial": 5,
+      "missing": 0,
+      "strictDonePct": 54.5,
+      "unweightedScore": 77.3,
+      "weightedPct": 83.3
+    },
+    {
+      "area": "Arrange",
+      "total": 9,
+      "done": 9,
+      "partial": 0,
+      "missing": 0,
+      "strictDonePct": 100,
+      "unweightedScore": 100,
+      "weightedPct": 100
+    },
+    {
+      "area": "Text",
+      "total": 25,
+      "done": 15,
+      "partial": 9,
+      "missing": 1,
+      "strictDonePct": 60,
+      "unweightedScore": 78,
+      "weightedPct": 83.3
+    },
+    {
+      "area": "Tables",
+      "total": 8,
+      "done": 7,
+      "partial": 1,
+      "missing": 0,
+      "strictDonePct": 87.5,
+      "unweightedScore": 93.8,
+      "weightedPct": 97.4
+    },
+    {
+      "area": "Charts",
+      "total": 5,
+      "done": 1,
+      "partial": 4,
+      "missing": 0,
+      "strictDonePct": 20,
+      "unweightedScore": 60,
+      "weightedPct": 65
+    },
+    {
+      "area": "SmartArt",
+      "total": 2,
+      "done": 0,
+      "partial": 2,
+      "missing": 0,
+      "strictDonePct": 0,
+      "unweightedScore": 50,
+      "weightedPct": 50
+    },
+    {
+      "area": "Pictures",
+      "total": 11,
+      "done": 4,
+      "partial": 4,
+      "missing": 3,
+      "strictDonePct": 36.4,
+      "unweightedScore": 54.5,
+      "weightedPct": 59.5
+    },
+    {
+      "area": "Media",
+      "total": 7,
+      "done": 3,
+      "partial": 2,
+      "missing": 2,
+      "strictDonePct": 42.9,
+      "unweightedScore": 57.1,
+      "weightedPct": 66.7
+    },
+    {
+      "area": "Transitions",
+      "total": 5,
+      "done": 5,
+      "partial": 0,
+      "missing": 0,
+      "strictDonePct": 100,
+      "unweightedScore": 100,
+      "weightedPct": 100
+    },
+    {
+      "area": "Animations",
+      "total": 8,
+      "done": 6,
+      "partial": 2,
+      "missing": 0,
+      "strictDonePct": 75,
+      "unweightedScore": 87.5,
+      "weightedPct": 85.3
+    },
+    {
+      "area": "Slide show",
+      "total": 10,
+      "done": 5,
+      "partial": 3,
+      "missing": 2,
+      "strictDonePct": 50,
+      "unweightedScore": 65,
+      "weightedPct": 68.4
+    },
+    {
+      "area": "Review",
+      "total": 4,
+      "done": 2,
+      "partial": 1,
+      "missing": 1,
+      "strictDonePct": 50,
+      "unweightedScore": 62.5,
+      "weightedPct": 70
+    },
+    {
+      "area": "Draw",
+      "total": 2,
+      "done": 0,
+      "partial": 2,
+      "missing": 0,
+      "strictDonePct": 0,
+      "unweightedScore": 50,
+      "weightedPct": 50
+    },
+    {
+      "area": "Undo & clipboard",
+      "total": 3,
+      "done": 3,
+      "partial": 0,
+      "missing": 0,
+      "strictDonePct": 100,
+      "unweightedScore": 100,
+      "weightedPct": 100
+    },
+    {
+      "area": "Automation (✱)",
+      "total": 2,
+      "done": 2,
+      "partial": 0,
+      "missing": 0,
+      "strictDonePct": 100,
+      "unweightedScore": 100,
+      "weightedPct": 100
+    },
+    {
+      "area": "Platforms (✱)",
+      "total": 3,
+      "done": 1,
+      "partial": 2,
+      "missing": 0,
+      "strictDonePct": 33.3,
+      "unweightedScore": 66.7,
+      "weightedPct": 66.7
+    }
+  ],
+  "uiByCategory": [
+    {
+      "id": "UI-1",
+      "nameKo": "애플리케이션 셸 & 윈도우 크롬",
+      "count": 9,
+      "native": {
+        "total": 9,
+        "done": 4,
+        "partial": 2,
+        "missing": 3,
+        "strictDonePct": 44.4,
+        "unweightedScore": 55.6,
+        "weightedPct": 63.2
+      },
+      "wasm": {
+        "total": 9,
+        "done": 6,
+        "partial": 0,
+        "missing": 3,
+        "strictDonePct": 66.7,
+        "unweightedScore": 66.7,
+        "weightedPct": 73.7
+      },
+      "html": {
+        "total": 9,
+        "done": 4,
+        "partial": 2,
+        "missing": 3,
+        "strictDonePct": 44.4,
+        "unweightedScore": 55.6,
+        "weightedPct": 63.2
+      }
+    },
+    {
+      "id": "UI-2",
+      "nameKo": "파일 탭 (백스테이지 뷰 12페이지)",
+      "count": 9,
+      "native": {
+        "total": 9,
+        "done": 3,
+        "partial": 5,
+        "missing": 1,
+        "strictDonePct": 33.3,
+        "unweightedScore": 61.1,
+        "weightedPct": 69
+      },
+      "wasm": {
+        "total": 9,
+        "done": 3,
+        "partial": 5,
+        "missing": 1,
+        "strictDonePct": 33.3,
+        "unweightedScore": 61.1,
+        "weightedPct": 69
+      },
+      "html": {
+        "total": 9,
+        "done": 0,
+        "partial": 3,
+        "missing": 6,
+        "strictDonePct": 0,
+        "unweightedScore": 16.7,
+        "weightedPct": 21.4
+      }
+    },
+    {
+      "id": "UI-3",
+      "nameKo": "기본 리본 탭 (Core Ribbon 10종)",
+      "count": 10,
+      "native": {
+        "total": 10,
+        "done": 4,
+        "partial": 5,
+        "missing": 1,
+        "strictDonePct": 40,
+        "unweightedScore": 65,
+        "weightedPct": 71.2
+      },
+      "wasm": {
+        "total": 10,
+        "done": 4,
+        "partial": 5,
+        "missing": 1,
+        "strictDonePct": 40,
+        "unweightedScore": 65,
+        "weightedPct": 71.2
+      },
+      "html": {
+        "total": 10,
+        "done": 0,
+        "partial": 6,
+        "missing": 4,
+        "strictDonePct": 0,
+        "unweightedScore": 30,
+        "weightedPct": 34.6
+      }
+    },
+    {
+      "id": "UI-4",
+      "nameKo": "선택 문맥 리본 탭 (Contextual Ribbon 12종)",
+      "count": 11,
+      "native": {
+        "total": 11,
+        "done": 4,
+        "partial": 4,
+        "missing": 3,
+        "strictDonePct": 36.4,
+        "unweightedScore": 54.5,
+        "weightedPct": 64
+      },
+      "wasm": {
+        "total": 11,
+        "done": 4,
+        "partial": 4,
+        "missing": 3,
+        "strictDonePct": 36.4,
+        "unweightedScore": 54.5,
+        "weightedPct": 64
+      },
+      "html": {
+        "total": 11,
+        "done": 0,
+        "partial": 0,
+        "missing": 11,
+        "strictDonePct": 0,
+        "unweightedScore": 0,
+        "weightedPct": 0
+      }
+    },
+    {
+      "id": "UI-5",
+      "nameKo": "도킹 작업 창 & 사이드바 (Task Panes 11종)",
+      "count": 10,
+      "native": {
+        "total": 10,
+        "done": 7,
+        "partial": 2,
+        "missing": 1,
+        "strictDonePct": 70,
+        "unweightedScore": 80,
+        "weightedPct": 82.6
+      },
+      "wasm": {
+        "total": 10,
+        "done": 7,
+        "partial": 2,
+        "missing": 1,
+        "strictDonePct": 70,
+        "unweightedScore": 80,
+        "weightedPct": 82.6
+      },
+      "html": {
+        "total": 10,
+        "done": 1,
+        "partial": 1,
+        "missing": 8,
+        "strictDonePct": 10,
+        "unweightedScore": 15,
+        "weightedPct": 19.6
+      }
+    },
+    {
+      "id": "UI-6",
+      "nameKo": "모달 대화상자 (Dialogs ~60종 대비)",
+      "count": 6,
+      "native": {
+        "total": 6,
+        "done": 3,
+        "partial": 2,
+        "missing": 1,
+        "strictDonePct": 50,
+        "unweightedScore": 66.7,
+        "weightedPct": 76.9
+      },
+      "wasm": {
+        "total": 6,
+        "done": 3,
+        "partial": 2,
+        "missing": 1,
+        "strictDonePct": 50,
+        "unweightedScore": 66.7,
+        "weightedPct": 76.9
+      },
+      "html": {
+        "total": 6,
+        "done": 0,
+        "partial": 1,
+        "missing": 5,
+        "strictDonePct": 0,
+        "unweightedScore": 8.3,
+        "weightedPct": 11.5
+      }
+    },
+    {
+      "id": "UI-7",
+      "nameKo": "캔버스 직접 조작 & 정밀 인터랙션",
+      "count": 8,
+      "native": {
+        "total": 8,
+        "done": 6,
+        "partial": 2,
+        "missing": 0,
+        "strictDonePct": 75,
+        "unweightedScore": 87.5,
+        "weightedPct": 90
+      },
+      "wasm": {
+        "total": 8,
+        "done": 6,
+        "partial": 2,
+        "missing": 0,
+        "strictDonePct": 75,
+        "unweightedScore": 87.5,
+        "weightedPct": 90
+      },
+      "html": {
+        "total": 8,
+        "done": 0,
+        "partial": 3,
+        "missing": 5,
+        "strictDonePct": 0,
+        "unweightedScore": 18.8,
+        "weightedPct": 20
+      }
+    },
+    {
+      "id": "UI-8",
+      "nameKo": "하단 상태 표시줄 & 뷰 모드 (Views)",
+      "count": 4,
+      "native": {
+        "total": 4,
+        "done": 3,
+        "partial": 1,
+        "missing": 0,
+        "strictDonePct": 75,
+        "unweightedScore": 87.5,
+        "weightedPct": 87.5
+      },
+      "wasm": {
+        "total": 4,
+        "done": 3,
+        "partial": 1,
+        "missing": 0,
+        "strictDonePct": 75,
+        "unweightedScore": 87.5,
+        "weightedPct": 87.5
+      },
+      "html": {
+        "total": 4,
+        "done": 1,
+        "partial": 2,
+        "missing": 1,
+        "strictDonePct": 25,
+        "unweightedScore": 50,
+        "weightedPct": 50
+      }
+    }
+  ],
+  "disabledRibbonControls": [
+    {
+      "file": "deckcraft_upstream/crates/ui-egui/src/ribbon/draw.rs",
+      "line": 40,
+      "icon": "InkToText",
+      "label": "Ink to Text",
+      "tooltip": "Ink to Text (coming soon)"
+    },
+    {
+      "file": "deckcraft_upstream/crates/ui-egui/src/ribbon/draw.rs",
+      "line": 42,
+      "icon": "InkToMath",
+      "label": "Ink to Math",
+      "tooltip": "Ink to Math (coming soon)"
+    },
+    {
+      "file": "deckcraft_upstream/crates/ui-egui/src/ribbon/insert.rs",
+      "line": 60,
+      "icon": "Screenshot",
+      "label": "Screenshot",
+      "tooltip": "Screenshot (not available yet)"
+    },
+    {
+      "file": "deckcraft_upstream/crates/ui-egui/src/ribbon/review.rs",
+      "line": 29,
+      "icon": "Translate",
+      "label": "Translate",
+      "tooltip": "Translation needs a language model (not bundled)"
+    },
+    {
+      "file": "deckcraft_upstream/crates/ui-egui/src/ribbon/slide_show.rs",
+      "line": 34,
+      "icon": "Record",
+      "label": "Record",
+      "tooltip": "Recording narration needs audio capture (coming soon)"
+    },
+    {
+      "file": "deckcraft_upstream/crates/ui-egui/src/ribbon/slide_show.rs",
+      "line": 57,
+      "icon": "Cameo",
+      "label": "Cameo",
+      "tooltip": "Camera capture is not available yet"
+    }
+  ]
+}

@@ -3,7 +3,8 @@
 > **기준 타겟**: Microsoft PowerPoint for Mac 16.113 & PowerPoint for Windows (Microsoft 365 Version 2609) 클린룸 리버싱(REA / Black-Box Observation) 및 ECMA-376(OOXML) / ISO 32000(PDF) 표준 명세  
 > **코어 엔진**: DeckCraft Pure-Rust Presentation Engine (`v0.11.1` · **24 Crates · 202,000+ Lines of Rust · 327 Engine Commands · 42 UI Dialogs · 1,641 Unit/Integration Tests**)  
 > **검증 플랫폼 (5대 타겟 1:1 대응)**: **① CLI (`deckcraft-cli`) · ② MCP (`Model Context Protocol`) · ③ Windows (`deckcraft.exe`) · ④ macOS (`DeckCraft.app`) · ⑤ VS Code Extension (`OPEN_PPTX`)**  
-> **프로젝트 저장소**: [https://github.com/iamywl/OPEN_PPTX.git](https://github.com/iamywl/OPEN_PPTX.git)
+> **프로젝트 저장소**: [https://github.com/iamywl/OPEN_PPTX.git](https://github.com/iamywl/OPEN_PPTX.git)  
+> 📊 **구현 vs 미구현 정량 지표 & 추적관리 원장**: **[`PARITY_TRACKER.md`](./PARITY_TRACKER.md)** (`191개 피처: 124D / 51P / 16M [83.9%]` · `67개 UI 블록: 36D / 21P / 10M [75.8%]` · `npm run parity:audit`)
 
 ---
 

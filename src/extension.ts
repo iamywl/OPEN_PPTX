@@ -227,6 +227,24 @@ export function activate(context: vscode.ExtensionContext) {
       }
     })
   );
+
+  // Command: Open PowerPoint UI & Feature Parity Tracker
+  context.subscriptions.push(
+    vscode.commands.registerCommand('deckcraft.showParityReport', async () => {
+      const trackerPath = path.join(context.extensionPath, 'PARITY_TRACKER.md');
+      if (!fs.existsSync(trackerPath)) {
+        vscode.window.showWarningMessage('PARITY_TRACKER.md not found in extension root.');
+        return;
+      }
+      const uri = vscode.Uri.file(trackerPath);
+      try {
+        await vscode.commands.executeCommand('markdown.showPreview', uri);
+      } catch {
+        const doc = await vscode.workspace.openTextDocument(uri);
+        await vscode.window.showTextDocument(doc);
+      }
+    })
+  );
 }
 
 export function deactivate() {}

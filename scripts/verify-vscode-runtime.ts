@@ -116,6 +116,7 @@ async function verifyVsCodeRuntime() {
     'deckcraft.openDesktopApp',
     'deckcraft.startMcpServer',
     'deckcraft.downloadCli',
+    'deckcraft.showParityReport',
   ];
 
   for (const cmd of expectedCommands) {

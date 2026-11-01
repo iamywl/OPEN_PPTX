@@ -11,62 +11,84 @@
 <p align="center">
   <img alt="Platform: CLI · MCP · Windows · macOS · VS Code" src="https://img.shields.io/badge/Platforms-CLI%20%C2%B7%20MCP%20%C2%B7%20Windows%20%C2%B7%20macOS%20%C2%B7%20VS%20Code-blue?style=flat-square">
   <img alt="Engine: Rust (24 Crates · 327 Cmds)" src="https://img.shields.io/badge/Engine-Rust%20(24%20Crates%20%C2%B7%20327%20Cmds)-orange?style=flat-square">
-  <img alt="UI: Glassmorphism" src="https://img.shields.io/badge/UI-Liquid%20Glassmorphism-purple?style=flat-square">
-  <img alt="REA Spec: 22 Areas · 191 Features" src="https://img.shields.io/badge/REA%20Reverse%20Spec-22%20Areas%20%C2%B7%20191%20Features%20(100%25)-brightgreen?style=flat-square">
-  <img alt="5-Platform Parity: 1:1 Verified" src="https://img.shields.io/badge/5--Platform%20Parity-1%3A1%20Verified-success?style=flat-square">
+  <img alt="Feature Parity: 83.9% Weighted (P0 92.4%)" src="https://img.shields.io/badge/Feature%20Parity-83.9%25%20Weighted%20(124D%2F51P%2F16M)-brightgreen?style=flat-square">
+  <img alt="UI Parity: 75.8% Weighted (67 Blocks)" src="https://img.shields.io/badge/UI%20Parity-75.8%25%20Weighted%20(36D%2F21P%2F10M)-purple?style=flat-square">
+  <img alt="5-Platform Engine: 1:1 Shared" src="https://img.shields.io/badge/5--Platform%20Engine-327%20Cmds%201%3A1-success?style=flat-square">
   <img alt="License: MIT / Apache-2.0" src="https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-yellow?style=flat-square">
 </p>
 
 ---
 
-## 🔬 [최상단 요약] REA 클린룸 리버싱 기능명세서 & 5대 플랫폼(`CLI` · `MCP` · `Windows` · `macOS` · `VS Code Extension`) 1:1 대응 총괄표
+## 📊 [최상단 추적 지표] PowerPoint UI & 기능 구현 스코어카드 및 5대 플랫폼 1:1 대응표
 
-> 📖 **전체 기능명세서 원문**: **[`SPECIFICATION.md`](./SPECIFICATION.md)** 에서 **PowerPoint 16.113 (macOS) / Microsoft 365 (Windows)** 클린룸 역공학(Clean-Room Observation)으로 도출된 **22대 기능 영역(191개 피처)**, **30개 네임스페이스 327개 엔진 커맨드**, **42개 전문 대화상자**, **24개 MCP 도구**, **11개 CLI 서브커맨드** 전수 명세를 확인하실 수 있습니다.
+> 📈 **실시간 추적관리 대시보드**: **[`PARITY_TRACKER.md`](./PARITY_TRACKER.md)** (`npm run parity:audit` 자동 생성 · `npm run parity:check` 드리프트 검증)  
+> 📖 **전체 엔진 커맨드 명세서**: **[`SPECIFICATION.md`](./SPECIFICATION.md)** (PowerPoint 16.113 / M365 클린룸 리버싱 327개 엔진 커맨드 · 24개 MCP 툴 전수 명세)
 
-### 1️⃣ 5대 실행 플랫폼 1:1 아키텍처 & 실행 동등성 매트릭스
+### 0️⃣ PowerPoint 대비 구현(`✅`) · 부분 구현(`🟡`) · 미구현(`❌`) 정량 관리 지표 (KPI)
 
-단일 Rust 워크스페이스(**24개 크레이트, 약 202,000줄 순수 Rust, `#![forbid(unsafe_code)]`**) 위에서 **5대 실행 플랫폼(`CLI`, `MCP`, `Windows`, `macOS`, `VS Code Extension`)이 단 하나의 기능 누락 없이 1:1로 대응**합니다:
+과장 없이 코드·바이너리 정적/동적 스캔([`scripts/audit-parity.ts`](./scripts/audit-parity.ts))으로 검증된 현재 구현 수준입니다:
 
-| 비교 항목 | ① CLI (`deckcraft-cli`) | ② MCP (`deckcraft-cli mcp`) | ③ Windows (`deckcraft.exe`) | ④ macOS (`DeckCraft.app`) | ⑤ VS Code Extension (`OPEN_PPTX`) | 1:1 판정 |
+| KPI 코드 | 평가 차원 | 측정 모수 | ✅ 완전 구현 | 🟡 부분 구현 | ❌ 미구현 | 순수 완결률 | 가중 달성률 |
+|---|---|---:|---:|---:|---:|---:|---:|
+| **KPI-1** | **PowerPoint 표준 기능 패리티** (`P0` 미구현 **0건**) | **191개 피처** | **124개** (64.9%) | **51개** (26.7%) | **16개** (8.4%) | **64.9%** | **83.9%** (`P0 92.4%`) |
+| **KPI-2A** | **UI 표면 패리티 — VS Code WASM (`⚡ 1:1 기본 모드`)** | **67개 UI 블록** | **36개** (53.7%) | **21개** (31.3%) | **10개** (14.9%) | **53.7%** | **75.8%** |
+| **KPI-2B** | **UI 표면 패리티 — Native 앱 (`DeckCraft.app / .exe`)** | **67개 UI 블록** | **34개** (50.7%) | **23개** (34.3%) | **10개** (14.9%) | **50.7%** | **74.5%** |
+| **KPI-2C** | **UI 표면 패리티 — VS Code 경량 HTML (`🪟 폴백 모드`)** | **67개 UI 블록** | **6개** (9.0%) | **18개** (26.9%) | **43개** (64.2%) | **9.0%** | **26.1%** |
+| **KPI-3** | **모달 대화상자 커버리지** (`dialogs.rs`) | **약 60종** | **41종** (68.3%) | **1종** (`Equation`) | **약 18종** (30.0%) | **68.3%** | **69.2%** |
+| **KPI-4** | **파일 포맷 & 내장 미디어 호환성** | **22종 포맷군** | **9종** (40.9%) | **6종** (27.3%) | **7종** (31.8%) | **40.9%** | **54.5%** |
+| **KPI-5** | **실무 전환 종합 준비도 (Readiness Index)** | **10대 차원** | Alpha 6/6 통과 | **14개 Beta Blocker** | 클라우드/VBA 제외 | — | **55.3%** (Beta 목표 75%) |
+| **KPI-6** | **엔진 커맨드 & AI(MCP/CLI) 스크립팅 패리티** | **327개 명령** | **327개** | 0개 | 0개 | **100.0%** | **100.0%** (MCP 24툴) |
+
+* **주요 미구현(`❌`) 및 비활성 항목 요약** (상세 내역은 [`PARITY_TRACKER.md` 4절](./PARITY_TRACKER.md) 참조):
+  * **UI/쉘**: macOS 네이티브 상단 메뉴바 미장착(`menus.rs`), `ui-egui` 다국어 UI 미번역(영문 고정; 슬라이드 한글 IME/폰트는 완비), `Record` 리본 탭 플레이스홀더, 리본 비활성 버튼 6종(`Screenshot`, `Ink to Text`, `Ink to Math`, `Record`, `Cameo`, `Translate`), `Chart Format`·`Video/Audio Format` 문맥 탭 미분리.
+  * **기능/포맷**: 레거시 `.ppt`(97–2003)·`.odp`·`.pptm`(매크로) 열기/저장, 문서 암호화 보호, OS 직접 프린터 인쇄 창(현재 PDF 경유), SVG 직접 삽입(PNG 폴백만 표시), 그림 배경 자동 제거, OMML 시각 수식 편집기, MP4 동영상 내보내기, 듀얼 모니터 보조 화면 발표자 뷰 자동 분리.
+
+---
+
+### 1️⃣ 5대 실행 플랫폼 1:1 엔진 아키텍처 대응 매트릭스
+
+단일 Rust 워크스페이스(**24개 크레이트, 약 202,000줄 순수 Rust, `#![forbid(unsafe_code)]`**) 위에서 구현된 **327개 엔진 커맨드와 `SlideApp` 스튜디오는 5대 실행 플랫폼(`CLI`, `MCP`, `Windows`, `macOS`, `VS Code Extension`)에서 1:1 동일하게 동작**합니다:
+
+| 비교 항목 | ① CLI (`deckcraft-cli`) | ② MCP (`deckcraft-cli mcp`) | ③ Windows (`deckcraft.exe`) | ④ macOS (`DeckCraft.app`) | ⑤ VS Code Extension (`OPEN_PPTX`) | 엔진 동등성 |
 |---|---|---|---|---|---|---|
 | **구동 바이너리 / 런타임** | `deckcraft-cli` (`apps/deckcraft-cli`) | `deckcraft-cli mcp` (`crates/mcp`, JSON-RPC 2.0 stdio) | `deckcraft.exe` + `deckcraft-cli.exe` (`x64`/`ARM64`) | `DeckCraft.app` + `deckcraft-cli` (Universal Mach-O) | `deckcraft-web_bg.wasm` (`SlideApp`) + `DeckcraftEditorProvider` | ✅ **100% 1:1** |
 | **문서·커맨드 코어** | `deckcraft_core` (327개 커맨드) | `deckcraft_core` (327개 커맨드 + 24개 MCP 툴) | `deckcraft_core` (327개 커맨드) | `deckcraft_core` (327개 커맨드) | `deckcraft_core` (WASM 내장 327개 + CLI 호스트 브리지 327개) | ✅ **100% 1:1** |
 | **인터랙티브 스튜디오 UI** | `deckcraft-cli app` 실행 시 `SlideApp` 기동 | `--connect <port>`로 라이브 `SlideApp` 제어 | `eframe` + `wgpu` (**Direct3D 12** / Vulkan) `SlideApp` | `eframe` + `wgpu` (**Metal**) `SlideApp` | `eframe` + `wgpu` (**WebGL2** `<canvas id="deckcraft_canvas">`) `SlideApp` + HTML 리본 폴백 | ✅ **100% 1:1** |
 | **글래스모피즘 디자인 테마** | `--dark` 렌더링 및 `app` 기동 시 동일 적용 | `screenshot` 캡처 시 글래스 UI 그대로 출력 | `theme.rs` + `ribbon.rs` (`Brightness::Dark` 기본) | `theme.rs` + `ribbon.rs` (`Brightness::Dark` 기본) | WASM `theme.rs`/`ribbon.rs` + Webview CSS 글래스모피즘 | ✅ **100% 1:1** |
-| **파일 포맷 입출력 (17종)** | `.pptx`, `.potx`, `.ppsx`, `.ppt`, `.odp`, `.deckcraft`, `.md`, `.html`, `.pdf`, `.svg`, `.png`, `.jpg`, `.gif`, `.mp4`, `.rtf` | `open_presentation`, `save_presentation`, `export` | 네이티브 파일 다이얼로그 + 드래그앤드롭 | 네이티브 macOS 파일 다이얼로그 + QuickLook | VS Code Custom Editor (`.pptx`, `.potx`, `.ppsx`, `.deckcraft`, `.ppt`) + 호스트 파일 다이얼로그 브리지 | ✅ **100% 1:1** |
+| **지원 문서 입출력** | `.pptx`, `.potx`, `.ppsx`, `.deckcraft`, `.md`, `.txt`, `.rtf` (열기/저장) + `.pdf`, `.png`, `.jpg`, `.gif` (내보내기) | `open_presentation`, `save_presentation`, `export` | 네이티브 파일 다이얼로그 + 드래그앤드롭 | 네이티브 macOS 파일 다이얼로그 | VS Code Custom Editor (`.pptx`, `.potx`, `.ppsx`, `.deckcraft`) + 호스트 파일 다이얼로그 브리지 | ✅ **100% 1:1** |
 | **렌더링 & 내보내기** | `render`, `render-transition`, `convert` | `render_slide`, `export`, `screenshot` | 백스테이지 `Export` + `Ctrl+P` / `Ctrl+S` | 백스테이지 `Export` + `Cmd+P` / `Cmd+S` | WASM `Ctrl/Cmd+S` 자동 저장 브리지 + 상단 PDF/PNG/MD/PPTX 추출 | ✅ **100% 1:1** |
 | **외부 원격 제어 & AI 연동** | `--cmd` / `--script` 배치 실행 | 24개 MCP 도구 (`run_command`, `batch`, `pointer`, `key`, `screenshot` 등) | `--control <port>` (TCP JSON-lines 16개 RPC) | `--control <port>` (TCP JSON-lines 16개 RPC) | `DeckcraftMcpManager` (Headless 샌드박스 & `--connect` 라이브 앱 연동) | ✅ **100% 1:1** |
 | **한글(CJK) & 시스템 폰트** | OS 시스템 폰트 자동 스캔 (`crates/fonts`) | OS 시스템 폰트 자동 스캔 | DirectWrite / `C:\Windows\Fonts` (`맑은 고딕` 등) | CoreText / `/System/Library/Fonts` (`Apple SD 산돌고딕 Neo` 등) | `deckcraftEditor.ts`가 OS 한글 TTF를 스캔해 WASM `SlideApp`에 실시간 주입 | ✅ **100% 1:1** |
 
 ---
 
-### 2️⃣ REA 리버싱 기반 22대 기능 영역(191개 피처) & 327개 엔진 커맨드 플랫폼별 1:1 대응표
+### 2️⃣ PowerPoint 22대 기능 영역(191개 피처) 영역별 구현 지표 & 327개 커맨드 매핑표
 
-| # | REA 역공학 기능 영역 (22 Areas) | 피처 수 | 엔진 네임스페이스 (30종 · 327개 커맨드) | ① CLI | ② MCP | ③ Windows | ④ macOS | ⑤ VS Code Ext |
-|---:|---|---:|---|---|---|---|---|---|
-| **1** | **문서 모델 & 테마/마스터** (16:9/4:3, 마스터·레이아웃 11종, 섹션) | 12 | `document`(1), `design`(14), `master`(6), `section`(5) | ✅ `run`/`info` | ✅ `inspect_document` | ✅ Design/Master 뷰 | ✅ Design/Master 뷰 | ✅ WASM + Webview |
-| **2** | **파워포인트 파일 입출력 (OOXML)** (`.pptx`/`.potx`/`.ppsx`, 미지원 XML 100% 보존 라운드트립, 암호화 감지) | 9 | `file.*` (19개 커맨드) | ✅ `convert`/`info` | ✅ `open`/`save` | ✅ Native File I/O | ✅ Native File I/O | ✅ CustomEditor + Bridge |
-| **3** | **슬라이드 조작** (추가/복제/삭제/이동/숨기기/배경/노트/외부 슬라이드 재사용) | 10 | `slide.*` (20개), `notes.*` (1개) | ✅ `slide.*` | ✅ `add_slide` 등 | ✅ 썸네일 & 리본 | ✅ 썸네일 & 리본 | ✅ WASM & HTML 스트립 |
-| **4** | **텍스트 & 타이포그래피** (리치 텍스트, 한글 IME, 글머리표, 다단, 텍스트 맞춤, 수식, 찾기/바꾸기) | 22 | `text.*` (16개), `font.*` (4개), `format.*` (46개) | ✅ `text.*`/`format.*` | ✅ `add_text_box`/`set_text` | ✅ 인캔버스 편집 | ✅ 인캔버스 편집 | ✅ WASM + 인라인 IME |
-| **5** | **도형, 선 & 커넥터** (187종 프리셋 도형, 노란 조절 핸들, 꺾은선/곡선 커넥터, 자유형, **Boolean 도형 병합 5종**) | 15 | `shape.*` (37개), `insert.*` (18개) | ✅ `shape.*` | ✅ `add_shape` | ✅ 187종 갤러리 | ✅ 187종 갤러리 | ✅ WASM + 도형 툴바 |
-| **6** | **채우기, 윤곽선 & 이펙트** (단색/그라디언트/패턴/그림 채우기, 대시/화살표, 그림자/반사/네온/소프트엣지/3D 회전) | 13 | `format.*` (46개 커맨드) | ✅ `format.*` | ✅ `run_command` | ✅ Format Shape 창 | ✅ Format Shape 창 | ✅ WASM + 서식 드로어 |
-| **7** | **정렬, 그룹화 & 배치** (그룹/해제, 앞뒤 순서, 맞춤 6종, 가로/세로 간격 동일, 스마트 가이드, 선택 창) | 10 | `arrange.*` (15개), `guide.*` (4개), `selection.*` (3개) | ✅ `arrange.*` | ✅ `select`/`pointer` | ✅ Arrange & 정렬 | ✅ Arrange & 정렬 | ✅ WASM + 레이어 바 |
-| **8** | **그림 & 이미지** (PNG/JPEG/GIF/WebP/SVG/TIFF/BMP, 크롭, 도형에 맞춰 자르기, 배경제거, 밝기/대비/색조, 압축, 앨범) | 12 | `picture.*` (12개 커맨드) | ✅ `picture.*` | ✅ `insert_picture` | ✅ Picture Format | ✅ Picture Format | ✅ WASM + 파일피커 브리지 |
-| **9** | **표 (Tables)** (삽입, 행/열 추가·삭제, 셀 병합/분할, 테두리/음영, 머리글/줄무늬/요약 행 스타일) | 7 | `table.*` (21개 커맨드) | ✅ `table.*` | ✅ `insert_table` | ✅ Table Design | ✅ Table Design | ✅ WASM Table Studio |
-| **10** | **차트 (Charts)** (막대/누적/꺾은선/원형/도넛/영역/분산/거품/방사/폭포/깔때기/콤보 차트, 내장 데이터 시트, 추세선/오차막대) | 10 | `chart.*` (3개), `insert.chart` | ✅ `chart.*` | ✅ `insert_chart` | ✅ Chart Design | ✅ Chart Design | ✅ WASM Chart Studio |
-| **11** | **SmartArt & 다이어그램** (목록/프로세스/주기/계층/관계/행렬/피라미드, 텍스트↔도형 상호 변환) | 3 | `smartArt.*` (13개 커맨드) | ✅ `smartArt.*` | ✅ `run_command` | ✅ SmartArt Design | ✅ SmartArt Design | ✅ WASM SmartArt |
-| **12** | **아이콘, 3D & 미디어** (SVG 아이콘 라이브러리, 오디오/비디오 삽입, 트리밍, 북마크, 페이드, 포스터 프레임, 화면 녹화) | 8 | `media.*` (9개), `insert.icon` | ✅ `media.*` | ✅ `run_command` | ✅ Media/Playback | ✅ Media/Playback | ✅ WASM + 미디어 브리지 |
-| **13** | **슬라이드 전환 (Transitions)** (Fade/Push/Wipe/Split/Reveal/Cut/Cover/Uncover/Flash/Dissolve/Checkerboard/Blinds/Zoom/**Morph**) | 6 | `transition.*` (6개 커맨드) | ✅ `render-transition` | ✅ `run_command` | ✅ Transitions 탭 | ✅ Transitions 탭 | ✅ WASM + 전환 바 |
-| **14** | **애니메이션 (Animations)** (나타내기/강조/끝내기/이동경로, 클릭/이전과함께/이전다음, 애니메이션 창, 트리거, 애니메이션 복사) | 9 | `animation.*` (11개 커맨드) | ✅ `animation.*` | ✅ `run_command` | ✅ Animations 탭 | ✅ Animations 탭 | ✅ WASM Animation Pane |
-| **15** | **슬라이드 쇼 & 발표자 도구** (전체화면 쇼, 발표자 뷰, 레이저/펜/형광펜 잉크 주석, 블랙/화이트 스크린, 예행 연습, 커스텀 쇼) | 10 | `show.*` (4개), `draw.*` (1개) | ✅ `app` 모드 쇼 | ✅ `call_app` | ✅ `F5` 발표자 뷰 | ✅ `F5` 발표자 뷰 | ✅ WASM 쇼 + HTML 오버레이 |
-| **16** | **검토, 메모 & 협업** (스레드 댓글, 맞춤법 검사, 유의어 사전, 덱 비교/병합 `Compare`, 변경 추적, **접근성 검사기**) | 6 | `review.*` (12개), `comment.*` (7개) | ✅ `review.*` | ✅ `run_command` | ✅ Review 탭 | ✅ Review 탭 | ✅ WASM Review 탭 |
-| **17** | **보기, 인쇄 & 내보내기** (기본/윤곽선/분류기/노트/읽기 뷰, 유인물 마스터, PDF/PNG/SVG/MP4/GIF/HTML/MD/ODP/RTF 내보내기) | 16 | `view.*` (4개), `handout.*` (1개), `file.export*` | ✅ `render`/`convert` | ✅ `export`/`render_slide` | ✅ View & Export | ✅ View & Export | ✅ WASM + 원클릭 Export |
-| **18** | **실행 취소, 클립보드 & 단축키** (다단계 Undo/Redo, 복사/붙여넣기, 복제, 서식 복사, 명령 팔레트, 키보드 단축키) | 7 | `edit.*` (12개), `window.*` (1개) | ✅ 배치 트랜잭션 | ✅ `key`/`type_text` | ✅ `Ctrl+Z/Y/C/V/D` | ✅ `Cmd+Z/Y/C/V/D` | ✅ 통합 단축키 라우터 |
-| **19** | **고급 프레젠테이션 기능** (하이퍼링크, 실행 단추, 슬라이드/섹션 줌 서머리, 머리글/바닥글, 문서 속성, 슬라이드 크기 변경) | 6 | `insert.action`, `insert.zoomSummary`, `links` | ✅ `links` 서브커맨드 | ✅ `run_command` | ✅ Insert Action/Zoom | ✅ Insert Action/Zoom | ✅ WASM Action/Zoom |
-| **20** | **CLI & 스크립팅** (헤드리스 렌더링, 포맷 변환, JSON 인스펙션, 명령 레지스트리 실행, 벤치마크, 하이퍼링크 검증) | — | **11개 CLI 서브커맨드** (`info`, `render`, `convert`, `run` 등) | ✅ 네이티브 제공 | ✅ CLI 내장 (`mcp`) | ✅ `deckcraft-cli.exe` | ✅ `deckcraft-cli` | ✅ `DeckcraftCli` 클래스 |
-| **21** | **MCP 서버 & AI 에이전트 연동** (JSON-RPC 2.0 stdio, 24개 전용 툴, 경로 샌드박싱, `--connect` 라이브 GUI 브리지) | — | **24개 MCP Tools** + **16개 TCP Control RPC** | ✅ `deckcraft-cli mcp` | ✅ 네이티브 제공 | ✅ `--control` 연동 | ✅ `--control` 연동 | ✅ `DeckcraftMcpManager` |
-| **22** | **성능 & 아키텍처 보장** (24개 크레이트, `wgpu` Metal/DX12/Vulkan/WebGL2 + `tiny-skia` CPU 폴백, `#![forbid(unsafe_code)]`) | — | 전 크레이트 공통 보장 | ✅ 100% 준수 | ✅ 100% 준수 | ✅ DX12/Vulkan + CPU | ✅ Metal + CPU | ✅ WebGL2 WASM + CPU |
-| **합계** | **22대 기능 영역 전수 구현** | **191개** | **30개 네임스페이스 · 327개 커맨드** | **100% (1:1)** | **100% (1:1)** | **100% (1:1)** | **100% (1:1)** | **100% (1:1)** |
+| # | PowerPoint 기능 영역 (22 Areas) | 피처 수 | ✅ 완료 / 🟡 부분 / ❌ 미구현 | 가중 패리티율 | 엔진 네임스페이스 (30종 · 327개 커맨드) | 5대 플랫폼 공유 |
+|---:|---|---:|:---:|---:|---|---|
+| **1** | **Application Shell** (시작 화면, 10종 리본, QAT, 상태바, 팔레트) | 11 | `7D / 3P / 1M` | **81.0%** | `view.*`, `window.*`, `app.*` | ✅ 1:1 공유 |
+| **2** | **Files & OOXML I/O** (`.pptx`/`.potx`/`.ppsx`, 자동복구, PDF/PNG/GIF 추출) | 18 | `9D / 5P / 4M` | **75.7%** | `file.*` (19개 커맨드) | ✅ 1:1 공유 |
+| **3** | **Slides & Sections** (추가/복제/삭제/정렬/섹션/11종 레이아웃/줌) | 9 | `7D / 2P / 0M` | **92.5%** | `slide.*` (20개), `section.*` (5개) | ✅ 1:1 공유 |
+| **4** | **Views & Guides** (5대 편집 뷰, 눈금자, 그리드, 스마트 가이드, 회색조) | 10 | `9D / 1P / 0M` | **97.6%** | `view.*` (4개), `guide.*` (4개) | ✅ 1:1 공유 |
+| **5** | **Masters & Themes** (슬라이드 마스터, 내장 테마 8종, 색상/글꼴/배경) | 14 | `11D / 1P / 2M` | **91.7%** | `master.*` (6개), `design.*` (14개) | ✅ 1:1 공유 |
+| **6** | **Shapes & Geometry** (~180종 도형, 노란 핸들, 커넥터, 자유형, 병합 5종) | 14 | `11D / 3P / 0M` | **91.4%** | `shape.*` (37개), `insert.*` (18개) | ✅ 1:1 공유 |
+| **7** | **Format** (단색/그라디언트/그림/패턴 채우기, 선/화살표, 그림자/3D) | 11 | `6D / 5P / 0M` | **83.3%** | `format.*` (46개 커맨드) | ✅ 1:1 공유 |
+| **8** | **Arrange** (크기/위치, 회전/대칭, 순서, 맞춤/배분, 그룹, 선택 창, 잠금) | 9 | `9D / 0P / 0M` | **100.0%** | `arrange.*` (15개), `selection.*` (3개) | ✅ 1:1 공유 |
+| **9** | **Text & Typography** (인플레이스 편집, 한글 IME, 목록, 다단, 자동맞춤) | 25 | `15D / 9P / 1M` | **83.3%** | `text.*` (16개), `font.*` (4개) | ✅ 1:1 공유 |
+| **10** | **Tables** (표 삽입, 스타일, 행/열 편집, 셀 병합/분할, 테두리, 범위 드래그) | 8 | `7D / 1P / 0M` | **97.4%** | `table.*` (21개 커맨드) | ✅ 1:1 공유 |
+| **11** | **Charts** (막대/선/원형/분산/폭포/깔때기/추세선, 데이터 편집, 워크북 보존) | 5 | `1D / 4P / 0M` | **65.0%** | `chart.*` (3개), `insert.chart` | ✅ 1:1 공유 |
+| **12** | **SmartArt** (15종 레이아웃, 텍스트 창 아웃라인, 승격/강등, 다이어그램 저장) | 2 | `0D / 2P / 0M` | **50.0%** | `smartArt.*` (13개 커맨드) | ✅ 1:1 공유 |
+| **13** | **Pictures** (래스터 포맷, EMF/WMF 벡터, 크롭, 보정, 스타일, 사진 앨범) | 11 | `4D / 4P / 3M` | **59.5%** | `picture.*` (12개 커맨드) | ✅ 1:1 공유 |
+| **14** | **Media** (순수 Rust 오디오/비디오 재생, 트리밍, 페이드, 루프, 볼륨) | 7 | `3D / 2P / 2M` | **66.7%** | `media.*` (9개 커맨드) | ✅ 1:1 공유 |
+| **15** | **Transitions** (Morph 포함 48종 전환, 효과 옵션, 사운드, 자동 전환) | 5 | `5D / 0P / 0M` | **100.0%** | `transition.*` (6개 커맨드) | ✅ 1:1 공유 |
+| **16** | **Animations** (64종 효과, 모션 패스, 타임라인 창, 문단별 빌드, 트리거) | 8 | `6D / 2P / 0M` | **85.3%** | `animation.*` (11개 커맨드) | ✅ 1:1 공유 |
+| **17** | **Slide Show** (전체화면 쇼, 발표자 뷰, 잉크/레이저, 예행 연습, 커스텀 쇼) | 10 | `5D / 3P / 2M` | **68.4%** | `show.*` (4개 커맨드) | ✅ 1:1 공유 |
+| **18** | **Review** (스레드 댓글, 답글/해결, 접근성 검사기, 프레젠테이션 비교) | 4 | `2D / 1P / 1M` | **70.0%** | `review.*` (12개), `comment.*` (7개) | ✅ 1:1 공유 |
+| **19** | **Draw** (필압 펜, 형광펜, 지우개, Ink to Shape) | 2 | `0D / 2P / 0M` | **50.0%** | `draw.*` (1개 커맨드) | ✅ 1:1 공유 |
+| **20** | **Undo & Clipboard** (무제한 Undo/Redo, 잘라내기/복사/선택하여 붙여넣기) | 3 | `3D / 0P / 0M` | **100.0%** | `edit.*` (12개 커맨드) | ✅ 1:1 공유 |
+| **21** | **Automation (✱)** (CLI 스크립팅, TCP Control RPC, 24개 MCP 도구) | 2 | `2D / 0P / 0M` | **100.0%** | **11개 CLI 서브커맨드 · 24개 MCP 툴** | ✅ 1:1 공유 |
+| **22** | **Platforms (✱)** (macOS, Windows, Linux, Web/WASM, FreeBSD) | 3 | `1D / 2P / 0M` | **66.7%** | `wgpu` (Metal/DX12/Vulkan/WebGL2) | ✅ 1:1 공유 |
+| **합계** | **22대 기능 영역 (`PARITY_TRACKER.md` 실시간 연동)** | **191개** | **`124D / 51P / 16M`** | **`83.9%` (`P0 92.4%`)** | **30개 네임스페이스 · 327개 커맨드** | **100% 1:1 공유** |
 
 ---
 

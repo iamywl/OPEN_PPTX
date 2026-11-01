@@ -75,7 +75,17 @@ This project adapts **DeckCraft**, an open-source presentation engine written in
       - `src/deckcraftCli.ts`: Integrated `PlatformHelper.getPlatformConfig()` for 1:1 binary resolution (`where` on Windows vs `which` on macOS/Linux) and multi-platform archive extraction (`Expand-Archive` on Windows `.zip`, `unzip` on macOS `.zip`, `tar -xzf` on Linux `.tar.gz`).
       - `src/deckcraftEditor.ts`: Added generic `runEngineCommand` Webview handler exposing all **327 engine commands**, removed the macOS-only guard in `openInDesktopApp()` to support Windows/macOS/Linux via `PlatformHelper.openNativeApp()`, and made `openInPowerPoint()` cross-platform (`open -a` / `cmd /c start` / `xdg-open`).
       - `src/mcpManager.ts`: Separated Headless Confined MCP mode (`--automation-read-root` / `--automation-write-root`) from Live App Bridge mode (`--connect <port>`) per `crates/mcp` mutual-exclusion contract.
-      - `package.json`: Added `.potx` and `.ppsx` custom editor file associations alongside `.pptx`, `.deckcraft`, and `.ppt`.
+      - `package.json`: Added `.potx` and `.ppsx` custom editor file associations alongside `.pptx` and `.deckcraft`.
+12. **PowerPoint UI & Feature Parity Definition, Quantitative KPI Metrics & Automated Governance (`PARITY_TRACKER.md`)**:
+    - **User Directive**: *"powerpoint UI와 기능에 대해 명확히 정의히고구현된것과 그렇지안흔것을 지표로 만들어서 추적관리해"*.
+    - Established a strict, transparent, code-verified Parity Governance System eliminating exaggerated claims and clearly separating **Implemented (`✅ Done`)**, **Partial (`🟡 Partial`)**, and **Not Implemented (`❌ Missing`)**:
+      - **Canonical Registry (`parity/powerpoint-parity.json`)**: Defines **8 UI Layers / 67 granular PowerPoint UI blocks** (Shell, 12-page Backstage, 10 Core Ribbon Tabs, 12 Contextual Ribbon Tabs, 11 Task Panes, ~60 Modal Dialogs, Direct Manipulation, Status Bar & Views), **22 File/Media format groups**, and **Top 15 Prioritized Beta Blockers**.
+      - **Automated Audit & KPI Generator (`scripts/audit-parity.ts` — `npm run parity:audit` / `npm run parity:check`)**:
+        - Parses `deckcraft_upstream/docs/parity-checklist.md` (**191 features**: `124 Done [64.9%]` · `51 Partial [26.7%]` · `16 Missing [8.4%]` → **83.9% Weighted Breadth**, `P0` Missing = `0`).
+        - Evaluates UI Surface Parity across all 3 UI runtimes: **VS Code WASM Studio (`75.8%` weighted, `36D/21P/10M`)**, **Native Desktop App (`74.5%` weighted, `34D/23P/10M`)**, and **VS Code Classic HTML Fallback (`26.1%` weighted, `6D/18P/43M`)**.
+        - Statically scans `crates/ui-egui/src/dialogs.rs` (**42/60 dialogs = 70.0%**, 41 functional + 1 `equation` placeholder), auto-detects **6 disabled Rust Ribbon buttons** (`Screenshot`, `Ink to Text`, `Ink to Math`, `Record`, `Cameo`, `Translate`), and asserts **0 mock `alert()` handlers** in `src/webview/template.ts`.
+        - Outputs deterministic `parity/parity-metrics-snapshot.json` and [`PARITY_TRACKER.md`](./PARITY_TRACKER.md), and enforces drift-free synchronization via `npm run parity:check`.
+      - **VS Code Command Integration**: Registered `deckcraft.showParityReport` (`"DeckCraft: Open PowerPoint UI & Feature Parity Tracker"`) in `package.json` and `src/extension.ts`, wired `tabDesign`/`tabTransitions` buttons in `src/webview/template.ts` to live `runEngineCommand`, and removed unsupported legacy binary `*.ppt` from `customEditors`.
 
 ---
 
@@ -126,8 +136,9 @@ To achieve 100% quality and verify compliance across all deliverables, the proje
 | **Loop 5** | Glassmorphism UI & Screenshot assets | `scripts/qa-test.ts` (All 6 images verified) | **PASS (100%)** |
 | **Loop 6** | Webview DOM & CSP Integrity | `scripts/verify-webview.ts` (80 DOM IDs) | **PASS (100%)** |
 | **Loop 7** | End-to-End Creation Roundtrip | `scripts/verify-full-roundtrip.ts` | **PASS (100%)** |
-| **Loop 8** | VSIX Package & VS Code Install | `vsce package` & `code --install-extension` | **PASS (Installed)** |
-| **Loop 9** | Git Origin Synchronization | `git push -u origin main` | **PASS** |
+| **Loop 8** | PowerPoint UI & Feature Parity Drift Check | `npm run parity:audit && npm run parity:check` | **PASS (Synced)** |
+| **Loop 9** | VSIX Package & VS Code Install | `vsce package` & `code --install-extension` | **PASS (Installed)** |
+| **Loop 10** | Git Origin Synchronization | `git push -u origin main` | **PASS** |
 
 ---
 

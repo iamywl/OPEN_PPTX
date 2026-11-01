@@ -1477,15 +1477,15 @@ export function getWebviewContent(
     <div class="ribbon-tab-pane" id="tabDesign">
       <div class="ribbon-group-box">
         <div class="ribbon-group-items">
-          <button class="ribbon-btn-small" onclick="alert('테마: DeckCraft가 적용되어 있습니다.')">🎨 기본 테마</button>
-          <button class="ribbon-btn-small" onclick="alert('슬라이드 배경 서식이 적용되어 있습니다.')">🌌 모던 테마</button>
+          <button class="ribbon-btn-small" data-engine-cmd="design.theme" data-engine-params='{"name":"DeckCraft"}'>🎨 기본 테마 (DeckCraft)</button>
+          <button class="ribbon-btn-small" data-engine-cmd="design.theme" data-engine-params='{"name":"Midnight"}'>🌌 모던 다크 (Midnight)</button>
         </div>
         <span class="ribbon-group-title">테마</span>
       </div>
       <div class="ribbon-group-box">
         <div class="ribbon-group-items">
-          <button class="ribbon-btn-small">📐 16:9 와이드스크린 (기본)</button>
-          <button class="ribbon-btn-small">📐 4:3 표준</button>
+          <button class="ribbon-btn-small" data-engine-cmd="design.slideSize" data-engine-params='{"preset":"widescreen"}'>📐 16:9 와이드스크린</button>
+          <button class="ribbon-btn-small" data-engine-cmd="design.slideSize" data-engine-params='{"preset":"standard"}'>📐 4:3 표준</button>
         </div>
         <span class="ribbon-group-title">슬라이드 크기</span>
       </div>
@@ -1495,11 +1495,12 @@ export function getWebviewContent(
     <div class="ribbon-tab-pane" id="tabTransitions">
       <div class="ribbon-group-box">
         <div class="ribbon-group-items">
-          <button class="ribbon-btn-small">없음</button>
-          <button class="ribbon-btn-small" style="color:#38bdf8;">페이드 (Fade)</button>
-          <button class="ribbon-btn-small">밀어내기 (Push)</button>
-          <button class="ribbon-btn-small">닦아내기 (Wipe)</button>
-          <button class="ribbon-btn-small">분할 (Split)</button>
+          <button class="ribbon-btn-small" data-engine-cmd="transition.set" data-engine-params='{"kind":"none"}'>없음</button>
+          <button class="ribbon-btn-small" style="color:#38bdf8;" data-engine-cmd="transition.set" data-engine-params='{"kind":"morph"}'>모프 (Morph)</button>
+          <button class="ribbon-btn-small" data-engine-cmd="transition.set" data-engine-params='{"kind":"fade"}'>페이드 (Fade)</button>
+          <button class="ribbon-btn-small" data-engine-cmd="transition.set" data-engine-params='{"kind":"push"}'>밀어내기 (Push)</button>
+          <button class="ribbon-btn-small" data-engine-cmd="transition.set" data-engine-params='{"kind":"wipe"}'>닦아내기 (Wipe)</button>
+          <button class="ribbon-btn-small" data-engine-cmd="transition.set" data-engine-params='{"kind":"split"}'>분할 (Split)</button>
         </div>
         <span class="ribbon-group-title">이 슬라이드로 전환</span>
       </div>
@@ -2924,6 +2925,21 @@ export function getWebviewContent(
 
     btnModeNativeApp.addEventListener('click', () => {
       vscode.postMessage({ command: 'openDesktopApp' });
+    });
+
+    document.querySelectorAll('[data-engine-cmd]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const engineCmd = btn.getAttribute('data-engine-cmd');
+        const rawParams = btn.getAttribute('data-engine-params');
+        let params = {};
+        if (rawParams) {
+          try { params = JSON.parse(rawParams); } catch (_e) {}
+        }
+        if (engineCmd === 'transition.set') {
+          params.index = currentIndex;
+        }
+        vscode.postMessage({ command: 'runEngineCommand', engineCmd, params });
+      });
     });
 
     async function bootNativeWasmEngine() {

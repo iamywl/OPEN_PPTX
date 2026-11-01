@@ -48,9 +48,6 @@
           },
           {
             "filenamePattern": "*.ppsx"
-          },
-          {
-            "filenamePattern": "*.ppt"
           }
         ],
         "priority": "default"
@@ -95,6 +92,11 @@
       {
         "command": "deckcraft.downloadCli",
         "title": "DeckCraft: Check / Update CLI Binary",
+        "category": "DeckCraft"
+      },
+      {
+        "command": "deckcraft.showParityReport",
+        "title": "DeckCraft: Open PowerPoint UI & Feature Parity Tracker",
         "category": "DeckCraft"
       }
     ],
@@ -162,7 +164,9 @@
     "watch": "tsc -watch -p ./",
     "build": "node esbuild.js --production",
     "build-dev": "node esbuild.js",
-    "package": "vsce package"
+    "package": "vsce package",
+    "parity:audit": "npx --yes ts-node scripts/audit-parity.ts",
+    "parity:check": "npx --yes ts-node scripts/audit-parity.ts --check"
   },
   "devDependencies": {
     "@types/node": "^20.11.0",
