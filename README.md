@@ -11,22 +11,37 @@
 <p align="center">
   <img alt="Platform: CLI · MCP · Windows · macOS · VS Code" src="https://img.shields.io/badge/Platforms-CLI%20%C2%B7%20MCP%20%C2%B7%20Windows%20%C2%B7%20macOS%20%C2%B7%20VS%20Code-blue?style=flat-square">
   <img alt="Engine: Rust (24 Crates · 327 Cmds)" src="https://img.shields.io/badge/Engine-Rust%20(24%20Crates%20%C2%B7%20327%20Cmds)-orange?style=flat-square">
-  <img alt="Feature Parity: 83.9% Weighted (P0 92.4%)" src="https://img.shields.io/badge/Feature%20Parity-83.9%25%20Weighted%20(124D%2F51P%2F16M)-brightgreen?style=flat-square">
-  <img alt="UI Parity: 75.8% Weighted (67 Blocks)" src="https://img.shields.io/badge/UI%20Parity-75.8%25%20Weighted%20(36D%2F21P%2F10M)-purple?style=flat-square">
-  <img alt="5-Platform Engine: 1:1 Shared" src="https://img.shields.io/badge/5--Platform%20Engine-327%20Cmds%201%3A1-success?style=flat-square">
+  <img alt="Feature Breadth: 83.9% (Checklist)" src="https://img.shields.io/badge/Feature%20Breadth-83.9%25%20(124D%2F51P%2F16M)-blue?style=flat-square">
+  <img alt="Real Work Depth: ~53-55% (Alpha)" src="https://img.shields.io/badge/Real%20Work%20Depth-~53--55%25%20(Alpha%20Stage)-red?style=flat-square">
+  <img alt="UI Parity: WASM 75.8% | HTML 26.1%" src="https://img.shields.io/badge/UI%20Surface-WASM%2075.8%25%20%7C%20HTML%2026.1%25-purple?style=flat-square">
   <img alt="License: MIT / Apache-2.0" src="https://img.shields.io/badge/License-MIT%20OR%20Apache--2.0-yellow?style=flat-square">
 </p>
 
 ---
 
-## 📊 [최상단 추적 지표] PowerPoint UI & 기능 구현 스코어카드 및 5대 플랫폼 1:1 대응표
+## 📊 [최상단 엄밀 감사] PowerPoint 대비 실무 체감 깊이(~53%) 및 현실적 한계 전수 공개
 
-> 📈 **실시간 추적관리 대시보드**: **[`PARITY_TRACKER.md`](./PARITY_TRACKER.md)** (`npm run parity:audit` 자동 생성 · `npm run parity:check` 드리프트 검증)  
-> 📖 **전체 엔진 커맨드 명세서**: **[`SPECIFICATION.md`](./SPECIFICATION.md)** (PowerPoint 16.113 / M365 클린룸 리버싱 327개 엔진 커맨드 · 24개 MCP 툴 전수 명세)
+> ⚠️ **솔직한 현실 공지 (No Exaggeration Policy)**:  
+> 체크리스트 상의 "기능 이름 존재율(Breadth)"은 **83.9%**이지만, 실제 직장인이 Microsoft PowerPoint 대신 업무에 즉시 투입할 수 있는 **"실무 체감 깊이(Ready for real work)"는 현재 ~53~55% (Alpha 단계)**입니다.  
+> 📈 **심층 추적관리 대시보드**: **[`PARITY_TRACKER.md`](./PARITY_TRACKER.md)** (`npm run parity:audit` 자동 검증)  
+> 📖 **엔진 커맨드 명세서**: **[`SPECIFICATION.md`](./SPECIFICATION.md)** (327개 엔진 커맨드 · 24개 MCP 툴 전수 규격)
 
-### 0️⃣ PowerPoint 대비 구현(`✅`) · 부분 구현(`🟡`) · 미구현(`❌`) 정량 관리 지표 (KPI)
+### 0️⃣ "파워포인트랑 왜 너무 다른가?" — 냉정한 8대 핵심 괴리 (Reality Check)
 
-과장 없이 코드·바이너리 정적/동적 스캔([`scripts/audit-parity.ts`](./scripts/audit-parity.ts))으로 검증된 현재 구현 수준입니다:
+실제 Microsoft PowerPoint 365(macOS/Windows)와 비교했을 때 사용자가 체감하는 결정적 차이점입니다:
+
+1. **WASM 엔진 vs Webview HTML 폴백 모드의 극심한 격차**:
+   - `⚡ WASM Studio 모드`: 기능 너비 84%, 실무 깊이 55%. 전체 10개 리본 탭 및 캔버스 직접 조작 지원.
+   - `🪟 Webview HTML 모드`: **기능 완성도 26.1% (미구현 43개 블록)**. 탭 6개만 존재하며 애니메이션/검토/서식창/문맥탭이 아예 없는 간이 뷰어 수준.
+2. **UI 언어**: 파워포인트는 한국어 포함 26개국 언어를 지원하나, Rust `ui-egui` 엔진은 **현재 영어 UI 고정** (다국어 카탈로그 부재). *슬라이드 본문 한글 타이핑/렌더링은 완비.*
+3. **차트 편집 (Charts)**: 파워포인트는 차트 클릭 시 Excel 스프레드시트가 열려 수식/다중 계열을 편집하지만, 본 엔진은 텍스트 표 대화상자(`chartData`)에서 기본 값만 수정 가능하며 편집 시 기존 엑셀 바이너리가 유실됨.
+4. **수식 (Equation)**: 파워포인트의 OMML 시각 그래픽 수식 에디터 대비, 본 엔진은 41줄짜리 문자열 치환(`a^2` → `a²`) 플레이스홀더에 불과함.
+5. **폰트 웨이트 (Fonts)**: 파워포인트는 모든 설치 폰트의 세부 굵기(Thin, Light, Regular, SemiBold, Bold, Black)를 지원하나, 본 엔진은 Regular/Bold/Italic 3개로 강제 축약(#69).
+6. **그림/미디어 (Pictures & Media)**: SVG 파일 직접 삽입 불가(PNG 폴백만 렌더링), 배경 제거(누끼) 미지원, 듀얼 모니터 발표자 뷰 자동 분리 미지원.
+7. **비활성화된 리본 버튼**: `Screenshot`, `Ink to Text`, `Ink to Math`, `Record`, `Cameo`, `Translate` 6개 버튼이 UI에는 있으나 비활성(`enabled=false`) 상태.
+8. **파일 포맷 (Files)**: 구형 `.ppt`(97–2003), `.odp`, 암호화 파일 미지원. `.pptx` 저장 시 미디어 재생 옵션 및 애니메이션 되감기 속성 유실 버그(#74, #77) 존재.
+
+---
 
 | KPI 코드 | 평가 차원 | 측정 모수 | ✅ 완전 구현 | 🟡 부분 구현 | ❌ 미구현 | 순수 완결률 | 가중 달성률 |
 |---|---|---:|---:|---:|---:|---:|---:|

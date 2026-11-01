@@ -4,7 +4,8 @@
 > **코어 엔진**: DeckCraft Pure-Rust Presentation Engine (`v0.11.1` · **24 Crates · 202,000+ Lines of Rust · 327 Engine Commands · 42 UI Dialogs · 1,641 Unit/Integration Tests**)  
 > **검증 플랫폼 (5대 타겟 1:1 대응)**: **① CLI (`deckcraft-cli`) · ② MCP (`Model Context Protocol`) · ③ Windows (`deckcraft.exe`) · ④ macOS (`DeckCraft.app`) · ⑤ VS Code Extension (`OPEN_PPTX`)**  
 > **프로젝트 저장소**: [https://github.com/iamywl/OPEN_PPTX.git](https://github.com/iamywl/OPEN_PPTX.git)  
-> 📊 **구현 vs 미구현 정량 지표 & 추적관리 원장**: **[`PARITY_TRACKER.md`](./PARITY_TRACKER.md)** (`191개 피처: 124D / 51P / 16M [83.9%]` · `67개 UI 블록: 36D / 21P / 10M [75.8%]` · `npm run parity:audit`)
+> 📊 **구현 vs 미구현 정량 지표 & 추적관리 원장**: **[`PARITY_TRACKER.md`](./PARITY_TRACKER.md)** (체크리스트 너비 `83.9%` vs **실무 체감 깊이 `~53-55%`** · `67개 UI 블록: 36D / 21P / 10M [75.8%]` · `npm run parity:audit`)  
+> ⚠️ **엄밀 감사 결과**: 체크리스트 상 84%의 기능 이름이 존재하나, 실제 파워포인트 수준의 실무 사용성(Depth)은 **Alpha 단계(~55%)**에 위치하며 엑셀 차트 연동, 시각 수식, 다국어 UI, 다중 폰트 웨이트 등에서 중대한 격차(Gaps)가 확인되었습니다.
 
 ---
 

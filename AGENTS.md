@@ -86,6 +86,13 @@ This project adapts **DeckCraft**, an open-source presentation engine written in
         - Statically scans `crates/ui-egui/src/dialogs.rs` (**42/60 dialogs = 70.0%**, 41 functional + 1 `equation` placeholder), auto-detects **6 disabled Rust Ribbon buttons** (`Screenshot`, `Ink to Text`, `Ink to Math`, `Record`, `Cameo`, `Translate`), and asserts **0 mock `alert()` handlers** in `src/webview/template.ts`.
         - Outputs deterministic `parity/parity-metrics-snapshot.json` and [`PARITY_TRACKER.md`](./PARITY_TRACKER.md), and enforces drift-free synchronization via `npm run parity:check`.
       - **VS Code Command Integration**: Registered `deckcraft.showParityReport` (`"DeckCraft: Open PowerPoint UI & Feature Parity Tracker"`) in `package.json` and `src/extension.ts`, wired `tabDesign`/`tabTransitions` buttons in `src/webview/template.ts` to live `runEngineCommand`, and removed unsupported legacy binary `*.ppt` from `customEditors`.
+13. **Rigorous Reality-Check Audit (Feature Breadth 84% vs Real Work Depth ~53%)**:
+    - **User Challenge**: *"명확히 제대로 조사한 거 맞아? 다시 엄밀히 조사해"*.
+    - Executed a deep, uncompromising code-level audit exposing the exact root causes of why the engine feels so different from Microsoft PowerPoint:
+      - **Checklist Breadth (83.9%) vs Practitioner Depth (~53-55%)**: Clarified that 84% represents only the presence of feature names in the checklist, whereas actual production readiness for a professional workflow is **~53% (Alpha stage)**, with Beta requiring 120-210 agent hours.
+      - **Runtime Disparity (WASM 75.8% vs HTML 26.1%)**: Explicitly documented that the HTML Webview fallback lacks 43 of 67 UI blocks (no animation/review/draw tabs, no format/selection panes, no contextual tabs), explaining why users experience a massive downgrade if viewing HTML mode.
+      - **The 8 Concrete Technical Gaps**: Documented the real barriers—no Excel integration (plain text grid that deletes embedded workbooks on save #335), equation dialog being a 41-line string substitution instead of OMML, font engine locking out non-Regular/Bold weights (#69), English-only UI, 6 disabled ribbon buttons, no SVG insert, no dual-monitor presenter view, and silent drop of media/rewind settings on PPTX roundtrip (#74, #77).
+      - Synced this reality check into `README.md`, `PARITY_TRACKER.md`, `SPECIFICATION.md`, and `parity/powerpoint-parity.json`.
 
 ---
 
