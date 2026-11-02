@@ -1,8 +1,41 @@
-# AGENTS.md — OPEN_PPTX (DeckCraft VS Code Extension)
+# AGENTS.md — OPEN_PPTX Master Multi-Agent Constitution
 
-> **Agent Architecture, Conversation Record & Loop Engineering Specification**  
+> **Master Agent Architecture, Delegation Pipeline & Governance Specification**  
 > Repository: [https://github.com/iamywl/OPEN_PPTX.git](https://github.com/iamywl/OPEN_PPTX.git)  
 > Upstream Core: [https://github.com/storytold/deckcraft](https://github.com/storytold/deckcraft)
+
+---
+
+## 0. 5대 전문 에이전트 시스템 (Specialized Agent Architecture)
+
+본 프로젝트는 기획, 개발, QA, 배포의 자가 검증 오류를 방지하고 철저한 역할 분리를 위해 **5대 전문 에이전트 체계**를 따릅니다. 모든 에이전트 세션은 아래 전문 규칙 파일을 반드시 준수해야 합니다:
+
+```mermaid
+graph TD
+    Master["👑 AGENTS.md (총괄 오케스트레이터 & 거버넌스 헌장)"]
+    
+    Master --> A["📋 01_planner.md (기획 & 패리티 아키텍트)"]
+    Master --> B["⚡ 02_engine_architect.md (Rust 코어 & WASM/MCP 개발자)"]
+    Master --> C["🎨 03_ui_ux_craftsman.md (Webview UI & 한글 IME 인터랙션)"]
+    Master --> D["🔬 04_adversarial_qa.md (독립 적대적 QA & 실기기 감사관)"]
+    Master --> E["🚀 05_release_governor.md (크로스플랫폼 배포 & 버전 관리)"]
+    
+    A -.->|"명세 및 Acceptance Criteria 전달"| B
+    A -.->|"UI 패리티 요구사항 정의"| C
+    B & C -.->|"산출물 제출"| D
+    D -.->|"실사용 체감 검증 불합격 시 반려"| B
+    D -.->|"실사용 체감 검증 불합격 시 반려"| C
+    D == "100% 실측 PASS 승인" ==> E
+    E --> VSIX["최종 VSIX 빌드 & 실기기 설치 배포"]
+```
+
+| 전문 에이전트 규칙 파일 | 역할 정의 | 핵심 책임 및 통제 영역 |
+|---|---|---|
+| **[`01_planner.md`](.agents/rules/01_planner.md)** | **기획 & 패리티 아키텍트** | MS PowerPoint 1:1 패리티 감사, 명세서(`SPECIFICATION.md`, `PARITY_TRACKER.md`) 총괄, 체크리스트 명칭과 실무 깊이 분리 |
+| **[`02_engine_architect.md`](.agents/rules/02_engine_architect.md)** | **Rust 코어 & 엔진 개발자** | 24개 Rust 크레이트, 327개 엔진 커맨드, WASM 컴파일, OpenXML 파서, 24개 도구 MCP 서버 |
+| **[`03_ui_ux_craftsman.md`](.agents/rules/03_ui_ux_craftsman.md)** | **Webview UI/UX 장인** | Office 365 룩앤필 글래스모피즘 리본, 슬라이드 인라인 한글 DOM IME 조합기, 8방향 리사이즈 핸들 |
+| **[`04_adversarial_qa.md`](.agents/rules/04_adversarial_qa.md)** | **독립 적대적 QA 감사관** | 개발자와 분리된 12단계 마스터 QA 실행, "스크립트 통과와 실사용 체감 분리" 팩트체크, 100% 실캡처 검증 |
+| **[`05_release_governor.md`](.agents/rules/05_release_governor.md)** | **배포 & 릴리스 관리자** | 3대 OS 바이너리 패키징, VSIX 번들링, 사용자 맥북 실기기 설치(`code --install-extension`), Git 버전 거버넌스 |
 
 ---
 
