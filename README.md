@@ -35,7 +35,7 @@
 1. **WASM 엔진 vs Webview HTML 폴백 모드의 극심한 격차**:
    - `⚡ WASM Studio 모드`: 기능 너비 84%, 실무 깊이 55%. 전체 10개 리본 탭 및 캔버스 직접 조작 지원.
    - `🪟 Webview HTML 모드`: **기능 완성도 26.1% (미구현 43개 블록)**. 탭 6개만 존재하며 애니메이션/검토/서식창/문맥탭이 아예 없는 간이 뷰어 수준.
-2. **UI 언어**: 파워포인트는 한국어 포함 26개국 언어를 지원하나, Rust `ui-egui` 엔진은 **현재 영어 UI 고정** (다국어 카탈로그 부재). *슬라이드 본문 한글 타이핑/렌더링은 완비.*
+2. **UI 언어 및 한글 IME 현실**: 파워포인트는 한국어 포함 26개국 언어를 지원하나, Rust `ui-egui` 엔진은 **현재 영어 UI 고정** (다국어 번역율 0%, 1,050개 문자열 미번역). 또한 WASM Web 캔버스 상에서는 브라우저 한계로 한글 자판 직접 조합이 제한되며(자모 분리 현상, 업스트림 `docs/gaps.md:443` 미해결 과제), OpenXML UTF-8 입출력 및 CLI 고해상도 래스터 렌더링에서 한글이 정상 지원됩니다. 에디터 내 한글 타이핑은 DOM 기반 `🪟 Webview UI` 또는 `💻 DeckCraft.app` 데스크톱 앱 연동을 권장합니다.
 3. **차트 편집 (Charts)**: 파워포인트는 차트 클릭 시 Excel 스프레드시트가 열려 수식/다중 계열을 편집하지만, 본 엔진은 텍스트 표 대화상자(`chartData`)에서 기본 값만 수정 가능하며 편집 시 기존 엑셀 바이너리가 유실됨.
 4. **수식 (Equation)**: 파워포인트의 OMML 시각 그래픽 수식 에디터 대비, 본 엔진은 41줄짜리 문자열 치환(`a^2` → `a²`) 플레이스홀더에 불과함.
 5. **폰트 웨이트 (Fonts)**: 파워포인트는 모든 설치 폰트의 세부 굵기(Thin, Light, Regular, SemiBold, Bold, Black)를 지원하나, 본 엔진은 Regular/Bold/Italic 3개로 강제 축약(#69).
@@ -58,7 +58,7 @@
 | **KPI-7** | **레이아웃 & 서식 정밀도 (Layout Precision — [`보고서`](./LAYOUT_PRECISION_GAP_REPORT.md))** | **42개 정밀 항목** | **19.5개** (46.4%) | **14개** (33.3%) | **8.5개** (20.2%) | **46.4%** | **Native 46.5% / HTML 9.3%** |
 
 * **주요 미구현(`❌`) 및 비활성 항목 요약** (상세 내역은 [`PARITY_TRACKER.md` 4절](./PARITY_TRACKER.md) 참조):
-  * **UI/쉘**: macOS 네이티브 상단 메뉴바 미장착(`menus.rs`), `ui-egui` 다국어 UI 미번역(영문 고정; 슬라이드 한글 IME/폰트는 완비), `Record` 리본 탭 플레이스홀더, 리본 비활성 버튼 6종(`Screenshot`, `Ink to Text`, `Ink to Math`, `Record`, `Cameo`, `Translate`), `Chart Format`·`Video/Audio Format` 문맥 탭 미분리.
+  * **UI/쉘**: macOS 네이티브 상단 메뉴바 미장착(`menus.rs`), `ui-egui` 다국어 UI 미번역(영문 고정 0%; WASM 캔버스 브라우저 한글 IME 조합 한계 존재), `Record` 리본 탭 플레이스홀더, 리본 비활성 버튼 6종(`Screenshot`, `Ink to Text`, `Ink to Math`, `Record`, `Cameo`, `Translate`), `Chart Format`·`Video/Audio Format` 문맥 탭 미분리.
   * **기능/포맷**: 레거시 `.ppt`(97–2003)·`.odp`·`.pptm`(매크로) 열기/저장, 문서 암호화 보호, OS 직접 프린터 인쇄 창(현재 PDF 경유), SVG 직접 삽입(PNG 폴백만 표시), 그림 배경 자동 제거, OMML 시각 수식 편집기, MP4 동영상 내보내기, 듀얼 모니터 보조 화면 발표자 뷰 자동 분리.
 
 ---
@@ -76,7 +76,7 @@
 | **지원 문서 입출력** | `.pptx`, `.potx`, `.ppsx`, `.deckcraft`, `.md`, `.txt`, `.rtf` (열기/저장) + `.pdf`, `.png`, `.jpg`, `.gif` (내보내기) | `open_presentation`, `save_presentation`, `export` | 네이티브 파일 다이얼로그 + 드래그앤드롭 | 네이티브 macOS 파일 다이얼로그 | VS Code Custom Editor (`.pptx`, `.potx`, `.ppsx`, `.deckcraft`) + 호스트 파일 다이얼로그 브리지 | ✅ **100% 1:1** |
 | **렌더링 & 내보내기** | `render`, `render-transition`, `convert` | `render_slide`, `export`, `screenshot` | 백스테이지 `Export` + `Ctrl+P` / `Ctrl+S` | 백스테이지 `Export` + `Cmd+P` / `Cmd+S` | WASM `Ctrl/Cmd+S` 자동 저장 브리지 + 상단 PDF/PNG/MD/PPTX 추출 | ✅ **100% 1:1** |
 | **외부 원격 제어 & AI 연동** | `--cmd` / `--script` 배치 실행 | 24개 MCP 도구 (`run_command`, `batch`, `pointer`, `key`, `screenshot` 등) | `--control <port>` (TCP JSON-lines 16개 RPC) | `--control <port>` (TCP JSON-lines 16개 RPC) | `DeckcraftMcpManager` (Headless 샌드박스 & `--connect` 라이브 앱 연동) | ✅ **100% 1:1** |
-| **한글(CJK) & 시스템 폰트** | OS 시스템 폰트 자동 스캔 (`crates/fonts`) | OS 시스템 폰트 자동 스캔 | DirectWrite / `C:\Windows\Fonts` (`맑은 고딕` 등) | CoreText / `/System/Library/Fonts` (`Apple SD 산돌고딕 Neo` 등) | `deckcraftEditor.ts`가 OS 한글 TTF를 스캔해 WASM `SlideApp`에 실시간 주입 | ✅ **100% 1:1** |
+| **한글(CJK) & 시스템 폰트** | OS 시스템 폰트 자동 스캔 (`crates/fonts`) | OS 시스템 폰트 자동 스캔 | DirectWrite / `C:\Windows\Fonts` (`맑은 고딕` 등) | CoreText / `/System/Library/Fonts` (`Apple SD 산돌고딕 Neo` 등) | `deckcraftEditor.ts` 한글 TTF 주입 (WASM 직접 타이핑은 브라우저 IME 한계로 DOM 모드 권장) | 🟡 **부분 대응** |
 
 ---
 
@@ -178,7 +178,7 @@ OPEN_PPTX는 마우스 조작을 최소화하고 파워포인트 고유의 키�
 | 단축키 / 조작 | 기능 설명 |
 |---|---|
 | **빈 캔버스 더블클릭** | 마우스 클릭 좌표에 새 텍스트 박스 즉시 생성 및 타이핑 포커스 |
-| **도형 더블클릭** / `Enter` | 슬라이드 위에서 인라인 텍스트 편집 모드 진입 (한글 완성형/조합형 완벽 지원) |
+| **도형 더블클릭** / `Enter` | 슬라이드 위에서 인라인 텍스트 편집 모드 진입 (DOM 기반 한글 입력 지원) |
 | `Esc` / `Cmd + Enter` | 인라인 텍스트 저장 확정 및 편집기 종료 |
 | `Delete` / `Backspace` | 선택된 도형/텍스트 박스 즉시 삭제 |
 | `Cmd + D` (도형 선택 시) | 선택된 도형 즉시 복제 |
@@ -259,7 +259,7 @@ OPEN_PPTX는 **Apple Silicon (M1~M4) & Intel Universal**, **Windows (x64/ARM64)*
 * **고화질 렌더링 & 변환**: 벡터 PDF (862.5 KB) & 마크다운 개요 PASS
 * **스크린샷 에셋 검증**: 6개 고해상도 이미지 전수 검증 PASS
 * **웹뷰 DOM 무결성 검증**: 54개 DOM ID & 단일 단축키 라우터 PASS
-* **한글 UTF-8 인코딩**: 한글 입력/수정/렌더링 100% PASS
+* **한글 UTF-8 인코딩 & CLI 렌더링**: 한글 메타데이터 보존 및 래스터화 100% PASS (에디터 IME는 AGENTS.md 6절 가이드 참조)
 
 ---
 

@@ -795,10 +795,10 @@
       "pptDefinition": "슬라이드 위 직접 타이핑, PowerPoint 동일 단어 경계 이동(Ctrl/Opt+방향키), 한글 조합, 편집 중 테두리 드래그 이동",
       "priority": "P0",
       "nativeApp": "D",
-      "vscodeWasm": "D",
+      "vscodeWasm": "P",
       "vscodeHtml": "P",
       "codeRefs": ["deckcraft_upstream/crates/ui-egui/src/ime_hooks.rs", "src/webview/template.ts"],
-      "gap": "Native/WASM 및 HTML contenteditable 모두 한글 IME 직접 입력 지원"
+      "gap": "Native App은 OS IME 조합 지원하나, WASM Web 캔버스는 브라우저 IME 조합 미지원(자모 분리/영문 입력, upstream #101 미해결). HTML은 contenteditable/textarea 모달로 부분 지원."
     },
     {
       "id": "UI-7-06",

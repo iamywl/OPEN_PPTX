@@ -22,7 +22,7 @@
 │  [Loop 2] CLI 엔진 바이너리 실행 & 11개 서브커맨드         ✅ 100% PASS   │
 │  [Loop 3] OpenXML (.pptx) 파싱 & 메타데이터 추출          ✅ 100% PASS   │
 │  [Loop 4] 고해상도 래스터화 (1440×810) & 벡터 PDF 변환     ✅ 100% PASS   │
-│  [Loop 5] 한글(Korean) 조합형 IME & UTF-8 타이포그래피    ✅ 100% PASS   │
+│  [Loop 5] 한글(Korean) UTF-8 저장 & CLI 렌더링 무결성      ✅ 100% PASS   │
 │  [Loop 6] 프레젠테이션 생성·편집 풀 라운드트립             ✅ 100% PASS   │
 │  [Loop 7] VS Code 커스텀 에디터 런타임 시뮬레이션          ✅ 100% PASS   │
 │  [Loop 8] Webview 103개 DOM ID & CSP Nonce 보안 무결성   ✅ 100% PASS   │
@@ -72,14 +72,15 @@
   - 벡터 PDF 변환 파일 크기: **862.5 KB** (텍스트 벡터화 및 폰트 임베딩 보존).
   - 마크다운 아웃라인 추출: 1,071자 (슬라이드 제목 및 본문 계층 구조 완벽 추출).
 
-### [Loop 5] 한글(Korean) 조합형 IME 및 다국어 타이포그래피 검증
+### [Loop 5] 한글(Korean) UTF-8 저장 및 CLI 렌더링 무결성 검증
 - **실행 스크립트**: `npx ts-node scripts/verify-korean.ts`
-- **테스트 결과**: **PASS**
+- **테스트 결과**: **PASS (파일 입출력 및 정적 렌더링 무결성)**
 - **세부 검증 내용**:
   - 한글 슬라이드 생성: `qa_output/korean_verification/korean_deck.pptx` (25,403 bytes).
   - 제목 및 본문 UTF-8 무결성: `"오픈 파워포인트 스튜디오 (OPEN_PPTX)"`, `"Rust 기반 고성능 프레젠테이션 엔진"`.
   - 발표자 메모 한글 보존: `"발표자 메모: 한글 텍스트 및 유니코드 UTF-8 정상 렌더링"`.
-  - 고해상도 렌더링 검증: 1920×1080 PNG 렌더링 시 Pretendard / Apple SD 산돌고딕 Neo 글리프 정상 출력.
+  - 고해상도 렌더링 검증: 1920×1080 PNG 렌더링 시 Apple SD 산돌고딕 Neo 글리프 정상 출력.
+  - **주의 및 한계점 (`AGENTS.md` Section 6)**: 본 테스트는 OpenXML 디스크 입출력과 CLI 래스터 렌더링 검증이며, 에디터 내 인터랙티브 한글 자판 타이핑(WASM Web 캔버스 상의 브라우저 IME 조합 한계)이나 UI 한글화는 별도 계층으로 추적 관리됨.
 
 ### [Loop 6] 프레젠테이션 생성·편집 풀 라운드트립
 - **실행 스크립트**: `npx ts-node scripts/verify-full-roundtrip.ts`

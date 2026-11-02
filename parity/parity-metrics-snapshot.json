@@ -65,12 +65,12 @@
       "totalUiBlocks": 67,
       "vscodeWasmStudio": {
         "total": 67,
-        "done": 36,
-        "partial": 21,
+        "done": 35,
+        "partial": 22,
         "missing": 10,
-        "strictDonePct": 53.7,
-        "unweightedScore": 69.4,
-        "weightedPct": 75.8
+        "strictDonePct": 52.2,
+        "unweightedScore": 68.7,
+        "weightedPct": 74.8
       },
       "nativeDesktopApp": {
         "total": 67,
@@ -557,12 +557,12 @@
       },
       "wasm": {
         "total": 8,
-        "done": 6,
-        "partial": 2,
+        "done": 5,
+        "partial": 3,
         "missing": 0,
-        "strictDonePct": 75,
-        "unweightedScore": 87.5,
-        "weightedPct": 90
+        "strictDonePct": 62.5,
+        "unweightedScore": 81.3,
+        "weightedPct": 82.5
       },
       "html": {
         "total": 8,
