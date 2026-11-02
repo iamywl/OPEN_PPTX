@@ -129,6 +129,9 @@ pub(crate) fn apply_painted(sh: &mut Shape, p: &Painted) {
 
 ### 3.2 코드 레벨 결함 분석 (`crates/engine/src/cmd/format/paragraph.rs` & `crates/text/`)
 
+![Format Shape Task Pane Real Capture](assets/images/qa-live-format-pane.png)
+*▲ [실제 캡처: Format Shape 작업 창] 수직 맞춤(Anchor: Top/Middle/Bottom)과 내부 여백(Insets: Left/Right/Top/Bottom)이 홈 리본에 노출되지 않고 우측 작업 창에만 격리되어 있어 빠른 서식 지정이 불가함.*
+
 1. **홈 리본 퀵 액세스 단절**:
    - 파워포인트 사용자는 텍스트 상자 안에서 글자를 가운데 정렬할 때 `Ctrl+E`(수평 가운데)와 리본의 `텍스트 맞춤 -> 중간(Middle)`을 즉시 사용합니다.
    - DeckCraft는 `format.anchor` 명령(`paragraph.rs#L321`)을 갖추고 있지만, 홈 리본 단락 그룹(`ribbon/home.rs`)에는 수평 정렬 아이콘 4개만 배치되어 있고 수직 맞춤 버튼이 누락되어 있어, 사용자는 포맷 패널을 열어 콤보박스를 클릭해야 하는 심각한 UX 마찰을 겪습니다.
@@ -157,6 +160,9 @@ pub(crate) fn apply_painted(sh: &mut Shape, p: &Painted) {
 | **안내선 색상 지정 (Guide Color Customization)** | ✅ 각 안내선별 개별 색상 지정 가능 | ❌ 단일 회색 점선 고정 (`guides.rs#L14`) | ❌ 미지원 | ❌ 결여 |
 
 ### 4.2 코드 레벨 결함 분석 (`crates/engine/src/cmd/arrange.rs` & `tools/geometry.rs`)
+
+![Shape Format Ribbon Real Capture](assets/images/qa-live-shape-format.png)
+*▲ [실제 캡처: Shape Format 문맥 탭] 도형 선택 시 활성화되는 정렬(Align) 드롭다운과 크기 조절 컨트롤. 3개 미만 선택 시 슬라이드 전체 폭으로 강제 배분되는 버그와 등간격 스마트 가이드 결여가 확인됨.*
 
 ```rust
 // [crates/engine/src/cmd/arrange.rs:338]
@@ -202,6 +208,9 @@ for edge in [r.x0, r.center().x, r.x1].into_iter().zip(xs_on).filter_map(|(e, on
 
 ### 5.2 코드 레벨 결함 분석 (`crates/ui-egui/src/ribbon/picture_format.rs`)
 
+![VS Code Classic HTML Fallback Ribbon](assets/images/qa-live-vscode-classic.png)
+*▲ [실제 캡처: VS Code Classic HTML 폴백 화면] 그림 서식 탭, 사진 자르기 핸들, 개체 정렬 도구가 완전히 결여된 HTML Webview 모드의 실태 (성숙도 9.3%).*
+
 ```rust
 // [crates/ui-egui/src/ribbon/picture_format.rs:154-168]
 // ⚠️ 충격적인 UI 실태: 파워포인트의 핵심 기능인 자르기가 10%, 20% 고정 버튼 3개로 때워져 있음!
@@ -238,6 +247,13 @@ for edge in [r.x0, r.center().x, r.x1].into_iter().zip(xs_on).filter_map(|(e, on
 | **3. 개체 정렬 & 스마트 가이드 (Alignment)** | 10개 항목 | 100.0% | 50.0% (5/10) | 50.0% (5/10) | 15.0% (1.5/10) |
 | **4. 그림 정렬 & 자르기 (Picture Crop)** | 10개 항목 | 100.0% | 30.0% (3/10) | 30.0% (3/10) | 0.0% (0/10) |
 | **가중 종합 성숙도 (Weighted Precision Score)** | **42개 항목** | **100.0%** | **46.5%** | **46.5%** | **9.3%** |
+
+```carousel
+![Precision Render Proof](assets/images/qa-live-precision-render.png)
+<!-- slide -->
+![Korean Typography Proof](assets/images/qa-live-korean.png)
+```
+*▲ [실제 렌더링 검증] 좌: 기하 벡터 도형 및 영문 라운드트립 렌더링 / 우: 한글 유니코드 고해상도 렌더링 (1920×1080 실측)*
 
 > [!CAUTION]
 > **냉정한 현실 진단**:
