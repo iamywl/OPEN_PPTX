@@ -422,15 +422,15 @@ export function getWebviewContent(
     }
 
     button.btn-glass-primary {
-      background: linear-gradient(135deg, rgba(242, 107, 29, 0.9), rgba(212, 77, 8, 0.9));
+      background: linear-gradient(135deg, rgba(242, 107, 29, 0.92), rgba(212, 77, 8, 0.92));
       color: #ffffff;
-      border: 1px solid rgba(255, 255, 255, 0.25);
-      box-shadow: 0 0 14px var(--accent-orange-glow), inset 0 1px 0 rgba(255, 255, 255, 0.3);
+      border: 1px solid rgba(255, 255, 255, 0.22);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
     }
 
     button.btn-glass-primary:hover {
-      background: linear-gradient(135deg, #ff7b2b, #ea580c);
-      box-shadow: 0 0 20px rgba(242, 107, 29, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+      background: linear-gradient(135deg, #f97316, #ea580c);
+      box-shadow: 0 4px 12px rgba(242, 107, 29, 0.28), inset 0 1px 0 rgba(255, 255, 255, 0.35);
     }
 
     button.btn-glass-danger {
@@ -1098,13 +1098,13 @@ export function getWebviewContent(
       background: rgba(255, 255, 255, 0.2);
     }
 
-    /* MODAL POPUPS */
+    /* MODAL POPUPS (Ergonomic & Eye-Friendly) */
     .modal-backdrop {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0, 0, 0, 0.65);
-      backdrop-filter: blur(6px);
+      background: rgba(11, 14, 23, 0.45);
+      backdrop-filter: blur(2.5px);
       z-index: 10000;
       align-items: center;
       justify-content: center;
@@ -1116,21 +1116,22 @@ export function getWebviewContent(
 
     .glass-modal {
       width: 440px;
-      background: rgba(28, 33, 46, 0.92);
-      backdrop-filter: blur(24px);
-      border: 1px solid var(--glass-border);
+      background: rgba(24, 29, 43, 0.96);
+      backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.16);
       border-radius: 12px;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.7), var(--glass-highlight);
-      padding: 20px;
+      box-shadow: 0 16px 40px rgba(0, 0, 0, 0.45), inset 0 1px 0 rgba(255, 255, 255, 0.12);
+      padding: 22px;
       display: flex;
       flex-direction: column;
       gap: 14px;
     }
 
     .modal-title {
-      font-size: 15px;
+      font-size: 15.5px;
       font-weight: 600;
-      color: white;
+      color: #f8fafc;
+      letter-spacing: -0.2px;
       display: flex;
       align-items: center;
       justify-content: space-between;
@@ -1143,22 +1144,59 @@ export function getWebviewContent(
     }
 
     .modal-label {
-      font-size: 12px;
-      color: var(--fg-secondary);
+      font-size: 13px;
+      font-weight: 500;
+      color: #cbd5e1;
     }
 
     .modal-input, .modal-select {
-      background: rgba(0, 0, 0, 0.35);
-      border: 1px solid var(--glass-border);
-      border-radius: 6px;
-      color: white;
-      padding: 8px 10px;
-      font-size: 13px;
+      background: rgba(15, 23, 42, 0.65);
+      border: 1px solid rgba(255, 255, 255, 0.16);
+      border-radius: 7px;
+      color: #f8fafc;
+      padding: 9px 12px;
+      font-size: 13.5px;
       outline: none;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .modal-input::placeholder {
+      color: #64748b;
+      opacity: 1;
     }
 
     .modal-input:focus, .modal-select:focus {
       border-color: var(--accent-orange);
+      box-shadow: 0 0 0 3px rgba(242, 107, 29, 0.25);
+    }
+
+    /* Custom Ergonomic Range Slider for Modals */
+    .modal-input-range {
+      -webkit-appearance: none;
+      appearance: none;
+      height: 5px;
+      background: rgba(255, 255, 255, 0.16);
+      border-radius: 3px;
+      outline: none;
+      transition: background 0.15s;
+    }
+    .modal-input-range:hover {
+      background: rgba(255, 255, 255, 0.28);
+    }
+    .modal-input-range::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 15px;
+      height: 15px;
+      border-radius: 50%;
+      background: var(--accent-orange);
+      cursor: pointer;
+      border: 2px solid #ffffff;
+      box-shadow: 0 1px 4px rgba(0, 0, 0, 0.4);
+      transition: transform 0.1s ease;
+    }
+    .modal-input-range::-webkit-slider-thumb:hover {
+      transform: scale(1.15);
     }
 
     .modal-actions {
@@ -1800,44 +1838,44 @@ export function getWebviewContent(
 
   <!-- MODAL: PICTURE CROP -->
   <div class="modal-backdrop" id="modalCrop">
-    <div class="glass-modal" style="width: 440px;">
+    <div class="glass-modal" style="width: 460px;">
       <div class="modal-title">
         <span>✂️ 사진 자르기 (Picture Crop & Frame)</span>
         <button class="btn-glass modal-close" data-close="modalCrop" id="btnCloseCropModal">✕</button>
       </div>
-      <div style="font-size:12px; color:#94a3b8; margin-bottom:12px;">선택한 그림의 상/하/좌/우 영역을 자르거나 고정 가로세로 비율로 마스킹합니다.</div>
-      <div style="display:flex; flex-direction:column; gap:8px;">
+      <div style="font-size:12.5px; color:#cbd5e1; margin-bottom:12px; line-height:1.5;">선택한 그림의 상/하/좌/우 영역을 자르거나 고정 가로세로 비율로 마스킹합니다.</div>
+      <div style="display:flex; flex-direction:column; gap:10px;">
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <label style="font-size:12px;">왼쪽 (%):</label>
-          <input type="range" id="cropRangeLeft" min="0" max="80" value="0" style="width:180px;" />
-          <span id="cropValLeft" style="font-size:12px; width:40px; text-align:right;">0%</span>
+          <label style="font-size:13px; font-weight:500; color:#cbd5e1;">왼쪽 (%):</label>
+          <input type="range" class="modal-input-range" id="cropRangeLeft" min="0" max="80" value="0" style="width:200px;" />
+          <span id="cropValLeft" style="font-size:13px; font-weight:600; color:#f8fafc; font-variant-numeric:tabular-nums; width:45px; text-align:right;">0%</span>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <label style="font-size:12px;">위쪽 (%):</label>
-          <input type="range" id="cropRangeTop" min="0" max="80" value="0" style="width:180px;" />
-          <span id="cropValTop" style="font-size:12px; width:40px; text-align:right;">0%</span>
+          <label style="font-size:13px; font-weight:500; color:#cbd5e1;">위쪽 (%):</label>
+          <input type="range" class="modal-input-range" id="cropRangeTop" min="0" max="80" value="0" style="width:200px;" />
+          <span id="cropValTop" style="font-size:13px; font-weight:600; color:#f8fafc; font-variant-numeric:tabular-nums; width:45px; text-align:right;">0%</span>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <label style="font-size:12px;">오른쪽 (%):</label>
-          <input type="range" id="cropRangeRight" min="0" max="80" value="0" style="width:180px;" />
-          <span id="cropValRight" style="font-size:12px; width:40px; text-align:right;">0%</span>
+          <label style="font-size:13px; font-weight:500; color:#cbd5e1;">오른쪽 (%):</label>
+          <input type="range" class="modal-input-range" id="cropRangeRight" min="0" max="80" value="0" style="width:200px;" />
+          <span id="cropValRight" style="font-size:13px; font-weight:600; color:#f8fafc; font-variant-numeric:tabular-nums; width:45px; text-align:right;">0%</span>
         </div>
         <div style="display:flex; justify-content:space-between; align-items:center;">
-          <label style="font-size:12px;">아래쪽 (%):</label>
-          <input type="range" id="cropRangeBottom" min="0" max="80" value="0" style="width:180px;" />
-          <span id="cropValBottom" style="font-size:12px; width:40px; text-align:right;">0%</span>
+          <label style="font-size:13px; font-weight:500; color:#cbd5e1;">아래쪽 (%):</label>
+          <input type="range" class="modal-input-range" id="cropRangeBottom" min="0" max="80" value="0" style="width:200px;" />
+          <span id="cropValBottom" style="font-size:13px; font-weight:600; color:#f8fafc; font-variant-numeric:tabular-nums; width:45px; text-align:right;">0%</span>
         </div>
       </div>
-      <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.08); padding-top:8px;">
-        <label style="font-size:12px; display:block; margin-bottom:4px;">비율 프리셋:</label>
-        <div style="display:flex; gap:6px;">
-          <button class="btn-glass" id="btnCropRatio1_1" style="font-size:11px; padding:3px 6px;">1:1 정사각형</button>
-          <button class="btn-glass" id="btnCropRatio4_3" style="font-size:11px; padding:3px 6px;">4:3</button>
-          <button class="btn-glass" id="btnCropRatio16_9" style="font-size:11px; padding:3px 6px;">16:9 와이드</button>
-          <button class="btn-glass" id="btnCropReset" style="font-size:11px; padding:3px 6px;">초기화</button>
+      <div style="margin-top:12px; border-top:1px solid rgba(255,255,255,0.1); padding-top:10px;">
+        <label style="font-size:13px; font-weight:500; color:#cbd5e1; display:block; margin-bottom:6px;">비율 프리셋:</label>
+        <div style="display:flex; gap:8px;">
+          <button class="btn-glass" id="btnCropRatio1_1" style="font-size:12px; padding:5px 10px; font-weight:500;">1:1 정사각형</button>
+          <button class="btn-glass" id="btnCropRatio4_3" style="font-size:12px; padding:5px 10px; font-weight:500;">4:3 표준</button>
+          <button class="btn-glass" id="btnCropRatio16_9" style="font-size:12px; padding:5px 10px; font-weight:500;">16:9 와이드</button>
+          <button class="btn-glass" id="btnCropReset" style="font-size:12px; padding:5px 10px; font-weight:500;">초기화</button>
         </div>
       </div>
-      <div class="modal-actions" style="margin-top:14px;">
+      <div class="modal-actions" style="margin-top:16px;">
         <button class="btn-glass modal-close" data-close="modalCrop" id="btnCancelCrop">취소</button>
         <button class="btn-glass btn-glass-primary" id="btnConfirmCrop">✂️ 자르기 적용</button>
       </div>
