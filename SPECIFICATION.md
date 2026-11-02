@@ -6,6 +6,7 @@
 > **프로젝트 저장소**: [https://github.com/iamywl/OPEN_PPTX.git](https://github.com/iamywl/OPEN_PPTX.git)  
 > 📊 **구현 vs 미구현 정량 지표 & 추적관리 원장**: **[`PARITY_TRACKER.md`](./PARITY_TRACKER.md)** (체크리스트 너비 `83.9%` vs **실무 체감 깊이 `~53-55%`** · `67개 UI 블록: 36D / 21P / 10M [75.8%]` · `npm run parity:audit`)  
 > 🔍 **레이아웃 & 서식 정밀도 격차 감사 보고서**: **[`LAYOUT_PRECISION_GAP_REPORT.md`](./LAYOUT_PRECISION_GAP_REPORT.md)** (서식복사 · 글자위치 · 개체정렬 · 사진자르기 **정밀도 성숙도 Native 46.5% / HTML 9.3%**, 42개 항목 전수 실측)  
+> 🧪 **종합 품질 보증(QA) & 실시간 캡처 검증 명세서**: **[`QA_REPORT.md`](./QA_REPORT.md)** (10단계 검증 루프 100% PASS · 9종 실제 라이브 스크린샷 수록)  
 > ⚠️ **엄밀 감사 결과**: 체크리스트 상 84%의 기능 이름이 존재하나, 실제 파워포인트 수준의 실무 사용성(Depth)은 **Alpha 단계(~55%)**에 위치하며 엑셀 차트 연동, 시각 수식, 다국어 UI, 다중 폰트 웨이트, 사진 자르기/스마트가이드 정밀도 등에서 중대한 격차(Gaps)가 확인되었습니다.
 
 ---

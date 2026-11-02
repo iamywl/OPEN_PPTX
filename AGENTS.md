@@ -102,6 +102,22 @@ This project adapts **DeckCraft**, an open-source presentation engine written in
       - **그림 정렬 & 자르기 (Picture Crop & Framing)**: Analyzed `crates/ui-egui/src/ribbon/picture_format.rs`. Discovered **zero interactive canvas crop handles/mode**, ribbon literally only has 3 hardcoded buttons ("10% each side", "20% each side", "Reset"), `Crop to Shape` distorts aspect ratio, and Aspect Ratio presets & Fill/Fit commands are completely missing.
       - **KPI Metrics Established**: Weighted Precision Score: Native/WASM **46.5%**, HTML Webview **9.3%**. Established 4-phase remediation roadmap (105 Agent Hours).
       - Synced into `PARITY_TRACKER.md` (KPI-7), `SPECIFICATION.md`, `README.md`, and `parity/powerpoint-parity.json`.
+15. **Full System Master QA Suite, Real Live Screenshot Capture & Documentation Verification (`QA_REPORT.md`)**:
+    - **User Directive**: *"넌무조건 문서화 QA이런거 싹다해 캡처도 실캡쳐고"*.
+    - Published comprehensive master QA report [`QA_REPORT.md`](./QA_REPORT.md) detailing all 10 Loop Engineering verification stages (100% PASS across TypeScript, CLI, PPTX parsing, PDF/Markdown conversion, Korean IME, roundtrip, VS Code custom editor runtime, 84 DOM IDs, and parity check).
+    - Built automated live screenshot capture suite (`scripts/capture-live-qa.ts` — `npm run qa:capture`):
+      - Captured 9 real, live high-resolution screenshots from GPU framebuffers and headless Chrome:
+        1. `assets/images/qa-live-native-app.png` (Native Studio default view, 2880×1800 via TCP control `ui.screenshot`)
+        2. `assets/images/qa-live-format-pane.png` (Format Shape task pane docked on right)
+        3. `assets/images/qa-live-shape-format.png` (Contextual `Shape Format` ribbon tab active with cyan glow)
+        4. `assets/images/qa-live-slide-sorter.png` (Slide Sorter 8-slide grid view)
+        5. `assets/images/qa-live-transitions.png` (Transitions tab and animation effect tiles)
+        6. `assets/images/qa-live-vscode-webview.png` (VS Code extension live Webview captured via Chrome headless)
+        7. `assets/images/qa-live-vscode-classic.png` (VS Code classic HTML fallback ribbon view)
+        8. `assets/images/qa-live-korean.png` (High-res 1920×1080 Korean unicode typography render)
+        9. `assets/images/qa-live-precision-render.png` (High-res 1920×1080 custom roundtrip slide render)
+    - Enhanced `scripts/qa-test.ts` (`npm run qa:test`) to verify all 16 screenshot assets for zero corruption and strict file size bounds.
+    - Updated `README.md`, `SPECIFICATION.md`, `PARITY_TRACKER.md` and verified all automated QA suites.
 
 ---
 

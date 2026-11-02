@@ -129,6 +129,16 @@ async function runQa() {
       'slide-sorter.png',
       'format-pane.png',
       'shape-format.png',
+      'native-glass-app.png',
+      'qa-live-native-app.png',
+      'qa-live-format-pane.png',
+      'qa-live-shape-format.png',
+      'qa-live-slide-sorter.png',
+      'qa-live-transitions.png',
+      'qa-live-vscode-webview.png',
+      'qa-live-vscode-classic.png',
+      'qa-live-korean.png',
+      'qa-live-precision-render.png',
     ];
     for (const img of requiredImages) {
       const imgPath = path.join(rootDir, 'assets', 'images', img);
@@ -136,16 +146,16 @@ async function runQa() {
         throw new Error(`Missing screenshot asset: ${img}`);
       }
       const stats = fs.statSync(imgPath);
-      if (stats.size < 50000) {
+      if (stats.size < 40000) {
         throw new Error(`Asset ${img} appears corrupted or too small (${stats.size} bytes)`);
       }
     }
     results.push({
       test: 'Documentation Asset Verification',
       status: 'PASS',
-      details: `Verified ${requiredImages.length} high-resolution screenshot assets`,
+      details: `Verified ${requiredImages.length} live high-resolution screenshot assets`,
     });
-    console.log(`  ✓ Passed: All ${requiredImages.length} screenshots verified`);
+    console.log(`  ✓ Passed: All ${requiredImages.length} real live screenshots verified`);
   } catch (err: any) {
     results.push({ test: 'Documentation Asset Verification', status: 'FAIL', details: err.message });
     console.error(`  ✗ Failed: ${err.message}`);

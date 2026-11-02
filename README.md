@@ -23,6 +23,7 @@
 
 > ⚠️ **솔직한 현실 공지 (No Exaggeration Policy)**:  
 > 체크리스트 상의 "기능 이름 존재율(Breadth)"은 **83.9%**이지만, 실제 직장인이 Microsoft PowerPoint 대신 업무에 즉시 투입할 수 있는 **"실무 체감 깊이(Ready for real work)"는 현재 ~53~55% (Alpha 단계)**입니다.  
+> 🧪 **종합 QA 및 실시간 캡처 검증 보고서**: **[`QA_REPORT.md`](./QA_REPORT.md)** (10단계 검증 루프 100% PASS · 9종 실제 라이브 스크린샷 전수 수록)  
 > 🔍 **레이아웃 & 서식 정밀도 격차 감사 보고서**: **[`LAYOUT_PRECISION_GAP_REPORT.md`](./LAYOUT_PRECISION_GAP_REPORT.md)** (서식복사 · 글자위치 · 개체정렬 · 사진자르기 **정밀도 성숙도 Native 46.5% / HTML 9.3%**, 42개 항목 전수 실측)  
 > 📈 **심층 추적관리 대시보드**: **[`PARITY_TRACKER.md`](./PARITY_TRACKER.md)** (`npm run parity:audit` 자동 검증)  
 > 📖 **엔진 커맨드 명세서**: **[`SPECIFICATION.md`](./SPECIFICATION.md)** (327개 엔진 커맨드 · 24개 MCP 툴 전수 규격)
@@ -114,47 +115,41 @@
 DeckCraft의 고성능 Rust 렌더링 코어(`deckcraft_ui_egui::SlideApp`)와 초현대적인 **글래스모피즘(Liquid Glassmorphism)** 디자인 시스템을 통해 **VS Code 익스텐션(WASM 엔진)과 네이티브 데스크톱 앱(`DeckCraft.app`) 양쪽 모두에서 100% 1:1로 동일한 파워포인트 스튜디오**를 경험할 수 있습니다.
 
 ### 0. 글래스모피즘 네이티브 엔진 & 데스크톱 앱 1:1 동등성 (100% Native Engine & Glassmorphism UI)
-![Glassmorphism Native DeckCraft Studio](assets/images/native-glass-app.png)
+![Glassmorphism Native DeckCraft Studio](assets/images/qa-live-native-app.png)
 * **VS Code & 네이티브 앱 100% 단일 코드베이스**: `deckcraft_upstream/crates/ui-egui`의 `SlideApp`을 WebAssembly(`assets/wasm/deckcraft-web_bg.wasm`)와 네이티브 앱(`bin/DeckCraft.app`) 양쪽으로 동시 빌드하여 기능 격차를 완전히 제거했습니다.
 * **딥 스페이스 글래스모피즘 테마 (`theme.rs` & `ribbon.rs`)**: 옵시디언 글래스 배경(`#111522`), 반투명 슬레이트 리본 카드(`#1C2234`)와 상단 1px 스페큘러 하이라이트, 레이디언트 오렌지(`#f26b1d`) 액센트, 그리고 도형 선택 시 활성화되는 시안 글로우(`#38bdf8` / `#0ea5e9`) 문맥 탭(`Shape Format`) 및 벡터 바운딩 핸들을 기본 적용했습니다.
 * **전 기능 리본 탭 & 우측 Format Shape 패널**: `File`, `Home`, `Insert`, `Draw`, `Design`, `Transitions`, `Animations`, `Slide Show`, `Record`, `Review`, `View` 10개 기본 탭과 도형/표/차트/SmartArt 선택 시 동적으로 열리는 문맥 탭, 우측 `Format Shape` 세부 서식 창을 완벽 지원합니다.
 
 ---
 
-### 1. 프레젠테이션 에디터 & 캔버스 직접 조작 (WYSIWYG Editor View)
-![DeckCraft Editor](assets/images/editor.png)
-* **슬라이드 필름스트립**: 왼쪽 사이드바에서 모든 슬라이드의 썸네일, 슬라이드 번호(`#1`), 레이아웃 종류를 한눈에 탐색.
-* **인-캔버스 실시간 편집**: 슬라이드 위 글자를 더블클릭하면 팝업창 없이 슬라이드 위에서 바로 커서가 깜빡이며 타이핑 가능 (한글 IME 지원).
-* **8-Point 리사이즈 핸들**: 요소를 클릭하면 8개의 조절점이 나타나며 마우스 드래그로 자유로운 크기 조절 및 위치 이동 지원.
-* **플로팅 퀵 액션 바**: 요소 선택 시 바로 위에 `✏️ 직접 수정`, `B 굵게`, `I 기울임`, `U 밑줄`, `A+`/`A-`, `📋 복제`, `🗑️ 삭제` 미니 툴바 노출.
+### 1. VS Code 확장프로그램 1:1 WASM 스튜디오 (VS Code Webview Studio View)
+![VS Code WASM Studio](assets/images/qa-live-vscode-webview.png)
+* **VS Code 안에서 100% 순수 WASM 엔진 직접 구동**: VS Code 내부에서 WebGL2를 통해 순수 Rust `SlideApp`을 그대로 렌더링.
+* **실시간 자동 저장 & 양방향 파일 브릿지**: `Ctrl+S` / `Cmd+S` 클릭 시 VS Code 파일 시스템으로 실시간 무손실 저장 (`Services::write`).
+* **경량 HTML 폴백 모드 전환 지원**: 헤비 그래픽 가속이 불가능한 원격 컨테이너 환경을 위해 클래식 HTML 리본 모드(`qa-live-vscode-classic.png`) 원클릭 전환 버튼 제공.
 
 ---
 
-### 2. 다크 모드 & 네이티브 차트 렌더링 (Dark Mode & Native Charts)
-![Dark Mode View](assets/images/dark-mode.png)
-* **눈이 편안한 다크 모드**: VS Code의 테마와 완벽하게 일체화되는 딥 블루/차콜 글래스 인터페이스 (`backdrop-filter: blur(24px)`).
-* **정밀 벡터 차트 엔진**: 막대형, 꺾은선형, 원형(Pie/Doughnut) 차트 등 파워포인트 내장 데이터 차트를 왜곡 없이 고화질로 렌더링.
-
----
-
-### 3. 슬라이드 분류기 & 화면 전환 효과 (Slide Sorter & Transitions)
-![Slide Sorter](assets/images/slide-sorter.png)
-* **프레젠테이션 조망**: 수십 장의 발표 자료를 바둑판 배열로 한눈에 파악하고 드래그하여 순서 재배치.
-* **전환 효과 메타데이터**: Fade, Wipe, Push, Split, Morph 등 슬라이드별 화면 전환 효과를 HUD 뱃지로 직관적으로 확인.
-
----
-
-### 4. 도형 서식 및 기하학적 제어 (Shape Format & Geometry)
-![Shape Format](assets/images/shape-format.png)
-* **파워포인트 도형 지원**: 사각형, 둥근 사각형(Squircle), 타원, 별, 화살표 등 다양한 도형을 상단 리본에서 원클릭으로 캔버스에 추가.
-* **자유로운 변형**: 회전 각도, 비율 고정 리사이징, 다각형 꼭짓점 좌표 제어.
-
----
-
-### 5. 세부 스타일링 & 채우기 패널 (Format Pane & Effects)
-![Format Pane](assets/images/format-pane.png)
+### 2. 세부 스타일링 & 우측 서식 작업 창 (Format Shape Task Pane)
+![Format Shape Pane](assets/images/qa-live-format-pane.png)
 * **디테일한 그래픽 옵션**: 단색 채우기(Solid Fill), 선형/방사형 그라디언트(Gradient), 투명도 조절.
 * **그림자 및 반사 효과**: 부드러운 드롭 섀도우(Drop Shadow), 네온 글로우(Glow) 효과를 슬라이드 요소에 적용.
+* **텍스트 상자 세부 여백 제어**: 상하좌우 내부 여백(`inset_l/r/t/b`), 수직 맞춤(Top/Middle/Bottom), 자동 줄바꿈.
+
+---
+
+### 3. 도형 선택 & 문맥 리본 탭 (Contextual Shape Format Tab)
+![Shape Format](assets/images/qa-live-shape-format.png)
+* **지능형 문맥 탭 활성화**: 슬라이드 상의 도형을 선택하면 상단에 시안 글로우(`#38bdf8`)의 `Shape Format` 탭이 즉시 열림.
+* **도형 스타일 갤러리**: 테마 색상 기반 퀵 스타일 프리셋 타일에서 원클릭으로 서식 적용.
+* **정렬 & 크기 조정**: 6대 가장자리 정렬, 회전, 그룹화, 레이어 순서(맨 앞으로/맨 뒤로) 제어.
+
+---
+
+### 4. 슬라이드 분류기 & 전환 효과 (Slide Sorter & Transitions)
+![Slide Sorter](assets/images/qa-live-slide-sorter.png)
+* **프레젠테이션 조망**: 수십 장의 발표 자료를 바둑판 배열로 한눈에 파악하고 드래그하여 순서 재배치.
+* **전환 효과 갤러리**: [`assets/images/qa-live-transitions.png`](assets/images/qa-live-transitions.png)에서 볼 수 있듯이 Fade, Wipe, Push, Split, Morph 등 슬라이드별 화면 전환 효과를 리본에서 직접 선택 및 타이밍 제어.
 
 ---
 

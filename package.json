@@ -165,6 +165,8 @@
     "build": "node esbuild.js --production",
     "build-dev": "node esbuild.js",
     "package": "vsce package",
+    "qa:test": "npx --yes ts-node scripts/qa-test.ts",
+    "qa:capture": "npx --yes ts-node scripts/capture-live-qa.ts",
     "parity:audit": "npx --yes ts-node scripts/audit-parity.ts",
     "parity:check": "npx --yes ts-node scripts/audit-parity.ts --check"
   },

@@ -35,6 +35,9 @@
 8. **파일 저장 시 조용한 속성 유실 (#74, #77)**: 구형 `.ppt`(97–2003)·`.odp`·암호화 파일 미지원 외에도, 기존 `.pptx`를 열어 저장할 때 미디어 재생 옵션(#74)과 애니메이션 되감기 플래그(#77)가 저장 시 유실되는 버그가 존재합니다.
 
 > [!IMPORTANT]
+> **🧪 [종합 QA 전수 통과] 10단계 검증 루프 & 실제 실시간 스크린샷 보고서**:
+> **[`QA_REPORT.md`](./QA_REPORT.md)**에 10단계 검증 루프(TypeScript, CLI, PPTX 파싱, PDF/Markdown 변환, 한글 IME, 라운드트립, VS Code 런타임, 84개 DOM 무결성, 패리티 드리프트 검사) 통과 기록과 **GPU 프레임버퍼 캡처 9종 실제 실캡처(Live Captures)**가 수록되어 있습니다.
+>
 > **📖 [별도 심층 보고서 발간] 서식 복사 · 글자 위치 · 개체 정렬 · 그림 자르기 정밀 감사**:
 > 사용자의 정밀 감사 지시에 따라 작성된 **[`LAYOUT_PRECISION_GAP_REPORT.md`](./LAYOUT_PRECISION_GAP_REPORT.md)**에서 4대 핵심 영역(서식 복사, 텍스트 상자 배치, 개체 맞춤/스마트가이드, 사진 자르기)의 42개 세부 기능 및 코드 레벨 결함(`painter.rs`, `paragraph.rs`, `geometry.rs`, `picture_format.rs`)을 1:1로 엄밀히 실측하였습니다.
 > **실측 정밀도 성숙도**: Native/WASM **46.5%**, HTML Webview **9.3%**.
