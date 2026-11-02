@@ -414,6 +414,18 @@ export class DeckcraftEditorProvider implements vscode.CustomReadonlyEditorProvi
             if (message.align) {
               commands.push(`format.align=${JSON.stringify({ align: message.align })}`);
             }
+            if (message.anchor) {
+              commands.push(`format.anchor=${JSON.stringify({ anchor: message.anchor })}`);
+            }
+            if (message.alignObj) {
+              commands.push(`arrange.align=${JSON.stringify({ edge: message.alignObj, to: message.to || 'selection' })}`);
+            }
+            if (message.distribute) {
+              commands.push(`arrange.distribute=${JSON.stringify({ dir: message.distribute, to: message.to || 'selection' })}`);
+            }
+            if (message.crop) {
+              commands.push(`picture.crop=${JSON.stringify(message.crop)}`);
+            }
             await DeckcraftCli.runCommand(commands, this.context, filePath, filePath);
             const { info, slideUris } = await loadPresentationData();
             info.slideShapes![index] = await DeckcraftCli.inspectSlide(filePath, index, this.context);

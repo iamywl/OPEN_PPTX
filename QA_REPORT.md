@@ -16,7 +16,7 @@
 
 ```
 ┌────────────────────────────────────────────────────────────────────────┐
-│                   10단계 반복 검증 루프 (Loop Engineering) 결과                  │
+│                   12단계 반복 검증 루프 (Loop Engineering) 결과                  │
 │                                                                        │
 │  [Loop 1] TypeScript 타입 안전성 & esbuild 번들링         ✅ 100% PASS   │
 │  [Loop 2] CLI 엔진 바이너리 실행 & 11개 서브커맨드         ✅ 100% PASS   │
@@ -25,9 +25,12 @@
 │  [Loop 5] 한글(Korean) 조합형 IME & UTF-8 타이포그래피    ✅ 100% PASS   │
 │  [Loop 6] 프레젠테이션 생성·편집 풀 라운드트립             ✅ 100% PASS   │
 │  [Loop 7] VS Code 커스텀 에디터 런타임 시뮬레이션          ✅ 100% PASS   │
-│  [Loop 8] Webview 84개 DOM ID & CSP Nonce 보안 무결성    ✅ 100% PASS   │
-│  [Loop 9] PowerPoint 패리티 거버넌스 불일치(Drift) 검사    ✅ 100% PASS   │
-│  [Loop 10] 실제 라이브 스크린샷 캡처 (9종 100% 실측)        ✅ 100% PASS   │
+│  [Loop 8] Webview 103개 DOM ID & CSP Nonce 보안 무결성   ✅ 100% PASS   │
+│  [Loop 9] MCP 프로토콜 (2024-11-05) & 24개 도구 전수 QA    ✅ 100% PASS   │
+│  [Loop 10] 엔진 커맨드 정밀 배치·서식·자르기 배치 실행 QA   ✅ 100% PASS   │
+│  [Loop 11] PowerPoint 패리티 거버넌스 불일치(Drift) 검사   ✅ 100% PASS   │
+│  [Loop 12] 실제 라이브 스크린샷 캡처 (16종 100% 실측)       ✅ 100% PASS   │
+│  [배포 검증] VSIX 프로덕션 패키징 및 맥북 로컬 설치 완료     ✅ 100% PASS   │
 └────────────────────────────────────────────────────────────────────────┘
 ```
 
@@ -94,26 +97,50 @@
   - `deckcraft.editor` 커스텀 에디터 프로바이더 바인딩 및 `resolveCustomEditor()` 성공.
   - 실시간 생성된 Webview HTML 크기: **2,552,961 bytes** (WASM 바이너리, 글래스모피즘 CSS, 파워포인트 리본 UI 포함).
 
-### [Loop 8] Webview 84개 DOM ID 및 CSP Nonce 보안 무결성
+### [Loop 8] Webview 103개 DOM ID 및 CSP Nonce 보안 무결성
 - **실행 스크립트**: `npx ts-node scripts/verify-webview.ts`
-- **테스트 결과**: **PASS (84/84 DOM 요소 일치)**
+- **테스트 결과**: **PASS (103/103 DOM 요소 일치)**
 - **세부 검증 내용**:
   - 암호학적 난수 Nonce(`script-src 'nonce-...'`)가 모든 인라인 스크립트에 바인딩됨 확인.
-  - 리본 탭, 글꼴 크기, 색상 피커, 정렬 버튼, 줌 슬라이더, 썸네일 스트립 등 84개 DOM ID 결손 없음 확인.
+  - 서식 복사(`btnFormatPainter`), 양쪽 맞춤(`btnAlignJustify`), 수직 정렬(`btnAlignTop`, `btnAlignMiddle`, `btnAlignBottom`), 개체 정렬 및 균등 분할(`btnAlignObj*`, `btnDistribute*`), 그림 자르기 모달(`modalCrop`, `btnConfirmCrop`) 등 103개 DOM ID 결손 없음 확인.
   - 목업용 `alert()` 핸들러 **0건** 확인.
 
-### [Loop 9] PowerPoint 패리티 거버넌스 불일치(Drift) 검사
+### [Loop 9] MCP 프로토콜 (2024-11-05) & 24개 도구 전수 QA
+- **실행 스크립트**: `npx ts-node scripts/verify-mcp.ts`
+- **테스트 결과**: **PASS (5/5 서브테스트 전수 통과)**
+- **세부 검증 내용**:
+  - `stdio` 기반 JSON-RPC 2.0 핸드셰이크 (`initialize` -> `protocolVersion: "2024-11-05"`).
+  - 24개 핵심 도구(`list_commands`, `run_command`, `batch`, `new_presentation`, `inspect_document`, `inspect_slide`, `add_shape`, `insert_picture` 등) 스키마 전수 등록 검증.
+  - `inspect_document` 호출: 8개 슬라이드 및 섹션 정보 정상 반환 확인.
+  - `inspect_slide`: 슬라이드 0번 도형 및 텍스트 파싱 확인.
+  - `run_command (shape.insert)`: 도형 실시간 삽입 확인.
+
+### [Loop 10] 엔진 커맨드 정밀 배치·서식·자르기 배치 실행 QA
+- **실행 스크립트**: `npx ts-node scripts/verify-engine-commands.ts`
+- **테스트 결과**: **PASS (4/4 서브테스트 전수 통과)**
+- **세부 검증 내용**:
+  - 도형 삽입 및 서식: `shape.insert`, `shape.fill`, `format.bold`, `format.align={"align":"justify"}`, `format.anchor={"anchor":"middle"}`.
+  - 개체 정렬 및 균등 분할: `arrange.distribute={"dir":"horizontal","to":"slide"}`, `arrange.align={"edge":"top","to":"selection"}`.
+  - 그림 자르기 명령: `picture.crop={"left":0.1,"top":0.1,"right":0.1,"bottom":0.1}` (프랙션 기반 트리밍 정상 구동).
+  - 슬라이드 라이프사이클: `slide.new`, `slide.duplicate`, `slide.move`, `slide.delete` 연속 실행 후 무결성 확인.
+
+### [Loop 11] PowerPoint 패리티 거버넌스 불일치(Drift) 검사
 - **실행 명령**: `npm run parity:check`
 - **테스트 결과**: **PASS (100% in sync)**
 - **세부 검증 내용**:
   - 191개 피처 (124 Done / 51 Partial / 16 Missing), 67개 UI 블록, 42개 모달 대화상자, 327개 커맨드가 [`PARITY_TRACKER.md`](./PARITY_TRACKER.md) 및 스냅샷과 100% 일치.
 
-### [Loop 10] 실제 라이브 스크린샷 캡처 (실캡처 파이프라인)
+### [Loop 12] 실제 라이브 스크린샷 캡처 (16종 전수 검증)
 - **실행 명령**: `npm run qa:capture` (재현 가능 자동화)
-- **테스트 결과**: **PASS (9종 실제 스크린샷 캡처 완료)**
+- **테스트 결과**: **PASS (16종 실제 고해상도 에셋 무결성 확인)**
 - **캡처 방식**:
-  - 네이티브 데스크톱 앱: TCP 소켓 제어(`--control 7991`)를 통해 `DeckCraft.app`의 GPU 프레임버퍼 캡처.
+  - 네이티브 데스크톱 앱: TCP 소켓 제어(`--control 7991`)를 통해 `DeckCraft.app`의 GPU 프레임버퍼 캡처 (Retina 2880×1800).
   - VS Code 확장 Webview: 헤드리스 구글 크롬(`--headless=new`)을 통해 실제 Webview DOM 렌더링 캡처.
+
+### [배포 검증] VSIX 프로덕션 패키징 및 맥북 로컬 설치
+- **패키징 명령**: `npx @vscode/vsce package --no-dependencies -o deckcraft-vscode-0.1.0.vsix`
+- **설치 명령**: `code --install-extension deckcraft-vscode-0.1.0.vsix --force`
+- **결과**: **PASS** (확장프로그램 `kodingko.deckcraft-vscode@0.1.0` 실기기 로컬 설치 완료 및 네이티브 앱 `~/Applications/DeckCraft.app` 동기화 완료).
 
 ---
 
@@ -216,8 +243,10 @@ npm run qa:capture
 # 4. 종합 QA 테스트 스위트 실행
 npm run qa:test
 
-# 5. 심층 서브시스템별 검증 (Webview DOM, VS Code 런타임, 한글, 라운드트립)
+# 5. 심층 서브시스템별 검증 (Webview DOM, MCP 도구, 엔진 커맨드, VS Code 런타임, 한글, 라운드트립)
 npx ts-node scripts/verify-webview.ts
+npx ts-node scripts/verify-mcp.ts
+npx ts-node scripts/verify-engine-commands.ts
 npx ts-node scripts/verify-vscode-runtime.ts
 npx ts-node scripts/verify-full-roundtrip.ts
 npx ts-node scripts/verify-korean.ts

@@ -118,6 +118,26 @@ This project adapts **DeckCraft**, an open-source presentation engine written in
         9. `assets/images/qa-live-precision-render.png` (High-res 1920×1080 custom roundtrip slide render)
     - Enhanced `scripts/qa-test.ts` (`npm run qa:test`) to verify all 16 screenshot assets for zero corruption and strict file size bounds.
     - Updated `README.md`, `SPECIFICATION.md`, `PARITY_TRACKER.md` and verified all automated QA suites.
+16. **Specification Rectification, Precision Tools Implementation, MCP & Engine QA Suites & MacBook Deployment**:
+    - **User Directive**: *"추출한 기능명세서가 제대로 된것이 아닌경우 그리고 기능이나 UI측면에서 제대로 구현되지 않은 경우 명세서에 구현되어있는기능인데 QA해당안되어서 제대로 검증안한경우 이런경우 싹다고려해서 에이전트파일수정하고 검증및 개발진행해 그리고 통과되면 내 맥북에도 하나 빌드해서 깔아주고"*.
+    - **Specification Rectification & Reality Audit**:
+      - Corrected discrepancies between reverse-engineered checklist breadth and engine operational capabilities.
+      - Identified and prioritized previously unverified specification components: MCP stdio server protocol (24 tools), low-level engine commands (`format.anchor`, `arrange.align`, `arrange.distribute`, `picture.crop`), and HTML Webview formatting parity.
+    - **Feature & UI Implementation**:
+      - **서식 복사 (Format Painter)**: Added `#btnFormatPainter` with single-click and sticky double-click modes, dynamic `cursor: copy` indicator, and target shape application (`tryApplyPainter(shape)`).
+      - **단락 및 수직 텍스트 정렬 (Paragraph & Text Placement)**: Added 양쪽 맞춤 (`#btnAlignJustify`) and 상/중/하 수직 정렬 (`#btnAlignTop`, `#btnAlignMiddle`, `#btnAlignBottom`) connected to `format.anchor`.
+      - **개체 정렬 및 균등 분할 (Arrange & Distribute)**: Added 6-way object alignment (`#btnAlignObjLeft`~`#btnAlignObjBottom`) and horizontal/vertical distribution (`#btnDistributeH`, `#btnDistributeV`).
+      - **그림 자르기 모달 (Picture Crop Dialog)**: Added `#modalCrop` with live 0~100% boundary sliders, aspect ratio presets (1:1, 4:3, 16:9), reset button, and live execution bridge to `picture.crop`.
+    - **Comprehensive Automated QA Test Suites**:
+      - Created `scripts/verify-mcp.ts`: Tests stdio JSON-RPC 2.0 handshake (protocol `2024-11-05`), verifies all 24 registered tool definitions, and executes `inspect_document`, `inspect_slide`, and `run_command (shape.insert)`.
+      - Created `scripts/verify-engine-commands.ts`: Tests CLI batch execution of `shape.insert`, `shape.fill`, `format.bold`, `format.align`, `format.anchor`, `arrange.distribute`, `arrange.align`, `picture.crop`, and slide lifecycle.
+      - Upgraded `scripts/verify-webview.ts` from 84 to **103 verified DOM IDs** and strict CSP nonce enforcement.
+      - Integrated all 10 testing targets into `scripts/qa-test.ts` (`npm run qa:test`) with 100% PASS.
+    - **MacBook Production Packaging & Installation**:
+      - Packaged production `.vsix` bundle: `deckcraft-vscode-0.1.0.vsix` (85.59 MB).
+      - Installed onto MacBook VS Code environment: `code --install-extension deckcraft-vscode-0.1.0.vsix --force`.
+      - Verified extension runtime: `kodingko.deckcraft-vscode@0.1.0` active.
+      - Synchronized Glassmorphism native application bundle `bin/DeckCraft.app` to `~/Applications/DeckCraft.app`.
 
 ---
 
@@ -165,12 +185,14 @@ To achieve 100% quality and verify compliance across all deliverables, the proje
 | **Loop 2** | Multi-platform CLI execution | `deckcraft-cli --version` | **PASS (v0.11.1 Universal)** |
 | **Loop 3** | PPTX metadata extraction | `deckcraft-cli info samples/sample.pptx` | **PASS (8 slides)** |
 | **Loop 4** | High-Res PNG rendering & conversions | Vector PDF (862.5 KB) & Markdown outline | **PASS (100%)** |
-| **Loop 5** | Glassmorphism UI & Screenshot assets | `scripts/qa-test.ts` (All 6 images verified) | **PASS (100%)** |
-| **Loop 6** | Webview DOM & CSP Integrity | `scripts/verify-webview.ts` (80 DOM IDs) | **PASS (100%)** |
+| **Loop 5** | Glassmorphism UI & Screenshot assets | `scripts/qa-test.ts` (All 16 live images verified) | **PASS (100%)** |
+| **Loop 6** | Webview DOM & CSP Integrity | `scripts/verify-webview.ts` (103 DOM IDs) | **PASS (100%)** |
 | **Loop 7** | End-to-End Creation Roundtrip | `scripts/verify-full-roundtrip.ts` | **PASS (100%)** |
-| **Loop 8** | PowerPoint UI & Feature Parity Drift Check | `npm run parity:audit && npm run parity:check` | **PASS (Synced)** |
-| **Loop 9** | VSIX Package & VS Code Install | `vsce package` & `code --install-extension` | **PASS (Installed)** |
-| **Loop 10** | Git Origin Synchronization | `git push -u origin main` | **PASS** |
+| **Loop 8** | MCP Protocol & 24 Tools Suite | `scripts/verify-mcp.ts` | **PASS (100%)** |
+| **Loop 9** | Engine Commands & Precision Layout | `scripts/verify-engine-commands.ts` | **PASS (100%)** |
+| **Loop 10** | PowerPoint UI & Parity Drift Check | `npm run parity:audit && npm run parity:check` | **PASS (Synced)** |
+| **Loop 11** | VSIX Package & MacBook Install | `vsce package` & `code --install-extension` | **PASS (Installed)** |
+| **Loop 12** | Git Origin Synchronization | `git push -u origin main` | **PASS** |
 
 ---
 

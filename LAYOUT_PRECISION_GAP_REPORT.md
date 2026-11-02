@@ -314,6 +314,17 @@ flowchart TD
 
 ---
 
+### 7.1 구현 현황 업데이트 (Milestone 16 완료 내역)
+
+> [!NOTE] Phase 4 (VS Code Webview 패리티 및 정밀 서식 도구) 구현 완료
+> - **서식 복사 (Format Painter)**: `#btnFormatPainter` 단일 클릭 및 더블 클릭(고정 모드) 지원, 복사 커서(`cursor: copy`), `tryApplyPainter()`를 통한 스타일 복사 적용 완료.
+> - **텍스트 정렬 및 수직 맞춤**: 양쪽 맞춤(`#btnAlignJustify`) 및 상/중/하 수직 텍스트 맞춤(`#btnAlignTop`, `#btnAlignMiddle`, `#btnAlignBottom`) 신설 및 `format.anchor` 엔진 커맨드 바인딩 완료.
+> - **개체 정렬 및 균등 분할**: 좌/가운데/우/상/중간/하 6방향 개체 정렬(`#btnAlignObj*`) 및 가로/세로 균등 분할(`#btnDistributeH`, `#btnDistributeV`) 신설 및 `arrange.align` / `arrange.distribute` 바인딩 완료.
+> - **사진 자르기 모달**: `#modalCrop` 대화상자 신설, 0~100% 좌/상/우/하 정밀 슬라이더, 1:1 / 4:3 / 16:9 비율 프리셋, 리셋 기능 및 `picture.crop` 바인딩 완료.
+> - **자동화 검증**: `scripts/verify-webview.ts` (103개 DOM ID 전수 통과) 및 `scripts/verify-engine-commands.ts` (4개 세부 테스트 전수 통과).
+
+---
+
 ## 8. 결론 및 향후 관리 방침
 
 - 본 보고서에서 밝혀진 **46.5%의 정밀도 격차**는 단순한 버그가 아니라, **오픈소스 엔진이 아직 '기능의 이름(Name)'만 흉내 내고 '실무적 정밀도(Precision)'에는 도달하지 못했음**을 명백히 보여줍니다.

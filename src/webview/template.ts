@@ -1329,6 +1329,17 @@ export function getWebviewContent(
   <div class="office-ribbon-content">
     <!-- TAB 1: 홈 (HOME) -->
     <div class="ribbon-tab-pane active" id="tabHome">
+      <!-- GROUP: 클립보드 -->
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <button class="ribbon-btn-large" id="btnFormatPainter" title="서식 복사 (Format Painter: 한 번 클릭으로 서식 복사, 더블클릭 시 연속 적용)">
+            <span class="btn-icon">🖌️</span>
+            <span class="btn-label">서식 복사</span>
+          </button>
+        </div>
+        <span class="ribbon-group-title">클립보드</span>
+      </div>
+
       <!-- GROUP: 슬라이드 -->
       <div class="ribbon-group-box">
         <div class="ribbon-group-items">
@@ -1394,21 +1405,25 @@ export function getWebviewContent(
         <span class="ribbon-group-title">글꼴 및 서식</span>
       </div>
 
-      <!-- GROUP: 단락 -->
+      <!-- GROUP: 단락 및 맞춤 -->
       <div class="ribbon-group-box">
         <div class="ribbon-group-items">
           <div class="ribbon-col-group">
             <div class="ribbon-row-group">
-              <button class="ribbon-tool-btn" id="btnAlignLeft" title="왼쪽 맞춤">⫷</button>
-              <button class="ribbon-tool-btn" id="btnAlignCenter" title="가운데 맞춤">≡</button>
-              <button class="ribbon-tool-btn" id="btnAlignRight" title="오른쪽 맞춤">⫸</button>
+              <button class="ribbon-tool-btn" id="btnAlignLeft" title="왼쪽 맞춤 (Left)">⫷</button>
+              <button class="ribbon-tool-btn" id="btnAlignCenter" title="가운데 맞춤 (Center)">≡</button>
+              <button class="ribbon-tool-btn" id="btnAlignRight" title="오른쪽 맞춤 (Right)">⫸</button>
+              <button class="ribbon-tool-btn" id="btnAlignJustify" title="양쪽 맞춤 (Justify)">≣</button>
             </div>
             <div class="ribbon-row-group">
-              <button class="ribbon-btn-small" id="btnEditTextOverlay" title="선택 텍스트 직접 편집 (Enter)">✏️ 인라인 수정</button>
+              <button class="ribbon-tool-btn" id="btnAlignTop" title="상자 위쪽 맞춤 (Top Anchor)">⤒</button>
+              <button class="ribbon-tool-btn" id="btnAlignMiddle" title="상자 중간 맞춤 (Middle Anchor)">↕</button>
+              <button class="ribbon-tool-btn" id="btnAlignBottom" title="상자 아래쪽 맞춤 (Bottom Anchor)">⤓</button>
+              <button class="ribbon-btn-small" id="btnEditTextOverlay" title="선택 텍스트 직접 편집 (Enter)">✏️ 인라인</button>
             </div>
           </div>
         </div>
-        <span class="ribbon-group-title">단락</span>
+        <span class="ribbon-group-title">단락 및 맞춤</span>
       </div>
 
       <!-- GROUP: 그리기 -->
@@ -1432,6 +1447,28 @@ export function getWebviewContent(
           </div>
         </div>
         <span class="ribbon-group-title">그리기</span>
+      </div>
+
+      <!-- GROUP: 정렬 및 자르기 -->
+      <div class="ribbon-group-box">
+        <div class="ribbon-group-items">
+          <div class="ribbon-col-group">
+            <div class="ribbon-row-group">
+              <button class="ribbon-tool-btn" id="btnAlignObjLeft" title="개체 왼쪽 맞춤">⇤</button>
+              <button class="ribbon-tool-btn" id="btnAlignObjCenter" title="개체 가로 가운데">⇥⇤</button>
+              <button class="ribbon-tool-btn" id="btnAlignObjRight" title="개체 오른쪽 맞춤">⇥</button>
+              <button class="ribbon-tool-btn" id="btnAlignObjTop" title="개체 위쪽 맞춤">⤊</button>
+              <button class="ribbon-tool-btn" id="btnAlignObjMiddle" title="개체 세로 가운데">⤋⤊</button>
+              <button class="ribbon-tool-btn" id="btnAlignObjBottom" title="개체 아래쪽 맞춤">⤋</button>
+            </div>
+            <div class="ribbon-row-group">
+              <button class="ribbon-btn-small" id="btnDistributeH" title="가로 균등 배분">↔ 가로</button>
+              <button class="ribbon-btn-small" id="btnDistributeV" title="세로 균등 배분">↕ 세로</button>
+              <button class="ribbon-btn-small" id="btnCropModal" title="사진 자르기 및 프레임 조정">✂️ 자르기</button>
+            </div>
+          </div>
+        </div>
+        <span class="ribbon-group-title">정렬 및 자르기</span>
       </div>
     </div>
 
@@ -1761,6 +1798,52 @@ export function getWebviewContent(
     </div>
   </div>
 
+  <!-- MODAL: PICTURE CROP -->
+  <div class="modal-backdrop" id="modalCrop">
+    <div class="glass-modal" style="width: 440px;">
+      <div class="modal-title">
+        <span>✂️ 사진 자르기 (Picture Crop & Frame)</span>
+        <button class="btn-glass modal-close" data-close="modalCrop" id="btnCloseCropModal">✕</button>
+      </div>
+      <div style="font-size:12px; color:#94a3b8; margin-bottom:12px;">선택한 그림의 상/하/좌/우 영역을 자르거나 고정 가로세로 비율로 마스킹합니다.</div>
+      <div style="display:flex; flex-direction:column; gap:8px;">
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="font-size:12px;">왼쪽 (%):</label>
+          <input type="range" id="cropRangeLeft" min="0" max="80" value="0" style="width:180px;" />
+          <span id="cropValLeft" style="font-size:12px; width:40px; text-align:right;">0%</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="font-size:12px;">위쪽 (%):</label>
+          <input type="range" id="cropRangeTop" min="0" max="80" value="0" style="width:180px;" />
+          <span id="cropValTop" style="font-size:12px; width:40px; text-align:right;">0%</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="font-size:12px;">오른쪽 (%):</label>
+          <input type="range" id="cropRangeRight" min="0" max="80" value="0" style="width:180px;" />
+          <span id="cropValRight" style="font-size:12px; width:40px; text-align:right;">0%</span>
+        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center;">
+          <label style="font-size:12px;">아래쪽 (%):</label>
+          <input type="range" id="cropRangeBottom" min="0" max="80" value="0" style="width:180px;" />
+          <span id="cropValBottom" style="font-size:12px; width:40px; text-align:right;">0%</span>
+        </div>
+      </div>
+      <div style="margin-top:10px; border-top:1px solid rgba(255,255,255,0.08); padding-top:8px;">
+        <label style="font-size:12px; display:block; margin-bottom:4px;">비율 프리셋:</label>
+        <div style="display:flex; gap:6px;">
+          <button class="btn-glass" id="btnCropRatio1_1" style="font-size:11px; padding:3px 6px;">1:1 정사각형</button>
+          <button class="btn-glass" id="btnCropRatio4_3" style="font-size:11px; padding:3px 6px;">4:3</button>
+          <button class="btn-glass" id="btnCropRatio16_9" style="font-size:11px; padding:3px 6px;">16:9 와이드</button>
+          <button class="btn-glass" id="btnCropReset" style="font-size:11px; padding:3px 6px;">초기화</button>
+        </div>
+      </div>
+      <div class="modal-actions" style="margin-top:14px;">
+        <button class="btn-glass modal-close" data-close="modalCrop" id="btnCancelCrop">취소</button>
+        <button class="btn-glass btn-glass-primary" id="btnConfirmCrop">✂️ 자르기 적용</button>
+      </div>
+    </div>
+  </div>
+
   <script nonce="${nonce}">
     const vscode = acquireVsCodeApi();
     let slidesData = ${JSON.stringify(info.slides)};
@@ -1959,6 +2042,9 @@ export function getWebviewContent(
       document.querySelectorAll('.shape-box-overlay').forEach((o) => o.classList.remove('selected'));
       el.classList.add('selected');
       selectedShape = shape;
+      if (typeof tryApplyPainter === 'function') {
+        tryApplyPainter(shape);
+      }
     }
 
     function startInlineEdit(shape, el) {
@@ -2631,7 +2717,62 @@ export function getWebviewContent(
       });
     }
 
-    // Paragraph Alignment
+    // Format Painter (클립보드 서식 복사)
+    let armedPainter = null;
+    let isPainterSticky = false;
+    const btnFormatPainter = document.getElementById('btnFormatPainter');
+    if (btnFormatPainter) {
+      btnFormatPainter.addEventListener('click', () => {
+        const sh = getTargetShape();
+        if (armedPainter) {
+          armedPainter = null;
+          isPainterSticky = false;
+          btnFormatPainter.classList.remove('active');
+          if (shapeOverlayLayer) shapeOverlayLayer.style.cursor = 'default';
+        } else if (sh) {
+          armedPainter = {
+            family: ribbonFontFamily ? ribbonFontFamily.value : undefined,
+            size: ribbonFontSize ? parseInt(ribbonFontSize.value, 10) : undefined,
+            color: ribbonFontColor ? ribbonFontColor.value : undefined,
+            fill: ribbonFillColor ? ribbonFillColor.value : undefined,
+          };
+          btnFormatPainter.classList.add('active');
+          if (shapeOverlayLayer) shapeOverlayLayer.style.cursor = 'copy';
+        }
+      });
+      btnFormatPainter.addEventListener('dblclick', () => {
+        const sh = getTargetShape();
+        if (sh) {
+          armedPainter = {
+            family: ribbonFontFamily ? ribbonFontFamily.value : undefined,
+            size: ribbonFontSize ? parseInt(ribbonFontSize.value, 10) : undefined,
+            color: ribbonFontColor ? ribbonFontColor.value : undefined,
+            fill: ribbonFillColor ? ribbonFillColor.value : undefined,
+          };
+          isPainterSticky = true;
+          btnFormatPainter.classList.add('active');
+          if (shapeOverlayLayer) shapeOverlayLayer.style.cursor = 'copy';
+        }
+      });
+    }
+
+    function tryApplyPainter(targetShape) {
+      if (armedPainter && targetShape) {
+        vscode.postMessage({
+          command: 'formatShape',
+          index: currentIndex,
+          shapeId: targetShape.id,
+          ...armedPainter,
+        });
+        if (!isPainterSticky) {
+          armedPainter = null;
+          btnFormatPainter?.classList.remove('active');
+          if (shapeOverlayLayer) shapeOverlayLayer.style.cursor = 'default';
+        }
+      }
+    }
+
+    // Paragraph Alignment & Vertical Anchor
     document.getElementById('btnAlignLeft')?.addEventListener('click', () => {
       const sh = getTargetShape();
       if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, align: 'left' });
@@ -2643,6 +2784,108 @@ export function getWebviewContent(
     document.getElementById('btnAlignRight')?.addEventListener('click', () => {
       const sh = getTargetShape();
       if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, align: 'right' });
+    });
+    document.getElementById('btnAlignJustify')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, align: 'justify' });
+    });
+    document.getElementById('btnAlignTop')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, anchor: 'top' });
+    });
+    document.getElementById('btnAlignMiddle')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, anchor: 'middle' });
+    });
+    document.getElementById('btnAlignBottom')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, anchor: 'bottom' });
+    });
+
+    // Object Alignment (Arrange) & Distribution
+    const alignObjMap = {
+      btnAlignObjLeft: 'left',
+      btnAlignObjCenter: 'center',
+      btnAlignObjRight: 'right',
+      btnAlignObjTop: 'top',
+      btnAlignObjMiddle: 'middle',
+      btnAlignObjBottom: 'bottom',
+    };
+    for (const [btnId, edge] of Object.entries(alignObjMap)) {
+      document.getElementById(btnId)?.addEventListener('click', () => {
+        const sh = getTargetShape();
+        if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, alignObj: edge });
+      });
+    }
+    document.getElementById('btnDistributeH')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, distribute: 'horizontal' });
+    });
+    document.getElementById('btnDistributeV')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      if (sh) vscode.postMessage({ command: 'formatShape', index: currentIndex, shapeId: sh.id, distribute: 'vertical' });
+    });
+
+    // Picture Crop Modal Controls
+    document.getElementById('btnCropModal')?.addEventListener('click', () => {
+      openModal('modalCrop');
+    });
+    document.getElementById('btnCloseCropModal')?.addEventListener('click', () => closeModal('modalCrop'));
+    document.getElementById('btnCancelCrop')?.addEventListener('click', () => closeModal('modalCrop'));
+
+    ['Left', 'Top', 'Right', 'Bottom'].forEach((side) => {
+      const range = document.getElementById('cropRange' + side);
+      const label = document.getElementById('cropVal' + side);
+      if (range && label) {
+        range.addEventListener('input', () => {
+          label.textContent = range.value + '%';
+        });
+      }
+    });
+
+    document.getElementById('btnCropRatio1_1')?.addEventListener('click', () => {
+      document.getElementById('cropRangeLeft').value = '10';
+      document.getElementById('cropRangeRight').value = '10';
+      document.getElementById('cropRangeTop').value = '0';
+      document.getElementById('cropRangeBottom').value = '0';
+      ['Left', 'Top', 'Right', 'Bottom'].forEach((s) => (document.getElementById('cropVal' + s).textContent = document.getElementById('cropRange' + s).value + '%'));
+    });
+    document.getElementById('btnCropRatio4_3')?.addEventListener('click', () => {
+      document.getElementById('cropRangeLeft').value = '12';
+      document.getElementById('cropRangeRight').value = '12';
+      document.getElementById('cropRangeTop').value = '0';
+      document.getElementById('cropRangeBottom').value = '0';
+      ['Left', 'Top', 'Right', 'Bottom'].forEach((s) => (document.getElementById('cropVal' + s).textContent = document.getElementById('cropRange' + s).value + '%'));
+    });
+    document.getElementById('btnCropRatio16_9')?.addEventListener('click', () => {
+      document.getElementById('cropRangeLeft').value = '0';
+      document.getElementById('cropRangeRight').value = '0';
+      document.getElementById('cropRangeTop').value = '10';
+      document.getElementById('cropRangeBottom').value = '10';
+      ['Left', 'Top', 'Right', 'Bottom'].forEach((s) => (document.getElementById('cropVal' + s).textContent = document.getElementById('cropRange' + s).value + '%'));
+    });
+    document.getElementById('btnCropReset')?.addEventListener('click', () => {
+      ['Left', 'Top', 'Right', 'Bottom'].forEach((s) => {
+        document.getElementById('cropRange' + s).value = '0';
+        document.getElementById('cropVal' + s).textContent = '0%';
+      });
+    });
+
+    document.getElementById('btnConfirmCrop')?.addEventListener('click', () => {
+      const sh = getTargetShape();
+      const left = parseFloat(document.getElementById('cropRangeLeft').value) / 100;
+      const top = parseFloat(document.getElementById('cropRangeTop').value) / 100;
+      const right = parseFloat(document.getElementById('cropRangeRight').value) / 100;
+      const bottom = parseFloat(document.getElementById('cropRangeBottom').value) / 100;
+      if (sh) {
+        vscode.postMessage({
+          command: 'formatShape',
+          index: currentIndex,
+          shapeId: sh.id,
+          crop: { left, top, right, bottom },
+        });
+      }
+      closeModal('modalCrop');
     });
 
     // Quick Shapes & Arrange
