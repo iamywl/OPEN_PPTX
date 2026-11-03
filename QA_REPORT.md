@@ -227,6 +227,27 @@
 
 ---
 
+### 3.4 macOS Finder 연동 및 무방해(Distraction-Free) 검증
+
+#### ⑩ 업스트림 강제 업데이트 팝업 차단 및 클린 실행 검증
+> **검증 대상**: 기동 시 `craft_update`에 의한 `DeckCraft UPDATE v0.11.1 to 0.15.0` 팝업 차단  
+> **검증 결과**: `apps/deckcraft/src/main.rs`의 `app.enable_update_checks()` 영구 제거 및 `updates_ui.rs` 비활성화 완료.
+> - **UI 다이얼로그 상태**: TCP RPC `ui.inspect` 확인 결과 `"dialog": null` (어떠한 모달도 뜨지 않음).
+> - **화면 가림 방지**: 프레젠테이션 파일이 모달 방해 없이 즉시 렌더링됨.
+
+#### ⑪ macOS Finder 파일 더블클릭 오픈 (Apple Event `kAEOpenDocuments`)
+> **검증 대상**: Finder에서 `.pptx`, `.deckcraft`, `.ppsx` 더블클릭 및 `open -a DeckCraft` 연동  
+> **검증 로그 확인** (`~/Library/Application Support/DeckCraft/logs/deckcraft.log`):
+> ```
+> [main] deckcraft::apple_events: Successfully opened from Finder (Apple Event): /Users/ywlee/.../samples/sample.pptx
+> [main] deckcraft::apple_events: Successfully opened from Finder (Apple Event): /Users/ywlee/.../samples/test_finder_open.pptx
+> ```
+> - **신규 기동**: 앱 미실행 상태에서 Finder로 열었을 때 정상 기동 및 슬라이드 표시.
+> - **실행 중 추가 오픈**: 앱 기동 상태에서 두 번째 파일 열었을 때 기존 세션에 추가 로드 및 `ViewportCommand::Focus` 전면 활성화.
+> - **PowerPoint Show (`.ppsx`)**: 파일 오픈 즉시 슬라이드 쇼 모드로 자동 진입.
+
+---
+
 ## 4. 자동화된 QA 실행 및 재현 명세 (Reproduction Guide)
 
 본 프로젝트의 모든 QA 검증은 다음 명령어를 통해 언제든지 100% 동일하게 재현할 수 있습니다:

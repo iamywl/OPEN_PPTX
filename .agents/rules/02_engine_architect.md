@@ -40,6 +40,10 @@
 ### 2.3 한글 폰트 셰이핑 및 폴백
 - `crates/fonts/src/fontdb.rs`의 `substitutes()`에 한국어 글꼴 패밀리 매핑 유지 (`Pretendard`, `Apple SD Gothic Neo`, `Malgun Gothic`, `NanumGothic`).
 
+### 2.4 업스트림 자동 업데이트 영구 비활성화 및 macOS Finder 연동 규칙
+- **업스트림 덮어쓰기 방지**: `craft_update`가 upstream `storytold/deckcraft`의 릴리스를 체크하여 로컬 커스텀 바이너리를 덮어쓰지 않도록 `apps/deckcraft/src/main.rs`의 `app.enable_update_checks()` 호출을 금지하며, `crates/ui-egui/src/dialogs/updates_ui.rs`에서 기동 시 자동 체크(`check_at_start`) 및 모달 팝업을 원천 차단한다.
+- **Finder Apple Event 완벽 연동**: Finder에서 더블클릭이나 `open` 명령어로 파일을 실행할 때 `apps/deckcraft/src/apple_events.rs`의 `Event::Open`에서 윈도우 포커스(`ViewportCommand::Focus`)를 보장하고, `.ppsx` 실행 시 슬라이드 쇼가 즉시 시작되도록 유지한다.
+
 ---
 
 ## 3. 타 에이전트와의 협업 인터페이스

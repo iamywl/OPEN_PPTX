@@ -190,6 +190,18 @@ This project adapts **DeckCraft**, an open-source presentation engine written in
       3. *11~12px 저대비 라벨 & 플레이스홀더*: WCAG 기준에 못 미치던 라벨을 13px/세미볼드(`#cbd5e1`, 대비율 7.5:1 이상)로 상향, 플레이스홀더 명도 보정, 사진 자르기 슬라이더 커스텀 트랙 및 썸 적용.
       4. *모달 팝업 만능주의 탈피*: 텍스트 수정 및 도형 조작은 모달 팝업 대신 캔버스 위 인라인 직접 조작(In-place WYSIWYG)을 최우선 적용.
     - **에이전트 규칙 반영**: `.agents/rules/03_ui_ux_craftsman.md` 및 `04_adversarial_qa.md`에 시각 인간공학 및 가독성 필수 수칙과 적대적 QA 감사 체크리스트 강제 편입.
+19. **macOS Finder 파일 연동 검증 및 업스트림 자동 업데이트 팝업 영구 제거 (Finder Launch & Update Blocker)**:
+    - **User Directives**:
+      - *"finder에서 열었을떄 제대로 열리는지 검증하고 안열리면 개선해줘"*
+      - *"이런 업데이트 안뜨게해줘 (DeckCraft UPDATE v0.11.1 to 0.15.0 팝업)"*
+    - **문제 원인 분석 (Root Cause)**:
+      1. *업스트림 강제 업데이트 팝업*: `apps/deckcraft/src/main.rs`에서 `app.enable_update_checks()`를 호출하여 기동 시 백그라운드로 `storytold/deckcraft` GitHub 릴리스를 체크하고, 최신 버전(`0.15.0`) 발견 시 모달 다이얼로그(`craft_update`)를 띄움. 사용자가 업데이트 시 커스텀 한글/글래스모피즘 코드가 업스트림 순정 바이너리로 덮어씌워지는 치명적 문제 유발.
+      2. *Finder 실행 시 포커스 누락*: Finder에서 더블클릭 또는 `open` 시 Apple Event(`kAEOpenDocuments`)를 통해 정상적으로 파일이 열리나, 창이 전면으로 포커스되지 않거나 슬라이드 쇼(`.ppsx`)가 즉시 시작되지 않는 동작 보완 필요.
+    - **개선 및 코드 반영**:
+      - `apps/deckcraft/src/main.rs`: `app.enable_update_checks()` 호출 영구 제거.
+      - `crates/ui-egui/src/dialogs/updates_ui.rs`: `enable()`을 무효화(no-op) 처리하고, 기동 시 자동 체크(`check_at_start`) 및 자동 모달 팝업 렌더링 원천 차단.
+      - `apps/deckcraft/src/apple_events.rs`: Finder 파일 오픈 이벤트 수신 시 `ctx.send_viewport_cmd(egui::ViewportCommand::Focus)`로 윈도우 포커스 부여, `.ppsx` 파일의 경우 자동으로 슬라이드 쇼 시작하도록 로직 고도화.
+      - 실기기 검증: `~/Applications/DeckCraft.app`과 `bin/DeckCraft.app`에 새 바이너리 동기화 및 애드혹 코드사인 완료. 실측 로그(`deckcraft.log`)에서 Apple Event 정상 수신 및 다이얼로그 `None` 상태 확인.
 
 ---
 

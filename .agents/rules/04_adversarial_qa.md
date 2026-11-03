@@ -21,6 +21,10 @@
    - **"모달 뒤쪽 슬라이드가 과도한 딤(65% 암전)으로 가려져 작업 맥락이 단절되지 않는가?"**
    - **"라벨과 플레이스홀더가 11~12px의 침침한 저대비 상태로 방치되어 있지 않은가 (WCAG AAA 기준 검증)?"**
    - 위 항목 중 하나라도 위반 시 `03_ui_ux_craftsman`에 즉각 재작업(Reject)을 통보한다.
+5. **작업 방해 팝업 및 Finder 연동 무결성 감사 (Distraction-Free & Finder Integration Audit)**:
+   - **"앱을 시작하거나 파일을 열었을 때 업스트림 강제 업데이트 팝업(`DeckCraft UPDATE`)이나 무관한 모달이 뜨는가?"**
+   - **"macOS Finder에서 `.pptx` 또는 `.deckcraft` 더블클릭 시 Apple Event(`kAEOpenDocuments`)를 수신하여 파일이 즉시 렌더링되고 전면으로 포커스되는가?"**
+   - 위 항목 중 업데이트 팝업이 발생하거나 파일 오픈 실패 시 즉시 불합격 처리한다.
 
 ---
 
